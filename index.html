@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VIDA SUPER HUB</title>
     <style>
-        /* Neon Cyber / Anime Style (Neon Blau & Lila) */
         body {
             background-color: #0b0f19;
             color: #ffffff;
@@ -19,10 +18,27 @@
             color: #00d2ff;
             text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
             font-size: 2.5rem;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
-        /* Key System Bereich oben */
+        .badge-container {
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            background-color: #131a26;
+            border: 1px solid #00d2ff;
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+            color: #00d2ff;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        /* Key System Bereich */
         .key-box {
             background: #131a26;
             border: 2px solid #9d4edd;
@@ -48,14 +64,36 @@
             text-align: center;
             font-size: 1rem;
             outline: none;
+            margin-bottom: 15px;
         }
 
         input[type="text"]:focus {
             box-shadow: 0 0 8px #00d2ff;
         }
 
+        /* Bestätigen-Button für den Key */
+        .submit-btn {
+            background-color: #131a26;
+            color: #9d4edd;
+            border: 1px solid #9d4edd;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 85%;
+            transition: all 0.2s;
+            box-shadow: 0 0 5px rgba(157, 78, 221, 0.3);
+        }
+
+        .submit-btn:hover {
+            background-color: #9d4edd;
+            color: #131a26;
+            box-shadow: 0 0 12px #9d4edd;
+        }
+
         .status-message {
-            margin-top: 10px;
+            margin-top: 15px;
             font-weight: bold;
             font-size: 0.9rem;
         }
@@ -69,7 +107,6 @@
             margin: 0 auto;
         }
 
-        /* Einzelne Spiele-Blöcke */
         .block {
             background: #131a26;
             border: 2px solid #00d2ff;
@@ -77,11 +114,10 @@
             padding: 20px;
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
-            opacity: 0.4; /* Standardmäßig ausgegraut */
-            pointer-events: none; /* Klicks deaktiviert */
+            opacity: 0.4;
+            pointer-events: none;
         }
 
-        /* Wenn der Key richtig ist, wird dieser Style aktiv */
         .block.unlocked {
             opacity: 1;
             pointer-events: auto;
@@ -98,7 +134,6 @@
             color: #00d2ff;
         }
 
-        /* Copy Buttons */
         .copy-btn {
             background-color: #131a26;
             color: #00d2ff;
@@ -122,12 +157,20 @@
 <body>
 
     <h1>⚡ VIDA SUPER HUB ⚡</h1>
+    
+    <div class="badge-container">
+        <span class="badge">🔥 100% FREE</span>
+        <span class="badge">🚀 NO KEY IN-GAME</span>
+        <span class="badge">🛠️ MOBILE OPTIMIZED</span>
+    </div>
 
     <div class="key-box">
         <h3>🔑 Enter Key to Unlock Hub</h3>
-        <input type="text" id="keyInput" placeholder="Enter Key Here..." oninput="checkKey()">
+        <input type="text" id="keyInput" placeholder="Enter Key Here...">
+        <button class="submit-btn" onclick="checkKey()">Submit Key</button>
         <div id="status" class="status-message" style="color: #858fbb;">Locked 🔒</div>
     </div>
+
     <div class="hub-container">
 
         <div class="block" id="block1">
@@ -145,11 +188,11 @@
     </div>
 
     <script>
-        const correctKey = "Super-Hub777";
+        const correctKey = "super-hub777"; 
 
-        // Funktion, die den eingegebenen Key überprüft
+        // Prüft erst, wenn man auf "Submit Key" klickt
         function checkKey() {
-            const input = document.getElementById("keyInput").value;
+            const input = document.getElementById("keyInput").value.toLowerCase().trim();
             const status = document.getElementById("status");
             const blocks = document.querySelectorAll(".block");
 
@@ -158,35 +201,31 @@
                 status.style.color = "#2ec4b6";
                 document.getElementById("keyInput").style.borderColor = "#2ec4b6";
                 
-                // Alle Blöcke freischalten
                 blocks.forEach(block => {
                     block.classList.add("unlocked");
                 });
             } else if (input === "") {
-                status.innerText = "Locked 🔒";
+                status.innerText = "Please enter a key! ⚠️";
                 status.style.color = "#858fbb";
                 document.getElementById("keyInput").style.borderColor = "#00d2ff";
                 
-                // Blöcke wieder sperren, wenn das Feld geleert wird
                 blocks.forEach(block => {
                     block.classList.remove("unlocked");
                 });
             } else {
-                status.innerText = "Wrong Key! ❌";
+                status.innerText = "Wrong Key! ❌ Try Again";
                 status.style.color = "#ff4b4b";
                 document.getElementById("keyInput").style.borderColor = "#ff4b4b";
                 
-                // Blöcke gesperrt lassen
                 blocks.forEach(block => {
                     block.classList.remove("unlocked");
                 });
             }
         }
 
-        // Kopier-Funktion für die Buttons
         function copyScript(scriptText) {
             navigator.clipboard.writeText(scriptText).then(() => {
-                alert("Script erfolgreich kopiert! Du kannst es jetzt in deinen Executor einfügen.");
+                alert("Script erfolgreich kopiert!");
             }).catch(err => {
                 alert("Fehler beim Kopieren: " + err);
             });
@@ -195,3 +234,4 @@
 
 </body>
 </html>
+
