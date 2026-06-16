@@ -4,382 +4,413 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vida Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-dark: #090a0f;
-            --bg-card: #12141c;
-            --neon-blue: #00d2ff;
-            --neon-blue-glow: rgba(0, 210, 255, 0.3);
-            --text-main: #ffffff;
-            --text-muted: #8a92b2;
-            --success-green: #2ecc71;
+            --bg-color: #0b0f19;
+            --card-bg: #131a26;
+            --accent-blue: #00d2ff;
+            --accent-purple: #9d4edd;
+            --text-color: #ffffff;
+            --text-muted: #858fbb;
+            --success-color: #2ec4b6;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            padding: 15px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
 
         header {
-            width: 100%;
-            max-width: 450px;
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 500px;
         }
 
-        .logo-area {
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px var(--neon-blue-glow);
             margin-bottom: 20px;
         }
 
-        .nav-buttons {
+        /* Navigation Tabs */
+        .tabs {
             display: flex;
-            gap: 8px;
-            justify-content: center;
-            margin-bottom: 15px;
+            justify-content: space-around;
+            background: var(--card-bg);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 210, 255, 0.1);
+            margin-bottom: 25px;
         }
 
-        .nav-btn {
-            background-color: transparent;
-            color: var(--text-muted);
+        .tab-btn {
+            background: none;
             border: none;
-            padding: 8px 16px;
+            color: var(--text-muted);
             font-size: 14px;
             font-weight: 600;
+            padding: 8px 16px;
             border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .nav-btn.active {
-            background-color: rgba(0, 210, 255, 0.15);
-            color: var(--neon-blue);
-            border: 1px solid var(--neon-blue);
+        .tab-btn.active {
+            color: var(--text-color);
+            background: rgba(0, 210, 255, 0.15);
+            border: 1px solid var(--accent-blue);
         }
 
-        /* --- STATS GRID --- */
+        /* Status & Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             width: 100%;
-            max-width: 450px;
-            margin-bottom: 20px;
+            max-width: 500px;
+            margin-bottom: 25px;
         }
 
         .stat-card {
-            background-color: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
+            padding: 15px;
             border-radius: 12px;
-            padding: 18px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
-        .stat-number {
-            font-size: 22px;
+        .stat-card h3 {
+            font-size: 20px;
+            color: var(--accent-blue);
             font-weight: 700;
-            color: var(--neon-blue);
-            text-shadow: 0 0 8px var(--neon-blue-glow);
-            margin-bottom: 5px;
         }
 
-        .stat-label {
-            font-size: 11px;
+        .stat-card p {
+            font-size: 10px;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--text-muted);
+            margin-top: 4px;
         }
 
-        /* --- NEW: GET KEY AREA --- */
-        .key-area {
+        /* Key System Box */
+        .key-box {
+            background: var(--card-bg);
             width: 100%;
-            max-width: 450px;
-            background-color: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 14px;
+            max-width: 500px;
             padding: 20px;
-            margin-bottom: 25px;
+            border-radius: 16px;
             text-align: center;
+            border: 1px solid rgba(157, 78, 221, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
         }
 
-        .key-area h3 {
-            font-size: 18px;
-            margin-bottom: 12px;
-            color: var(--text-main);
+        .key-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        /* --- SCRIPT CARD AREA (image_3.png) --- */
-        .scripts-grid {
+        /* Container für Skripte */
+        .container {
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
-            gap: 25px; /* Abstand zwischen den Kästen */
+            gap: 25px;
         }
 
-        .script-card {
-            background-color: var(--bg-card);
-            border-radius: 14px;
+        /* Skript Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s ease;
         }
 
-        .card-banner {
+        .banner-frame {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
-            display: block;
-            background-color: #1a1d29;
+            height: 180px;
+            background: #182232;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
         }
 
-        .card-content {
+        .banner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-placeholder {
+            color: var(--text-muted);
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
             padding: 20px;
         }
 
         .card-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--text-main);
+            margin-bottom: 6px;
+            color: var(--text-color);
         }
 
         .card-desc {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-muted);
+            margin-bottom: 18px;
             line-height: 1.5;
-            margin-bottom: 20px;
         }
 
-        .copy-button-wrapper {
+        /* Buttons */
+        .btn {
+            width: 100%;
+            background: none;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-        }
-
-        .btn-copy {
-            background-color: transparent;
-            color: var(--neon-blue);
-            border: 2px solid var(--neon-blue);
-            padding: 10px 30px;
-            font-size: 15px;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
+            justify-content: center;
             gap: 8px;
             transition: all 0.2s ease;
-            width: 100%;
-            justify-content: center;
         }
 
-        .btn-copy.copied {
-            background-color: var(--success-green) !important;
-            border-color: var(--success-green) !important;
-            color: #ffffff !important;
-            box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn.copied {
+            background: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+            color: #000000 !important;
         }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <header>
-        <div class="logo-area">
-            <span>⚡ VIDA HUB</span>
+        <div class="logo"><i class="fas fa-bolt"></i> Vida Hub</div>
+        
+        <div class="tabs">
+            <button class="tab-btn active">Scripts</button>
+            <button class="tab-btn">Executor</button>
+            <button class="tab-btn">FAQ</button>
         </div>
-        <div class="nav-buttons">
-            <button class="nav-btn active">Scripts</button>
-            <button class="nav-btn">Executor</button>
-            <button class="nav-btn">FAQ</button>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>10</h3>
+                <p>Scripts</p>
+            </div>
+            <div class="stat-card">
+                <h3>100%</h3>
+                <p>Kostenlos</p>
+            </div>
+            <div class="stat-card">
+                <h3>24/7</h3>
+                <p>Verfügbar</p>
+            </div>
+            <div class="stat-card">
+                <h3>Aktiv</h3>
+                <p>Status</p>
+            </div>
         </div>
     </header>
 
-    <!-- Statistik-Karten -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-number">10</div>
-            <div class="stat-label">Scripts</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">100%</div>
-            <div class="stat-label">Kostenlos</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">24/7</div>
-            <div class="stat-label">Verfügbar</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">Aktiv</div>
-            <div class="stat-label">Status</div>
-        </div>
-    </div>
-
-    <!-- Get Key Kasten mit dem Key TrixoBeste444 -->
-    <div class="key-area">
-        <h3>🔑 Get Key</h3>
-        <button class="btn-copy" onclick="copyScript(this)" data-key="TrixoBeste444">
-            🗐 Copy Key
+    <div class="key-box">
+        <div class="key-title">🔑 Get Key</div>
+        <button class="btn" onclick="copyScript(this)" data-script="Hier echten Key-Link oder Key eintragen">
+            <i class="fas fa-key"></i> Copy Key
         </button>
     </div>
 
-    <!-- Die 10 Script-Kästen im exakten Abstand -->
-    <div class="scripts-grid">
-        
-        <!-- KASTEN 1 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
-                <div class="card-title">Überschrift</div>
-                <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-1">
-                        🗐 Copy
-                    </button>
-                </div>
+    <div class="container">
+
+        <!-- BLOCK 1 (Blox Fruits Bounty) -->
+        <div class="card">
+            <div class="banner-frame">
+                <img class="banner-img" src="https://cdn.discordapp.com/attachments/1516388906470215742/1516394601848770622/IMG_2698.webp?ex=6a327c06&is=6a312a86&hm=da332bd7912939c0b1ffdaa412e36dcc1be8df22ee4a315e394a83ec69d314dd&" alt="Blox Fruits">
+            </div>
+            <div class="card-body">
+                <div class="card-title">Blox Fruits (Bounty)</div>
+                <div class="card-desc">Dieser Script kann: [Auto Bounty, AIM, All on PVP]</div>
+                <button class="btn" onclick="copyScript(this)" data-script="loadstring(game:HttpGet(&quot;https://raw.githubusercontent.com/hermanos-dev/hermanos-hub/refs/heads/main/Loader.lua&quot;))()">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 2 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 2 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-2">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 2 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 3 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 3 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-3">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 3 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 4 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 4 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-4">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 4 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 5 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 5 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-5">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 5 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 6 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 6 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-6">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 6 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 7 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 7 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-7">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 7 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 8 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 8 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-8">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 8 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 9 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 9 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-9">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 9 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
-        <!-- KASTEN 10 -->
-        <div class="script-card">
-            <img class="card-banner" src="https://via.placeholder.com/450x200" alt="Game Banner">
-            <div class="card-content">
+        <!-- BLOCK 10 -->
+        <div class="card">
+            <div class="banner-frame">
+                <div class="banner-placeholder"><i class="far fa-image fa-2x"></i> Game Banner</div>
+            </div>
+            <div class="card-body">
                 <div class="card-title">Überschrift</div>
                 <div class="card-desc">Beschreibung</div>
-                <div class="copy-button-wrapper">
-                    <button class="btn-copy" onclick="copyScript(this)" data-key="DEIN-SCRIPT-KEY-10">
-                        🗐 Copy
-                    </button>
-                </div>
+                <button class="btn" onclick="copyScript(this)" data-script="Code für Block 10 hier">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
         </div>
 
@@ -388,20 +419,19 @@
     <!-- Kopier-Logik -->
     <script>
         function copyScript(buttonElement) {
-            const keyText = buttonElement.getAttribute('data-key');
+            const keyText = buttonElement.getAttribute('data-script');
             navigator.clipboard.writeText(keyText).then(() => {
                 buttonElement.classList.add('copied');
                 const originalText = buttonElement.innerHTML;
-                buttonElement.innerHTML = '✔ Copied!';
+                buttonElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
                 setTimeout(() => {
                     buttonElement.classList.remove('copied');
                     buttonElement.innerHTML = originalText;
                 }, 2000);
             }).catch(err => {
-                console.error('Fehler beim Kopieren:', err);
+                console.error('Fehler beim Kopieren: ', err);
             });
         }
     </script>
-
 </body>
 </html>
