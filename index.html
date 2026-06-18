@@ -119,8 +119,9 @@
             font-size: 0.9rem;
         }
 
+        /* Container ist standardmäßig versteckt */
         .hub-container {
-            display: grid;
+            display: none; 
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             max-width: 1000px;
@@ -129,23 +130,15 @@
 
         .block {
             background: #111111;
-            border: 2px solid #222222;
+            border: 2px solid #ffffff; /* Direkt weißer Rand, da es eh erst nach Key-Eingabe kommt */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 25px 20px;
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
-            opacity: 0.3;
-            pointer-events: none;
         }
 
-        .block.unlocked {
-            opacity: 1;
-            pointer-events: auto;
-            border-color: #ffffff;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-        }
-
-        .block:hover.unlocked {
+        .block:hover {
             transform: translateY(-5px);
             box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
         }
@@ -221,22 +214,22 @@
         <div id="status" class="status-message" style="color: #666666;">Locked 🔒</div>
     </div>
 
-    <div class="hub-container">
+    <div class="hub-container" id="hubContainer">
 
         <div class="block" id="block1">
-            <h2>🏴‍☠️ Blox Fruits</h2>
+            <h2>🏴‍☠️ Blox Fruits [Hermanos Pvp]</h2>
             <p>Hermanos Hub - Best Bounty & Auto Farm Script</p>
             <button class="copy-btn" onclick="copyScript(this, `loadstring(game:HttpGet('https://raw.githubusercontent.com/hermanos-dev/hermanos-hub/refs/heads/main/Loader.lua'))()`)">Copy Script</button>
         </div>
 
         <div class="block" id="block2">
-            <h2>⚔️ Blox Fruits [All in ONE]</h2>
+            <h2>⚔️ Blox Fruits [QUANTUM ONYX]</h2>
             <p>Fake Admin, Raids, Auto Farm, Quests & More!</p>
             <button class="copy-btn" onclick="copyScript(this, `loadstring(game:HttpGet(&quot;https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua&quot;))()`)">Copy Script</button>
         </div>
 
         <div class="block" id="block3">
-            <h2>🎯 Rivals</h2>
+            <h2>🎯 Rivals [Lexus]</h2>
             <p>Aimbot, Infinite Double Jump, ESP & More!</p>
             <button class="copy-btn" onclick="copyScript(this, `loadstring(game:HttpGet(&quot;https://raw.githubusercontent.com/awakeningswifters/LexusHubLoader/refs/heads/main/Loader.lua&quot;))()`)">Copy Script</button>
         </div>
@@ -244,37 +237,29 @@
     </div>
 
     <script>
-        // Neuer Key hinterlegt
         const correctKey = "rbx-hub777"; 
 
         function checkKey() {
             const input = document.getElementById("keyInput").value.toLowerCase().trim();
             const status = document.getElementById("status");
-            const blocks = document.querySelectorAll(".block");
+            const container = document.getElementById("hubContainer");
 
             if (input === correctKey) {
                 status.innerText = "Access Granted! ✅ Unlocked";
                 status.style.color = "#ffffff";
                 document.getElementById("keyInput").style.borderColor = "#ffffff";
                 
-                blocks.forEach(block => {
-                    block.classList.add("unlocked");
-                });
+                // Macht den ganzen Container sichtbar
+                container.style.display = "grid";
             } else if (input === "") {
                 status.innerText = "Please enter a key! ⚠️";
                 document.getElementById("keyInput").style.borderColor = "#ffffff";
-                
-                blocks.forEach(block => {
-                    block.classList.remove("unlocked");
-                });
+                container.style.display = "none";
             } else {
                 status.innerText = "Wrong Key! ❌ Try Again";
                 status.style.color = "#ff4b4b";
                 document.getElementById("keyInput").style.borderColor = "#ff4b4b";
-                
-                blocks.forEach(block => {
-                    block.classList.remove("unlocked");
-                });
+                container.style.display = "none";
             }
         }
 
