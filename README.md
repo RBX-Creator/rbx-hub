@@ -1,2 +1,0 @@
-# RBX-Hub
-Script Web
