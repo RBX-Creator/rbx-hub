@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Hub</title>
+    <title>SUPER HUB</title>
     <style>
         body {
-            background-color: #000000; /* Reines Schwarz */
+            background-color: #000000; /* Reines Schwarz wie in image_7.png */
             color: #ffffff; /* Hellweiß */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
@@ -16,22 +16,13 @@
 
         h1 {
             color: #ffffff; /* Hellweiß */
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* Weißer Glow */
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4); /* Weißer Glow-Effekt */
             font-size: 2.5rem;
-            margin-bottom: 5px;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            color: #888888; /* Clean-Grau */
-            font-size: 1rem;
             margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-weight: bold;
         }
 
-        /* 2x2 Kachel-Raster in Schwarz-Weiß */
+        /* Das originale 2x2 Kachel-Raster */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -45,7 +36,7 @@
             background-color: #111111; /* Dunkelgrau */
             border-radius: 12px;
             padding: 20px 10px;
-            border: 1px solid #333333; /* Dezenter grauer Rand */
+            border: 1px solid #222222; /* Dezenter grauer Rand */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -62,7 +53,7 @@
         .stat-label {
             font-size: 0.75rem;
             text-transform: uppercase;
-            color: #777777;
+            color: #666666; /* Dunkleres Grau für die Beschriftung */
             letter-spacing: 1px;
             font-weight: 600;
         }
@@ -70,8 +61,8 @@
         /* Key System Bereich */
         .key-box {
             background: #111111;
-            border: 2px solid #ffffff; /* Weißer Rahmen */
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            border: 2px solid #ffffff; /* Weißer Rahmen wie in image_7.png */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
             border-radius: 12px;
             padding: 20px;
             max-width: 400px;
@@ -91,7 +82,7 @@
             width: 85%;
             padding: 12px;
             background-color: #000000;
-            border: 1px solid #444444;
+            border: 1px solid #333333;
             border-radius: 8px;
             color: white;
             text-align: center;
@@ -136,12 +127,12 @@
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             max-width: 1000px;
-            margin: 0 auto 40px auto;
+            margin: 0 auto;
         }
 
         .block {
             background: #111111;
-            border: 2px solid #333333;
+            border: 2px solid #222222;
             border-radius: 12px;
             padding: 20px;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -153,13 +144,13 @@
         .block.unlocked {
             opacity: 1;
             pointer-events: auto;
-            border-color: #ffffff; /* Weißer Rand wenn freigeschaltet */
+            border-color: #ffffff; /* Weißer Rand bei Unlocked */
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
         }
 
         .block:hover.unlocked {
             transform: translateY(-5px);
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
         }
 
         .block h2 {
@@ -209,65 +200,28 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
-
-        /* Socials Footer */
-        .socials-footer {
-            margin-top: 50px;
-            padding: 20px;
-            background-color: #111111;
-            border-top: 1px solid #333333;
-        }
-
-        .socials-footer h4 {
-            color: #ffffff;
-            margin-bottom: 15px;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .social-links a {
-            color: #ffffff;
-            text-decoration: none;
-            background: #000000;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: 1px solid #333333;
-            font-size: 0.9rem;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .social-links a:hover {
-            box-shadow: 0 0 10px #ffffff;
-            border-color: #ffffff;
-        }
     </style>
 </head>
 <body>
 
-    <h1>MY HUB</h1>
-    <div class="subtitle">Personal Script & Project Dashboard</div>
+    <h1>⚡ SUPER HUB</h1>
     
     <div class="stats-grid">
         <div class="stat-card">
-            <span class="stat-value">Custom</span>
+            <span class="stat-value">10</span>
             <span class="stat-label">Scripts</span>
         </div>
         <div class="stat-card">
-            <span class="stat-value">Active</span>
+            <span class="stat-value">100%</span>
+            <span class="stat-label">Kostenlos</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">24/7</span>
+            <span class="stat-label">Verfügbar</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">Aktiv</span>
             <span class="stat-label">Status</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">Private</span>
-            <span class="stat-label">Access</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">1.0</span>
-            <span class="stat-label">Version</span>
         </div>
     </div>
 
@@ -275,30 +229,36 @@
         <h3>🔑 Enter Key to Unlock Hub</h3>
         <input type="text" id="keyInput" placeholder="Enter Key Here...">
         <button class="submit-btn" onclick="checkKey()">Submit Key</button>
-        <div id="status" class="status-message" style="color: #888888;">Locked 🔒</div>
+        <div id="status" class="status-message" style="color: #666666;">Locked 🔒</div>
     </div>
 
     <div class="hub-container">
 
         <div class="block" id="block1">
-            <img src="https://images.prodia.xyz/744fb8f0-48fe-4098-824e-0f09d455d4f5.png" alt="Script Banner" class="game-banner">
-            <h2>⚡ Main Project Script</h2>
-            <p>Your custom execution features and settings</p>
-            <button class="copy-btn" onclick="copyScript(this, `print('Hello World')`)">Copy Script</button>
+            <img src="https://cdn.discordapp.com/attachments/1516375399645581434/1516549532396032120/image0.jpg?ex=6a330c50&is=6a31bad0&hm=2eb861b030dba3d5b33f823dae3eeb063cc58764ee79c057372136e1b5844936&" alt="Game Banner" class="game-banner">
+            <h2>🏴‍☠️ Blox Fruits</h2>
+            <p>Hermanos Hub - Best Bounty & Auto Farm Script</p>
+            <button class="copy-btn" onclick="copyScript(this, `loadstring(game:HttpGet('https://raw.githubusercontent.com/hermanos-dev/hermanos-hub/refs/heads/main/Loader.lua'))()`)">Copy Script</button>
         </div>
 
-    </div>
-
-    <div class="socials-footer">
-        <h4>🔗 Community & Links</h4>
-        <div class="social-links">
-            <a href="https://discord.gg/" target="_blank">💬 Discord Server</a>
+        <div class="block" id="block2">
+            <img src="https://cdn.discordapp.com/attachments/1516375399645581434/1516551977994031215/IMG_2772.png?ex=6a330e97&is=6a31bd17&hm=1df311fb6d95372f07e978a9fcf3ea9d37056259563f9b466b35bd35d46f0f7d&" alt="Game Banner" class="game-banner">
+            <h2>⚔️ Blox Fruits [All in ONE]</h2>
+            <p>Fake Admin, Raids, Auto Farm, Quests & More!</p>
+            <button class="copy-btn" onclick="copyScript(this, `loadstring(game:HttpGet(&quot;https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua&quot;))()`)">Copy Script</button>
         </div>
+
+        <div class="block" id="block3">
+            <img src="https://cdn.discordapp.com/attachments/1516375399645581434/1516750519253729310/image.png" alt="Game Banner" class="game-banner">
+            <h2>🎯 Rivals</h2>
+            <p>Aimbot, Infinite Double Jump, ESP & More!</p>
+            <button class="copy-btn" onclick="copyScript(this, `loadstring(game:HttpGet(&quot;https://raw.githubusercontent.com/awakeningswifters/LexusHubLoader/refs/heads/main/Loader.lua&quot;))()`)">Copy Script</button>
+        </div>
+
     </div>
 
     <script>
-        // Setze hier deinen gewünschten Key ein
-        const correctKey = "mein-key"; 
+        const correctKey = "super-hub777"; 
 
         function checkKey() {
             const input = document.getElementById("keyInput").value.toLowerCase().trim();
