@@ -1,2 +1,2 @@
-# vida-hub
+# RBX-Hub
 Script Web
