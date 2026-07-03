@@ -1,4 +1,4 @@
--- [[ VIDA ULTIMATE v8.4 - Fruit Snipe Edition ]]
+-- [[ VIDA ULTIMATE v8.9 - Overdrive 3x Speed Edition ]]
 local Player = game.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
@@ -121,7 +121,7 @@ scroll.Position = UDim2.new(0, 10, 0, 40)
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
 scroll.ScrollBarThickness = 0
-scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0) -- Angepasst für Snipe Button
+scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0)
 local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 8)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -133,31 +133,52 @@ local function createSlider(parent, defaultValue, minVal, maxVal, order)
     sliderFrame.BackgroundTransparency = 1
     sliderFrame.Visible = false
     sliderFrame.LayoutOrder = order
+    
     local bg = Instance.new("Frame", sliderFrame)
     bg.Size = UDim2.new(1, -20, 0, 4)
     bg.Position = UDim2.new(0, 10, 0.5, -2)
     bg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
     Instance.new("UICorner", bg)
+    
     local fill = Instance.new("Frame", bg)
     fill.Size = UDim2.new((defaultValue - minVal)/(maxVal - minVal), 0, 1, 0)
     fill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
     Instance.new("UICorner", fill)
+    
     local knob = Instance.new("Frame", sliderFrame)
     knob.Size = UDim2.new(0, 14, 0, 14)
     knob.Position = UDim2.new(fill.Size.X.Scale, -7, 0.5, -7)
     knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+    
     local currentVal = defaultValue
+    local dragging = false
+    
     local function update(input)
         local pos = math.clamp((input.Position.X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
         fill.Size = UDim2.new(pos, 0, 1, 0)
         knob.Position = UDim2.new(pos, -7, 0.5, -7)
         currentVal = minVal + (pos * (maxVal - minVal))
     end
-    local dragging = false
-    knob.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true end end)
-    UserInputService.InputEnded:Connect(function() dragging = false end)
-    UserInputService.InputChanged:Connect(function(input) if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then update(input) end end)
+    
+    knob.InputBegan:Connect(function(input) 
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
+            dragging = true 
+        end 
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false 
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input) 
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then 
+            update(input) 
+        end 
+    end)
+    
     return sliderFrame, function() return currentVal end
 end
 
@@ -198,22 +219,24 @@ local function createScanner(target, highlightColor, labelColor)
     label.TextSize = 18
     label.Font = Enum.Font.GothamBold
     label.TextStrokeTransparency = 0.2
-    RunService.RenderStepped:Connect(function()
+    
+    local scanConn
+    scanConn = RunService.RenderStepped:Connect(function()
         if target.Parent and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             local dist = math.floor((target.HumanoidRootPart.Position - Player.Character.HumanoidRootPart.Position).Magnitude)
             label.Text = "[" .. dist .. "m]"
         else
-            highlight:Destroy() billboard:Destroy()
+            highlight:Destroy() billboard:Destroy() scanConn:Disconnect()
         end
     end)
 end
 
--- 7. BUTTONS
+-- 7. BUTTONS ERSTELLEN
 local tpPlayerBtn, tpPlayerS = createBtn("TP PLAYER: OFF", 0)
 local flyBtn, flyS = createBtn("FLY: OFF", 1)
 local flySlider, getFlySpeed = createSlider(scroll, 2, 1, 10, 2)
 local speedBtn, speedS = createBtn("SPEED: OFF", 3)
-local speedSlider, getWalkSpeed = createSlider(scroll, 2, 1, 15, 4)
+local speedSlider, getWalkSpeed = createSlider(scroll, 16, 16, 250, 4)
 local killBtn, killS = createBtn("AUTO KILL: OFF", 5)
 local aimBtn, aimS = createBtn("VIDA AIM: OFF", 7)
 local invBtn, invS = createBtn("INVISIBLE: OFF", 8)
@@ -221,7 +244,7 @@ local ghostBtn, ghostS = createBtn("GHOST: OFF", 9)
 local setBtn, setS = createBtn("SET POSITION", 10)
 local loadBtn, loadS = createBtn("LOAD POSITION", 11)
 local scanP, scanPS = createBtn("SCAN PLAYER: OFF", 12)
-local snipeFruitBtn, snipeFS = createBtn("SNIPE FRUIT", 13) -- NEUER SNIPE BUTTON
+local snipeFruitBtn, snipeFS = createBtn("SNIPE FRUIT", 13)
 
 -- 8. LOGIK VARIABLEN
 local flyOn, speedOn, invOn, ghostOn, pScanOn = false, false, false, false, false
@@ -230,7 +253,8 @@ local stickyTpOn = false
 local tpTargetPlayer = nil
 local savedPos, tpPos, currentTarget = nil, nil, nil
 local rotX, rotY = 0, 0
-local bodyVelocity, guiStates = nil, {}
+local bodyVelocity = nil
+local guiStates = {}
 
 -- UI ELEMENTS
 local tpPlayerFrame = Instance.new("ScrollingFrame", screenGui)
@@ -289,13 +313,13 @@ flyBtn.MouseButton1Click:Connect(function()
     flyS.Color = flyOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
     flySlider.Visible = flyOn
     local char = Player.Character
-    if flyOn and char then
+    if flyOn and char and char:FindFirstChild("HumanoidRootPart") then
         char.Humanoid.PlatformStand = true
         bodyVelocity = Instance.new("BodyVelocity", char.HumanoidRootPart)
         bodyVelocity.MaxForce = Vector3.new(1,1,1) * 10^5
-    elseif char then
+    elseif char and char:FindFirstChild("Humanoid") then
         char.Humanoid.PlatformStand = false
-        if bodyVelocity then bodyVelocity:Destroy() end
+        if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
     end
 end)
 
@@ -343,7 +367,7 @@ invBtn.MouseButton1Click:Connect(function()
     invOn = not invOn
     invBtn.Text = invOn and "INVISIBLE: ON" or "INVISIBLE: OFF"
     invS.Color = invOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
-    local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
     if invOn and hrp then
         savedPos = hrp.CFrame
         hrp.CFrame = hrp.CFrame * CFrame.new(0, -150, 0)
@@ -359,7 +383,7 @@ ghostBtn.MouseButton1Click:Connect(function()
     ghostBtn.Text = ghostOn and "GHOST: ON" or "GHOST: OFF"
     ghostS.Color = ghostOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
     local char = Player.Character
-    if ghostOn and char then
+    if ghostOn and char and char:FindFirstChild("HumanoidRootPart") then
         for _, g in pairs(PlayerGui:GetChildren()) do
             if g:IsA("ScreenGui") and g ~= screenGui and g.Name ~= "TouchGui" then
                 guiStates[g] = g.Enabled g.Enabled = false
@@ -370,7 +394,7 @@ ghostBtn.MouseButton1Click:Connect(function()
         local y, x, z = Camera.CFrame:ToEulerAnglesYXZ()
         rotX, rotY = x, y
         Camera.CameraType = Enum.CameraType.Scriptable
-    elseif char then
+    elseif char and char:FindFirstChild("HumanoidRootPart") then
         for g, state in pairs(guiStates) do if g and g.Parent then g.Enabled = state end end
         char.HumanoidRootPart.Anchored = false
         char.Humanoid.AutoRotate = true
@@ -391,7 +415,6 @@ loadBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- FRUIT SNIPE LOGIK
 snipeFruitBtn.MouseButton1Click:Connect(function()
     local char = Player.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
@@ -411,7 +434,7 @@ snipeFruitBtn.MouseButton1Click:Connect(function()
         
         snipeFS.Color = Color3.fromRGB(255, 255, 255)
         hrp.CFrame = fruitPos
-        task.wait(0.1) -- Blitzschnelles Warten
+        task.wait(0.1)
         hrp.CFrame = oldPos
         snipeFS.Color = Color3.fromRGB(60, 60, 80)
     else
@@ -421,15 +444,15 @@ snipeFruitBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 10. MAIN LOOP
+-- 10. MAIN RENDERING LOOP (OVERDRIVE 3X CFRAME WARP MULTIPLIER)
 RunService.RenderStepped:Connect(function()
     local char = Player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
     local hrp = char.HumanoidRootPart
-    local hum = char:FindFirstChild("Humanoid")
+    local hum = char.Humanoid
 
     -- NOCLIP
-    if flyOn or stickyTpOn then
+    if flyOn or stickyTpOn or (speedOn and getWalkSpeed() > 50) then
         for _, part in pairs(char:GetDescendants()) do
             if part:IsA("BasePart") then part.CanCollide = false end
         end
@@ -437,8 +460,7 @@ RunService.RenderStepped:Connect(function()
     
     -- STICKY TP
     if stickyTpOn and tpTargetPlayer and tpTargetPlayer.Character and tpTargetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local targetHrp = tpTargetPlayer.Character.HumanoidRootPart
-        hrp.CFrame = targetHrp.CFrame
+        hrp.CFrame = tpTargetPlayer.Character.HumanoidRootPart.CFrame
         hrp.Velocity = Vector3.new(0, 0, 0)
     elseif stickyTpOn then
         stickyTpOn = false
@@ -447,8 +469,10 @@ RunService.RenderStepped:Connect(function()
         tpPlayerS.Color = Color3.fromRGB(60, 60, 80)
     end
 
+    -- WATER WALKER
     if hrp.Position.Y < 5 then waterPart.CFrame = CFrame.new(hrp.Position.X, 0, hrp.Position.Z) else waterPart.CFrame = CFrame.new(0, -500, 0) end
 
+    -- AIMBOT
     if aimOn then
         local target = nil
         local dist = 150
@@ -463,11 +487,13 @@ RunService.RenderStepped:Connect(function()
         if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position) end
     end
 
-    if tracking and currentTarget and currentTarget:FindFirstChild("HumanoidRootPart") then
+    -- AUTO KILL HUNTING
+    if tracking and currentTarget and currentTarget:FindFirstChild("HumanoidRootPart") and currentTarget:FindFirstChild("Humanoid") then
         hrp.CFrame = currentTarget.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
         if currentTarget.Humanoid.Health <= 0 then tracking = false killBtn.Text = "AUTO KILL: OFF" end
     end
 
+    -- GHOST & FLY CONTROL
     if ghostOn then
         Camera.CFrame = CFrame.new(Camera.CFrame.Position) * CFrame.fromEulerAnglesYXZ(rotY, rotX, 0)
         local mv = ControlModule:GetMoveVector()
@@ -478,7 +504,31 @@ RunService.RenderStepped:Connect(function()
         local lookAtCFrame = CFrame.new(hrp.Position) * Camera.CFrame.Rotation
         hrp.CFrame = lookAtCFrame + (Camera.CFrame.LookVector * -mv.Z + Camera.CFrame.RightVector * mv.X) * getFlySpeed()
     end
-    if speedOn then hum.WalkSpeed = 16 * getWalkSpeed() else hum.WalkSpeed = 16 end
+    
+    -- OVERDRIVE SPEED WARP LOGIK
+    if speedOn then 
+        local targetSpeed = getWalkSpeed()
+        
+        if targetSpeed > 60 then
+            local moveVector = ControlModule:GetMoveVector()
+            if moveVector.Magnitude > 0 then
+                local rawDirection = (Camera.CFrame.LookVector * -moveVector.Z + Camera.CFrame.RightVector * moveVector.X)
+                local flatDirection = Vector3.new(rawDirection.X, 0, rawDirection.Z)
+                
+                if flatDirection.Magnitude > 0 then
+                    flatDirection = flatDirection.Unit
+                    -- Multiplikator auf 0.36 erhöht (Nochmal 3x schneller als die 0.12er Version)
+                    local warpFactor = (targetSpeed - 60) * 0.36
+                    hrp.CFrame = hrp.CFrame + (flatDirection * warpFactor)
+                end
+            end
+            hum.WalkSpeed = 60
+        else
+            hum.WalkSpeed = targetSpeed
+        end
+    else 
+        hum.WalkSpeed = 16 
+    end
 end)
 
 -- DRAGGING
@@ -493,4 +543,8 @@ UserInputService.InputChanged:Connect(function(input)
         rotY = math.clamp(rotY - input.Delta.Y * 0.005, -1.4, 1.4)
     end
 end)
-UserInputService.InputEnded:Connect(function() dragging = false end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false 
+    end
+end)
