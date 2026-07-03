@@ -1,4 +1,4 @@
--- [[ VIDA ULTIMATE v8.9 - Overdrive 3x Speed Edition ]]
+-- [[ DARK DEMON v9.6 - Synced Lightning Speed & Fly Edition ]]
 local Player = game.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
@@ -9,7 +9,7 @@ local ControlModule = require(Player.PlayerScripts:WaitForChild("PlayerModule"))
 
 -- 1. CLEANUP
 local function cleanup()
-    local ids = {"VidaLoader", "VidaHub", "VidaESP", "VidaWaterWalker", "VidaFlash"}
+    local ids = {"VidaLoader", "VidaHub", "VidaESP", "VidaWaterWalker", "VidaFlash", "DarkDemonLoader", "DarkDemonHub", "LightningHolder"}
     for _, id in pairs(ids) do
         local old = PlayerGui:FindFirstChild(id) or workspace:FindFirstChild(id)
         if old then old:Destroy() end
@@ -19,6 +19,9 @@ cleanup()
 
 local espFolder = Instance.new("Folder", PlayerGui)
 espFolder.Name = "VidaESP"
+
+local lightningFolder = Instance.new("Folder", workspace)
+lightningFolder.Name = "LightningHolder"
 
 -- 2. MULTI-FLASH LOGIK
 local flashGui = Instance.new("ScreenGui", PlayerGui)
@@ -38,42 +41,42 @@ local function doMultiFlash()
     end
 end
 
--- 3. NEON LOADING SCREEN
+-- 3. DEMONIC LOADING SCREEN
 local loaderGui = Instance.new("ScreenGui", PlayerGui)
-loaderGui.Name = "VidaLoader"
+loaderGui.Name = "DarkDemonLoader"
 loaderGui.IgnoreGuiInset = true
 local loadFrame = Instance.new("Frame", loaderGui)
 loadFrame.Size = UDim2.new(1, 0, 1, 0)
-loadFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+loadFrame.BackgroundColor3 = Color3.fromRGB(5, 0, 0)
 local title = Instance.new("TextLabel", loadFrame)
 title.Size = UDim2.new(0, 500, 0, 120)
 title.Position = UDim2.new(0.5, -250, 0.45, -60)
-title.Text = "VIDA HUB"
-title.TextColor3 = Color3.fromRGB(0, 200, 255)
+title.Text = "DARK DEMON"
+title.TextColor3 = Color3.fromRGB(255, 0, 0)
 title.TextSize = 75
 title.Font = Enum.Font.SpecialElite
 title.BackgroundTransparency = 1
 title.TextStrokeTransparency = 0.2
-title.TextStrokeColor3 = Color3.fromRGB(150, 0, 255)
+title.TextStrokeColor3 = Color3.fromRGB(50, 0, 0)
 local subText = Instance.new("TextLabel", loadFrame)
 subText.Size = UDim2.new(0, 400, 0, 30)
 subText.Position = UDim2.new(0.5, -200, 0.58, 0)
-subText.Text = "Initializing Hub..."
-subText.TextColor3 = Color3.fromRGB(180, 180, 180)
+subText.Text = "Awakening Demon..."
+subText.TextColor3 = Color3.fromRGB(150, 0, 0)
 subText.TextSize = 20
 subText.Font = Enum.Font.Code
 subText.BackgroundTransparency = 1
 
 local screenGui = Instance.new("ScreenGui", PlayerGui)
-screenGui.Name = "VidaHub"
+screenGui.Name = "DarkDemonHub"
 screenGui.Enabled = false
 
 task.spawn(function()
     for i = 1, 15 do
-        title.TextStrokeColor3 = Color3.fromRGB(150, 0, 255)
-        subText.Text = "VIDA Engine Loading... " .. (i*6) .. "%"
+        title.TextStrokeColor3 = Color3.fromRGB(100, 0, 0)
+        subText.Text = "DEMON Engine Loading... " .. (i*6) .. "%"
         task.wait(0.1)
-        title.TextStrokeColor3 = Color3.fromRGB(0, 200, 255)
+        title.TextStrokeColor3 = Color3.fromRGB(255, 0, 0)
         task.wait(0.1)
     end
     loaderGui:Destroy()
@@ -84,11 +87,11 @@ end)
 local mainContainer = Instance.new("Frame", screenGui)
 mainContainer.Size = UDim2.new(0, 240, 0, 420) 
 mainContainer.Position = UDim2.new(0.1, 0, 0.3, 0)
-mainContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+mainContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainContainer.BorderSizePixel = 0
 Instance.new("UICorner", mainContainer).CornerRadius = UDim.new(0, 12)
 local hubStroke = Instance.new("UIStroke", mainContainer)
-hubStroke.Color = Color3.fromRGB(0, 200, 255)
+hubStroke.Color = Color3.fromRGB(255, 0, 0)
 hubStroke.Thickness = 2.5
 
 local topBar = Instance.new("Frame", mainContainer)
@@ -99,18 +102,23 @@ local minBtn = Instance.new("TextButton", topBar)
 minBtn.Size = UDim2.new(0, 25, 0, 25)
 minBtn.Position = UDim2.new(1, -30, 0, 5)
 minBtn.Text = "-"
-minBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minBtn.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+minBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
 Instance.new("UICorner", minBtn).CornerRadius = UDim.new(1, 0)
+local minStroke = Instance.new("UIStroke", minBtn)
+minStroke.Color = Color3.fromRGB(150, 0, 0)
 
 local smallBtn = Instance.new("TextButton", screenGui)
 smallBtn.Size = UDim2.new(0, 60, 0, 60)
 smallBtn.Visible = false
-smallBtn.Text = "VIDA"
-smallBtn.BackgroundColor3 = Color3.fromRGB(30, 0, 60)
-smallBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+smallBtn.Text = "DEMON"
+smallBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+smallBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
 smallBtn.Font = Enum.Font.GothamBold
 Instance.new("UICorner", smallBtn).CornerRadius = UDim.new(1, 0)
+local smallStroke = Instance.new("UIStroke", smallBtn)
+smallStroke.Color = Color3.fromRGB(255, 0, 0)
+smallStroke.Thickness = 2
 
 minBtn.MouseButton1Click:Connect(function() mainContainer.Visible = false smallBtn.Visible = true smallBtn.Position = mainContainer.Position end)
 smallBtn.MouseButton1Click:Connect(function() smallBtn.Visible = false mainContainer.Visible = true end)
@@ -126,7 +134,7 @@ local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 8)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- 5. HILFSFUNKTIONEN
+-- 5. SLIDER & BUTTON CREATOR
 local function createSlider(parent, defaultValue, minVal, maxVal, order)
     local sliderFrame = Instance.new("Frame", parent)
     sliderFrame.Size = UDim2.new(1, 0, 0, 25)
@@ -137,12 +145,12 @@ local function createSlider(parent, defaultValue, minVal, maxVal, order)
     local bg = Instance.new("Frame", sliderFrame)
     bg.Size = UDim2.new(1, -20, 0, 4)
     bg.Position = UDim2.new(0, 10, 0.5, -2)
-    bg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    bg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Instance.new("UICorner", bg)
     
     local fill = Instance.new("Frame", bg)
     fill.Size = UDim2.new((defaultValue - minVal)/(maxVal - minVal), 0, 1, 0)
-    fill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     Instance.new("UICorner", fill)
     
     local knob = Instance.new("Frame", sliderFrame)
@@ -162,21 +170,13 @@ local function createSlider(parent, defaultValue, minVal, maxVal, order)
     end
     
     knob.InputBegan:Connect(function(input) 
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
-            dragging = true 
-        end 
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true end 
     end)
-    
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false 
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
     end)
-    
     UserInputService.InputChanged:Connect(function(input) 
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then 
-            update(input) 
-        end 
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then update(input) end 
     end)
     
     return sliderFrame, function() return currentVal end
@@ -185,14 +185,14 @@ end
 local function createBtn(name, order)
     local b = Instance.new("TextButton", scroll)
     b.Size = UDim2.new(1, 0, 0, 40)
-    b.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    b.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
     b.Text = name
-    b.TextColor3 = Color3.fromRGB(200, 200, 200)
+    b.TextColor3 = Color3.fromRGB(255, 0, 0)
     b.Font = Enum.Font.GothamBold
     b.LayoutOrder = order
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
     local s = Instance.new("UIStroke", b)
-    s.Color = Color3.fromRGB(60, 60, 80)
+    s.Color = Color3.fromRGB(120, 0, 0)
     s.Thickness = 1.5
     return b, s
 end
@@ -234,11 +234,11 @@ end
 -- 7. BUTTONS ERSTELLEN
 local tpPlayerBtn, tpPlayerS = createBtn("TP PLAYER: OFF", 0)
 local flyBtn, flyS = createBtn("FLY: OFF", 1)
-local flySlider, getFlySpeed = createSlider(scroll, 2, 1, 10, 2)
+local flySlider, getFlySpeed = createSlider(scroll, 2, 1, 250, 2)
 local speedBtn, speedS = createBtn("SPEED: OFF", 3)
 local speedSlider, getWalkSpeed = createSlider(scroll, 16, 16, 250, 4)
 local killBtn, killS = createBtn("AUTO KILL: OFF", 5)
-local aimBtn, aimS = createBtn("VIDA AIM: OFF", 7)
+local aimBtn, aimS = createBtn("DEMON AIM: OFF", 7)
 local invBtn, invS = createBtn("INVISIBLE: OFF", 8)
 local ghostBtn, ghostS = createBtn("GHOST: OFF", 9)
 local setBtn, setS = createBtn("SET POSITION", 10)
@@ -246,23 +246,22 @@ local loadBtn, loadS = createBtn("LOAD POSITION", 11)
 local scanP, scanPS = createBtn("SCAN PLAYER: OFF", 12)
 local snipeFruitBtn, snipeFS = createBtn("SNIPE FRUIT", 13)
 
--- 8. LOGIK VARIABLEN
+-- 8. VARIABLES
 local flyOn, speedOn, invOn, ghostOn, pScanOn = false, false, false, false, false
-local tracking, aimOn = false, false
-local stickyTpOn = false
-local tpTargetPlayer = nil
-local savedPos, tpPos, currentTarget = nil, nil, nil
+local tracking, aimOn, stickyTpOn = false, false, false
+local tpTargetPlayer, savedPos, tpPos, currentTarget = nil, nil, nil, nil
 local rotX, rotY = 0, 0
 local bodyVelocity = nil
 local guiStates = {}
 
--- UI ELEMENTS
 local tpPlayerFrame = Instance.new("ScrollingFrame", screenGui)
 tpPlayerFrame.Size = UDim2.new(0, 180, 0, 200)
 tpPlayerFrame.Position = UDim2.new(0.1, 250, 0.2, 0)
-tpPlayerFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+tpPlayerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 tpPlayerFrame.Visible = false
 Instance.new("UICorner", tpPlayerFrame)
+local tpFrameStroke = Instance.new("UIStroke", tpPlayerFrame)
+tpFrameStroke.Color = Color3.fromRGB(150, 0, 0)
 local tpLayout = Instance.new("UIListLayout", tpPlayerFrame)
 tpLayout.Padding = UDim.new(0, 5)
 
@@ -273,7 +272,51 @@ waterPart.Transparency = 1
 waterPart.Anchored = true
 waterPart.CanCollide = true
 
--- UPDATE FUNKTIONEN
+-- 8b. DIGITALE BLITZ-ENGINE (FILIGRAN, REIN PROZEDURAL)
+local function drawLightningSegment(startPos, endPos)
+    local p = Instance.new("Part")
+    p.Name = "DemonLightning"
+    p.Material = Enum.Material.Neon
+    p.Color = Color3.fromRGB(130, 0, 0) -- Extrem dunkles, reines Rot
+    p.Anchored = true
+    p.CanCollide = false
+    p.CastShadow = false
+    
+    local dist = (endPos - startPos).Magnitude
+    p.Size = Vector3.new(0.04, 0.04, dist) -- Haardünne Segmente für maximalen Realismus
+    p.CFrame = CFrame.new(startPos:Lerp(endPos, 0.5), endPos)
+    p.Parent = lightningFolder
+    
+    task.spawn(function()
+        for i = 1, 4 do
+            p.Transparency = i * 0.25
+            task.wait(0.02)
+        end
+        p:Destroy()
+    end)
+end
+
+local function generateLightningBolt(startPoint, endPoint, steps)
+    local lastPos = startPoint
+    for i = 1, steps do
+        local t = i / steps
+        local targetPos = startPoint:Lerp(endPoint, t)
+        
+        if i < steps then
+            -- Sehr organische Offsets für feine Zacken
+            local offset = Vector3.new(
+                math.random(-8, 8) * 0.1,
+                math.random(-8, 8) * 0.1,
+                math.random(-8, 8) * 0.1
+            )
+            targetPos = targetPos + offset
+        end
+        
+        drawLightningSegment(lastPos, targetPos)
+        lastPos = targetPos
+    end
+end
+
 local function updatePlayerTPList()
     for _, c in pairs(tpPlayerFrame:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
     for _, p in pairs(game.Players:GetPlayers()) do
@@ -281,36 +324,35 @@ local function updatePlayerTPList()
             local b = Instance.new("TextButton", tpPlayerFrame)
             b.Size = UDim2.new(1, 0, 0, 30)
             b.Text = p.Name
-            b.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-            b.TextColor3 = Color3.new(1, 1, 1)
+            b.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
+            b.TextColor3 = Color3.new(1, 0, 0)
+            b.Font = Enum.Font.GothamBold
             b.MouseButton1Click:Connect(function()
                 tpTargetPlayer = p
                 stickyTpOn = true
                 tpPlayerBtn.Text = "STICKY: " .. p.Name:sub(1,6)
-                tpPlayerS.Color = Color3.fromRGB(0, 255, 150)
+                tpPlayerS.Color = Color3.fromRGB(255, 0, 0)
                 tpPlayerFrame.Visible = false
             end)
         end
     end
 end
 
--- 9. BUTTON EVENTS
+-- 9. BUTTON CONNECTIONS
 tpPlayerBtn.MouseButton1Click:Connect(function()
     if stickyTpOn then
-        stickyTpOn = false
-        tpTargetPlayer = nil
-        tpPlayerBtn.Text = "TP PLAYER: OFF"
-        tpPlayerS.Color = Color3.fromRGB(60, 60, 80)
+        stickyTpOn = false tpTargetPlayer = nil
+        tpPlayerBtn.Text = "TP PLAYER: OFF" tpPlayerS.Color = Color3.fromRGB(120, 0, 0)
     else
-        updatePlayerTPList()
-        tpPlayerFrame.Visible = not tpPlayerFrame.Visible
+        updatePlayerTPList() tpPlayerFrame.Visible = not tpPlayerFrame.Visible
     end
 end)
 
 flyBtn.MouseButton1Click:Connect(function()
+    if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
     flyOn = not flyOn
     flyBtn.Text = flyOn and "FLY: ON" or "FLY: OFF"
-    flyS.Color = flyOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
+    flyS.Color = flyOn and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(120, 0, 0)
     flySlider.Visible = flyOn
     local char = Player.Character
     if flyOn and char and char:FindFirstChild("HumanoidRootPart") then
@@ -319,21 +361,20 @@ flyBtn.MouseButton1Click:Connect(function()
         bodyVelocity.MaxForce = Vector3.new(1,1,1) * 10^5
     elseif char and char:FindFirstChild("Humanoid") then
         char.Humanoid.PlatformStand = false
-        if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
     end
 end)
 
 speedBtn.MouseButton1Click:Connect(function()
     speedOn = not speedOn
     speedBtn.Text = speedOn and "SPEED: ON" or "SPEED: OFF"
-    speedS.Color = speedOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
+    speedS.Color = speedOn and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(120, 0, 0)
     speedSlider.Visible = speedOn
 end)
 
 killBtn.MouseButton1Click:Connect(function()
     tracking = not tracking
     killBtn.Text = tracking and "AUTO KILL: HUNTING" or "AUTO KILL: OFF"
-    killS.Color = tracking and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
+    killS.Color = tracking and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(120, 0, 0)
     if tracking then
         local dist = 300
         for _, v in pairs(game.Players:GetPlayers()) do
@@ -347,18 +388,18 @@ end)
 
 aimBtn.MouseButton1Click:Connect(function()
     aimOn = not aimOn
-    aimBtn.Text = aimOn and "VIDA AIM: ON" or "VIDA AIM: OFF"
-    aimS.Color = aimOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
+    aimBtn.Text = aimOn and "DEMON AIM: ON" or "DEMON AIM: OFF"
+    aimS.Color = aimOn and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(120, 0, 0)
 end)
 
 scanP.MouseButton1Click:Connect(function()
     pScanOn = not pScanOn
     scanP.Text = pScanOn and "SCAN PLAYER: ON" or "SCAN PLAYER: OFF"
-    scanPS.Color = pScanOn and Color3.new(1,1,1) or Color3.fromRGB(60, 60, 80)
+    scanPS.Color = pScanOn and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(120, 0, 0)
     espFolder:ClearAllChildren()
     if pScanOn then
         for _, p in pairs(game.Players:GetPlayers()) do
-            if p ~= Player and p.Character then createScanner(p.Character, Color3.new(1,1,1), Color3.new(1,1,1)) end
+            if p ~= Player and p.Character then createScanner(p.Character, Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 0, 0)) end
         end
     end
 end)
@@ -366,7 +407,7 @@ end)
 invBtn.MouseButton1Click:Connect(function()
     invOn = not invOn
     invBtn.Text = invOn and "INVISIBLE: ON" or "INVISIBLE: OFF"
-    invS.Color = invOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
+    invS.Color = invOn and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(120, 0, 0)
     local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
     if invOn and hrp then
         savedPos = hrp.CFrame
@@ -381,13 +422,11 @@ end)
 ghostBtn.MouseButton1Click:Connect(function()
     ghostOn = not ghostOn
     ghostBtn.Text = ghostOn and "GHOST: ON" or "GHOST: OFF"
-    ghostS.Color = ghostOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(60, 60, 80)
+    ghostS.Color = ghostOn and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(120, 0, 0)
     local char = Player.Character
     if ghostOn and char and char:FindFirstChild("HumanoidRootPart") then
         for _, g in pairs(PlayerGui:GetChildren()) do
-            if g:IsA("ScreenGui") and g ~= screenGui and g.Name ~= "TouchGui" then
-                guiStates[g] = g.Enabled g.Enabled = false
-            end
+            if g:IsA("ScreenGui") and g ~= screenGui and g.Name ~= "TouchGui" then guiStates[g] = g.Enabled g.Enabled = false end
         end
         char.HumanoidRootPart.Anchored = true
         char.Humanoid.AutoRotate = false
@@ -404,58 +443,71 @@ end)
 
 setBtn.MouseButton1Click:Connect(function()
     local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then tpPos = hrp.CFrame setS.Color = Color3.new(1,1,1) task.wait(0.3) setS.Color = Color3.fromRGB(60, 60, 80) end
+    if hrp then tpPos = hrp.CFrame setS.Color = Color3.fromRGB(255, 0, 0) task.wait(0.3) setS.Color = Color3.fromRGB(120, 0, 0) end
 end)
 
 loadBtn.MouseButton1Click:Connect(function()
     local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp and tpPos then 
-        task.spawn(doMultiFlash)
-        hrp.CFrame = tpPos 
-    end
+    if hrp and tpPos then task.spawn(doMultiFlash) hrp.CFrame = tpPos end
 end)
 
 snipeFruitBtn.MouseButton1Click:Connect(function()
     local char = Player.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
     local hrp = char.HumanoidRootPart
-    
     local targetFruit = nil
     for _, obj in pairs(workspace:GetChildren()) do
-        if obj.Name:find("Fruit") and (obj:IsA("Tool") or (obj:IsA("Model") and obj:FindFirstChild("Handle"))) then
-            targetFruit = obj
-            break
-        end
+        if obj.Name:find("Fruit") and (obj:IsA("Tool") or (obj:IsA("Model") and obj:FindFirstChild("Handle"))) then targetFruit = obj break end
     end
-
     if targetFruit then
         local oldPos = hrp.CFrame
         local fruitPos = targetFruit:IsA("Tool") and targetFruit.Handle.CFrame or targetFruit:GetModelCFrame()
-        
         snipeFS.Color = Color3.fromRGB(255, 255, 255)
         hrp.CFrame = fruitPos
         task.wait(0.1)
         hrp.CFrame = oldPos
-        snipeFS.Color = Color3.fromRGB(60, 60, 80)
+        snipeFS.Color = Color3.fromRGB(120, 0, 0)
     else
-        snipeFruitBtn.Text = "NO FRUIT!"
-        task.wait(1)
-        snipeFruitBtn.Text = "SNIPE FRUIT"
+        snipeFruitBtn.Text = "NO FRUIT!" task.wait(1) snipeFruitBtn.Text = "SNIPE FRUIT"
     end
 end)
 
--- 10. MAIN RENDERING LOOP (OVERDRIVE 3X CFRAME WARP MULTIPLIER)
+-- 10. MAIN RENDERING LOOP (CORRECTED MOTION-DETECTION FOR FLY AND WALK)
+local lastLightningTime = 0
+
 RunService.RenderStepped:Connect(function()
     local char = Player.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
     local hrp = char.HumanoidRootPart
     local hum = char.Humanoid
 
+    local currentFlySpeed = getFlySpeed()
+    local currentWalkSpeed = getWalkSpeed()
+    local moveVector = ControlModule:GetMoveVector()
+    
+    -- KORREKTUR: Erkennt Bewegung auch bei Fly (über Tasteninput) oder normalem Lauf (über Velocity)
+    local isActivelyMoving = (moveVector.Magnitude > 0) or (hrp.Velocity.Magnitude > 2)
+    
+    -- Blitze zünden NUR bei aktiver Bewegung UND wenn der jeweilige Regler auf Maximum (125+) steht
+    if isActivelyMoving and ((flyOn and currentFlySpeed >= 125) or (speedOn and currentWalkSpeed >= 125)) then
+        local now = tick()
+        if now - lastLightningTime > 0.02 then -- Höhere Frequenz für noch mehr Dichte
+            lastLightningTime = now
+            
+            -- Spawnt 4 dichte Ausbrüche gleichzeitig
+            for i = 1, 4 do
+                local sideOffset = (i % 2 == 0 and -2.5 or 2.5) + math.random(-1, 1)
+                local startLightning = hrp.Position + hrp.CFrame.RightVector * sideOffset + Vector3.new(0, math.random(-3, 3), 0)
+                local endLightning = startLightning - hrp.CFrame.LookVector * (8 + math.random(0, 12))
+                
+                generateLightningBolt(startLightning, endLightning, 8) -- 8 Segmente für feine, realistische Knicke
+            end
+        end
+    end
+
     -- NOCLIP
     if flyOn or stickyTpOn or (speedOn and getWalkSpeed() > 50) then
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
-        end
+        for _, part in pairs(char:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = false end end
     end
     
     -- STICKY TP
@@ -463,10 +515,7 @@ RunService.RenderStepped:Connect(function()
         hrp.CFrame = tpTargetPlayer.Character.HumanoidRootPart.CFrame
         hrp.Velocity = Vector3.new(0, 0, 0)
     elseif stickyTpOn then
-        stickyTpOn = false
-        tpTargetPlayer = nil
-        tpPlayerBtn.Text = "TP PLAYER: OFF"
-        tpPlayerS.Color = Color3.fromRGB(60, 60, 80)
+        stickyTpOn = false tpTargetPlayer = nil tpPlayerBtn.Text = "TP PLAYER: OFF" tpPlayerS.Color = Color3.fromRGB(120, 0, 0)
     end
 
     -- WATER WALKER
@@ -493,42 +542,48 @@ RunService.RenderStepped:Connect(function()
         if currentTarget.Humanoid.Health <= 0 then tracking = false killBtn.Text = "AUTO KILL: OFF" end
     end
 
-    -- GHOST & FLY CONTROL
+    -- GHOST CONTROL
     if ghostOn then
         Camera.CFrame = CFrame.new(Camera.CFrame.Position) * CFrame.fromEulerAnglesYXZ(rotY, rotX, 0)
         local mv = ControlModule:GetMoveVector()
         Camera.CFrame = Camera.CFrame + (Camera.CFrame.LookVector * -mv.Z + Camera.CFrame.RightVector * mv.X) * 2
+    -- FLY CONTROL
     elseif flyOn then
         local mv = ControlModule:GetMoveVector()
         hrp.Velocity = Vector3.new(0,0,0)
         local lookAtCFrame = CFrame.new(hrp.Position) * Camera.CFrame.Rotation
-        hrp.CFrame = lookAtCFrame + (Camera.CFrame.LookVector * -mv.Z + Camera.CFrame.RightVector * mv.X) * getFlySpeed()
+        
+        if currentFlySpeed > 10 then
+            hrp.CFrame = lookAtCFrame + (Camera.CFrame.LookVector * -mv.Z + Camera.CFrame.RightVector * mv.X) * 10
+            if mv.Magnitude > 0 then
+                local rawDirection = (Camera.CFrame.LookVector * -mv.Z + Camera.CFrame.RightVector * mv.X)
+                if rawDirection.Magnitude > 0 then
+                    local warpFactor = (currentFlySpeed - 10) * 0.36
+                    hrp.CFrame = hrp.CFrame + (rawDirection.Unit * warpFactor)
+                end
+            end
+        else
+            hrp.CFrame = lookAtCFrame + (Camera.CFrame.LookVector * -mv.Z + Camera.CFrame.RightVector * mv.X) * currentFlySpeed
+        end
     end
     
-    -- OVERDRIVE SPEED WARP LOGIK
+    -- SPEED WARP
     if speedOn then 
         local targetSpeed = getWalkSpeed()
-        
         if targetSpeed > 60 then
             local moveVector = ControlModule:GetMoveVector()
             if moveVector.Magnitude > 0 then
                 local rawDirection = (Camera.CFrame.LookVector * -moveVector.Z + Camera.CFrame.RightVector * moveVector.X)
                 local flatDirection = Vector3.new(rawDirection.X, 0, rawDirection.Z)
-                
                 if flatDirection.Magnitude > 0 then
                     flatDirection = flatDirection.Unit
-                    -- Multiplikator auf 0.36 erhöht (Nochmal 3x schneller als die 0.12er Version)
                     local warpFactor = (targetSpeed - 60) * 0.36
                     hrp.CFrame = hrp.CFrame + (flatDirection * warpFactor)
                 end
             end
             hum.WalkSpeed = 60
-        else
-            hum.WalkSpeed = targetSpeed
-        end
-    else 
-        hum.WalkSpeed = 16 
-    end
+        else hum.WalkSpeed = targetSpeed end
+    else hum.WalkSpeed = 16 end
 end)
 
 -- DRAGGING
@@ -539,12 +594,7 @@ UserInputService.InputChanged:Connect(function(input)
         local delta = input.Position - dragStart
         mainContainer.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     elseif ghostOn and input.UserInputType == Enum.UserInputType.Touch and input.Position.X > (Camera.ViewportSize.X / 2) then
-        rotX = rotX - input.Delta.X * 0.005
-        rotY = math.clamp(rotY - input.Delta.Y * 0.005, -1.4, 1.4)
+        rotX = rotX - input.Delta.X * 0.005 rotY = math.clamp(rotY - input.Delta.Y * 0.005, -1.4, 1.4)
     end
 end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false 
-    end
-end)
+UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
