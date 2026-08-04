@@ -2,17 +2,16 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JARVIS // COMMAND CENTER</title>
-    <!-- Three.js für den interaktiven 3D Globus -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --bg-color: #0a0202;
-            --panel-bg: rgba(25, 5, 5, 0.7);
+            --bg-color: #060101;
+            --panel-bg: rgba(20, 4, 4, 0.85);
             --border-red: #ff2200;
-            --glow-red: rgba(255, 34, 0, 0.4);
-            --text-main: #ff8877;
+            --glow-red: rgba(255, 34, 0, 0.5);
+            --text-main: #ff9988;
             --text-bright: #ffffff;
         }
 
@@ -20,17 +19,17 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            padding: 15px;
+            gap: 12px;
         }
 
         /* HEADER */
@@ -38,114 +37,141 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--border-red);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 0 10px var(--glow-red);
+            border: 1px solid var(--border-red);
+            background: var(--panel-bg);
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 0 12px var(--glow-red);
         }
 
         h1 {
             color: var(--text-bright);
-            font-size: 1.4rem;
-            letter-spacing: 2px;
-            text-shadow: 0 0 8px var(--border-red);
+            font-size: 1rem;
+            letter-spacing: 1.5px;
+            font-weight: 800;
         }
 
-        /* GRID LAYOUT */
-        .dashboard {
+        .status {
+            color: #00ff66;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* GLOBUS SECTION (CENTERPIECE) */
+        .globe-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-red);
+            border-radius: 6px;
+            height: 260px;
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.15), 0 0 15px var(--glow-red);
+            overflow: hidden;
+        }
+
+        #globe-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            touch-action: none;
+        }
+
+        /* GRID FÜR WIDGETS */
+        .widgets-grid {
             display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 15px;
-            height: calc(100vh - 140px);
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
 
         .panel {
             background: var(--panel-bg);
             border: 1px solid var(--border-red);
-            border-radius: 4px;
-            padding: 15px;
-            box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.1), 0 0 8px var(--glow-red);
-            display: flex;
-            flex-direction: column;
-            position: relative;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 0 8px var(--glow-red);
+        }
+
+        .panel-full {
+            grid-column: span 2;
         }
 
         .panel h2 {
-            font-size: 0.9rem;
+            font-size: 0.7rem;
             color: var(--text-bright);
-            border-bottom: 1px solid var(--border-red);
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        /* GLOBUS CONTAINER */
-        #globe-container {
-            grid-row: span 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: grab;
-        }
-
-        #globe-container:active {
-            cursor: grabbing;
-        }
-
-        /* KONTOSTAND */
-        .balance-value {
-            font-size: 2.2rem;
-            color: var(--text-bright);
-            font-weight: bold;
-            text-shadow: 0 0 10px var(--border-red);
-            margin-top: 10px;
-        }
-
-        .balance-sub {
-            font-size: 0.8rem;
-            color: #883333;
-        }
-
-        /* NEWS LISTE */
-        .news-item {
-            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255, 34, 0, 0.4);
+            padding-bottom: 4px;
             margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px dashed rgba(255, 34, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .news-time {
+        .balance-val {
+            font-size: 1.8rem;
             color: var(--text-bright);
-            font-weight: bold;
+            font-weight: 900;
+            text-shadow: 0 0 8px var(--border-red);
+            margin: 4px 0;
         }
 
-        /* FOOTER & BUTTON */
-        footer {
-            margin-top: 15px;
+        .sub-text {
+            font-size: 0.65rem;
+            opacity: 0.7;
+        }
+
+        .news-list {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+
+        .news-item {
+            border-bottom: 1px dashed rgba(255, 34, 0, 0.2);
+            padding-bottom: 4px;
+        }
+
+        /* BUTTON */
+        .btn-container {
+            margin-top: auto;
+            padding-top: 10px;
         }
 
         .start-btn {
-            background: rgba(255, 34, 0, 0.2);
+            width: 100%;
+            background: rgba(255, 34, 0, 0.25);
             border: 2px solid var(--border-red);
             color: var(--text-bright);
-            padding: 12px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            letter-spacing: 3px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            border-radius: 6px;
+            box-shadow: 0 0 20px var(--glow-red);
             cursor: pointer;
-            border-radius: 5px;
-            box-shadow: 0 0 15px var(--glow-red);
-            transition: all 0.3s ease;
+            text-align: center;
         }
 
-        .start-btn:hover {
+        .start-btn:active {
             background: var(--border-red);
             color: #000;
-            box-shadow: 0 0 25px var(--border-red);
-            transform: scale(1.05);
+        }
+
+        /* DESKTOP OPTIMIERUNG */
+        @media (min-width: 768px) {
+            body {
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .widgets-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            .globe-card {
+                height: 380px;
+            }
         }
     </style>
 </head>
@@ -153,122 +179,114 @@
 
     <header>
         <h1>JARVIS // COMMAND CENTER</h1>
-        <div id="system-status" style="color: #00ff66;">SYSTEMS: ONLINE</div>
+        <div class="status">● ONLINE</div>
     </header>
 
-    <div class="dashboard">
-        <!-- LINKES PANEL: KONTOSTAND -->
+    <!-- RUNDER GLOBUS IN DER MITTE -->
+    <div class="globe-card" id="globe-box">
+        <canvas id="globe-canvas"></canvas>
+    </div>
+
+    <!-- METRIKEN & KONTOSTAND -->
+    <div class="widgets-grid">
         <div class="panel">
-            <h2>Finanzen // Account</h2>
-            <div class="balance-sub">GESAMTGUTHABEN</div>
-            <div class="balance-value">0,00 €</div>
-            <br>
-            <div class="balance-sub">INCOMING PIPELINE</div>
-            <div style="color: var(--text-bright); margin-top: 5px;">+0,00 €</div>
+            <h2>FINANZEN</h2>
+            <div class="sub-text">KONTOSTAND</div>
+            <div class="balance-val">0,00 €</div>
+            <div class="sub-text" style="color: #00ff66;">PIPELINE: +0,00 €</div>
         </div>
 
-        <!-- MITTLERES PANEL: 3D GLOBUS -->
-        <div class="panel" id="globe-container">
-            <!-- Three.js Canvas wird hier eingefügt -->
+        <div class="panel">
+            <h2>SYSTEM</h2>
+            <div class="sub-text">CPU LOAD: <b style="color:#fff">12%</b></div>
+            <div class="sub-text" style="margin-top: 4px;">RAM: <b style="color:#fff">2.4 / 16 GB</b></div>
+            <div class="sub-text" style="margin-top: 4px;">LATENZ: <b style="color:#00ff66">14 ms</b></div>
         </div>
 
-        <!-- RECHTES PANEL: NEWS FEED -->
-        <div class="panel">
-            <h2>Live Feeds // News</h2>
-            <div class="news-item">
-                <span class="news-time">[12:00]</span> KI-System auf Version 1.0 gestartet.
-            </div>
-            <div class="news-item">
-                <span class="news-time">[11:45]</span> Warte auf erste Spracheingabe...
-            </div>
-            <div class="news-item">
-                <span class="news-time">[10:30]</span> Globales Netzwerk verbunden.
-            </div>
-        </div>
-
-        <!-- LINKES UNTERES PANEL: METRIKEN -->
-        <div class="panel">
-            <h2>System Metriken</h2>
-            <div style="margin-bottom: 8px;">CPU LOAD: <span style="color:var(--text-bright)">12%</span></div>
-            <div style="margin-bottom: 8px;">RAM USAGE: <span style="color:var(--text-bright)">2.4 / 16 GB</span></div>
-            <div>LATENZ: <span style="color:#00ff66">14 ms</span></div>
-        </div>
-
-        <!-- RECHTES UNTERES PANEL: LOGS -->
-        <div class="panel">
-            <h2>Prozess Logs</h2>
-            <div style="font-size: 0.75rem; opacity: 0.8;">
-                > INITIALIZING HUD INTERFACE...<br>
-                > CONNECTING GLOBE ENGINE...<br>
-                > READY FOR USER INPUT.
+        <div class="panel panel-full">
+            <h2>LIVE FEEDS // NEWS</h2>
+            <div class="news-list">
+                <div class="news-item"><b style="color:#fff">[12:00]</b> KI-System V1.0 online.</div>
+                <div class="news-item"><b style="color:#fff">[11:45]</b> Sprachsteuerung bereit.</div>
             </div>
         </div>
     </div>
 
-    <footer>
-        <button class="start-btn" onclick="startAI()">KI STARTEN</button>
-    </footer>
+    <div class="btn-container">
+        <button class="start-btn" onclick="triggerAI()">KI STARTEN</button>
+    </div>
 
     <script>
-        // --- 3D GLOBUS LOGIK (Three.js) ---
-        const container = document.getElementById('globe-container');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
+        // GLOBUS SETUP (Echter runder 3D Globus)
+        const box = document.getElementById('globe-box');
+        const canvas = document.getElementById('globe-canvas');
 
-        // Kugel erstellen (Gitter-Globus)
-        const geometry = new THREE.SphereGeometry(2, 24, 24);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, box.clientWidth / box.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+        function resize() {
+            const w = box.clientWidth;
+            const h = box.clientHeight;
+            renderer.setSize(w, h, false);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Kugel (Gitter)
+        const geometry = new THREE.SphereGeometry(1.8, 20, 20);
         const material = new THREE.MeshBasicMaterial({
             color: 0xff2200,
             wireframe: true,
             transparent: true,
-            opacity: 0.6
+            opacity: 0.75
         });
         const globe = new THREE.Mesh(geometry, material);
         scene.add(globe);
 
-        camera.position.z = 6;
+        camera.position.z = 5;
 
-        // Globus mit der Maus drehen
+        // Touch & Maus Steuerung
         let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
+        let prevX = 0, prevY = 0;
 
-        container.addEventListener('mousedown', (e) => {
+        function startDrag(x, y) {
             isDragging = true;
-        });
+            prevX = x;
+            prevY = y;
+        }
 
-        container.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                const deltaMove = {
-                    x: e.offsetX - previousMousePosition.x,
-                    y: e.offsetY - previousMousePosition.y
-                };
+        function moveDrag(x, y) {
+            if (!isDragging) return;
+            const deltaX = x - prevX;
+            const deltaY = y - prevY;
+            globe.rotation.y += deltaX * 0.008;
+            globe.rotation.x += deltaY * 0.008;
+            prevX = x;
+            prevY = y;
+        }
 
-                globe.rotation.y += deltaMove.x * 0.01;
-                globe.rotation.x += deltaMove.y * 0.01;
-            }
-            previousMousePosition = { x: e.offsetX, y: e.offsetY };
-        });
+        function stopDrag() { isDragging = false; }
 
-        window.addEventListener('mouseup', () => { isDragging = false; });
+        box.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
+        window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
+        window.addEventListener('mouseup', stopDrag);
 
-        // Animation Loop (Globus dreht sich auch von alleine langsam)
+        box.addEventListener('touchstart', e => startDrag(e.touches[0].clientX, e.touches[0].clientY));
+        window.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX, e.touches[0].clientY));
+        window.addEventListener('touchend', stopDrag);
+
         function animate() {
             requestAnimationFrame(animate);
-            if (!isDragging) {
-                globe.rotation.y += 0.003;
-            }
+            if (!isDragging) globe.rotation.y += 0.004;
             renderer.render(scene, camera);
         }
         animate();
 
-        // --- KI BUTTON LOGIK ---
-        function startAI() {
-            alert("JARVIS: Ich bin online, Master! Wie kann ich helfen?");
-            // Hier binden wir als Nächstes die echte Sprach-KI an!
+        function triggerAI() {
+            alert("JARVIS online. System bereit, Master!");
         }
     </script>
 </body>
