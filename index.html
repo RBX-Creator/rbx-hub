@@ -81,9 +81,12 @@
             padding: 10px 15px; border-radius: 4px; box-shadow: var(--hud-glow);
         }
         .user-greeting { color: var(--text-bright); font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; }
-        .header-right { display: flex; align-items: center; gap: 10px; }
-        .status { color: var(--amber-bright); font-size: 0.7rem; font-weight: bold; }
-        .logout-btn { background: rgba(255, 102, 0, 0.15); border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.65rem; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-weight: bold; }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .status { color: var(--amber-bright); font-size: 0.7rem; font-weight: bold; display: none; }
+        @media(min-width: 480px) { .status { display: block; } }
+        
+        .header-btn { background: rgba(255, 102, 0, 0.15); border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.65rem; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-weight: bold; }
+        .header-btn:hover { background: var(--amber-main); color: #000; }
 
         /* VOICE & CHAT STATUS */
         .voice-status {
@@ -102,7 +105,42 @@
         }
         .response-text { color: var(--text-bright); font-size: 0.8rem; line-height: 1.4; margin-top: 4px; }
 
-        /* LIVE KAMERA DISPLAY - STANDARDMÄSSIG UNSICHTBAR */
+        /* SILENT CHAT MODAL OVERLAY */
+        #chat-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(4, 2, 1, 0.85); z-index: 999; backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; padding: 15px;
+        }
+        .chat-container {
+            background: var(--panel-bg); border: 1px solid var(--amber-main);
+            width: 100%; max-width: 500px; height: 80vh; max-height: 600px;
+            border-radius: 4px; display: flex; flex-direction: column; box-shadow: var(--hud-glow);
+            overflow: hidden;
+        }
+        .chat-header-bar {
+            background: rgba(255, 102, 0, 0.15); padding: 10px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--amber-main); font-size: 0.75rem; color: var(--text-bright); font-weight: bold;
+        }
+        .close-chat-btn { background: transparent; border: 1px solid var(--amber-main); color: var(--amber-bright); padding: 2px 8px; cursor: pointer; font-size: 0.7rem; border-radius: 2px; }
+        .chat-messages {
+            flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.75rem;
+        }
+        .chat-msg { max-width: 85%; padding: 8px 12px; border-radius: 4px; line-height: 1.4; word-break: break-word; }
+        .chat-msg.user { background: rgba(255, 102, 0, 0.2); border: 1px solid var(--amber-main); color: var(--text-bright); align-self: flex-end; }
+        .chat-msg.jarvis { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,102,0,0.4); color: var(--text-main); align-self: flex-start; }
+        .chat-input-area {
+            padding: 10px; background: rgba(0,0,0,0.5); border-top: 1px solid var(--amber-main); display: flex; gap: 8px;
+        }
+        .chat-input-area input {
+            flex: 1; padding: 10px; background: rgba(255,102,0,0.05); border: 1px solid var(--amber-main);
+            color: var(--text-bright); font-size: 0.8rem; outline: none; border-radius: 3px;
+        }
+        .chat-send-btn {
+            background: var(--amber-main); color: #000; border: none; padding: 0 15px; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 0.75rem;
+        }
+
+        /* LIVE KAMERA DISPLAY */
         .live-cam-box {
             display: none; 
             background: rgba(0, 0, 0, 0.9); border: 1px solid var(--amber-main);
@@ -113,7 +151,7 @@
             width: 100%; height: 180px; background: #000; border: 1px solid rgba(255,102,0,0.3);
             position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
-        .cam-screen video { width: 100%; height: 100%; border: none; object-fit: cover; }
+        .cam-screen img { width: 100%; height: 100%; border: none; object-fit: cover; }
 
         /* TECH GLOBUS CONTAINER */
         .globe-card {
@@ -200,12 +238,30 @@
         </div>
     </div>
 
+    <!-- SILENT CHAT MODAL -->
+    <div id="chat-modal">
+        <div class="chat-container">
+            <div class="chat-header-bar">
+                <span>💬 SILENTER CHAT-MODUS (KEIN AUDIO)</span>
+                <button class="close-chat-btn" id="close-chat-btn">SCHLIESSEN</button>
+            </div>
+            <div class="chat-messages" id="chat-messages-box">
+                <div class="chat-msg jarvis">JARVIS: Chat-Kanal geöffnet. Tippe einen Ort oder Befehl, um leise zu agieren.</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input-field" placeholder="Nachricht an JARVIS...">
+                <button class="chat-send-btn" id="chat-send-btn">SENDEN</button>
+            </div>
+        </div>
+    </div>
+
     <!-- HEADER -->
     <header>
-        <div class="user-greeting" id="user-display">HALLO, WIEDERHERSTELLUNG...</div>
+        <div class="user-greeting" id="user-display">HALLO, VIDA</div>
         <div class="header-right">
             <div class="status">JARVIS ACTIVE</div>
-            <button class="logout-btn" id="logout-btn">LOGOUT</button>
+            <button class="header-btn" id="open-chat-btn">💬 CHAT</button>
+            <button class="header-btn" id="logout-btn">LOGOUT</button>
         </div>
     </header>
 
@@ -214,14 +270,14 @@
         <div class="status-header">
             <div class="status-left">
                 <div class="pulse-dot"></div>
-                <span id="speech-indicator">JARVIS online. (Nenne einen Ort per Sprache)</span>
+                <span id="speech-indicator">JARVIS online. (Sprich oder nutze den Chat-Button)</span>
             </div>
             <button class="test-voice-btn" onclick="testVoiceManual()">TEST VOICE</button>
         </div>
         <div class="response-text" id="jarvis-response">System bereit. Kamera-Fenster öffnet sich nur bei Aufruf.</div>
     </div>
 
-    <!-- LIVE KAMERA DISPLAY (ÖFFNET SICH NUR BEI AUFRUF) -->
+    <!-- LIVE KAMERA DISPLAY -->
     <div class="live-cam-box" id="live-cam-wrapper">
         <div class="cam-header">
             <span id="cam-title">CCTV FEED</span>
@@ -271,7 +327,17 @@
         const logoutBtn = document.getElementById('logout-btn');
         const stepIndicator = document.getElementById('step-indicator');
 
-        // Dynamischer Name aus dem Speicher oder Standardfeld
+        // Chat Modal Elemente
+        const chatModal = document.getElementById('chat-modal');
+        const openChatBtn = document.getElementById('open-chat-btn');
+        const closeChatBtn = document.getElementById('close-chat-btn');
+        const chatInputField = document.getElementById('chat-input-field');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+        const chatMessagesBox = document.getElementById('chat-messages-box');
+
+        openChatBtn.addEventListener('click', () => { chatModal.style.display = 'flex'; chatInputField.focus(); });
+        closeChatBtn.addEventListener('click', () => { chatModal.style.display = 'none'; });
+
         let userName = localStorage.getItem('jarvis_user_name') || 'Vida';
         let apiKey = localStorage.getItem('jarvis_openrouter_key');
 
@@ -289,7 +355,7 @@
             if (currentStep === 1) {
                 const enteredName = document.getElementById('username').value.trim();
                 if (!enteredName) { alert("Bitte Namen eingeben."); return; }
-                userName = enteredName; // Dynamisch übernehmen!
+                userName = enteredName;
             }
             if (currentStep === totalSteps) {
                 const inputKey = document.getElementById('apikey').value.trim();
@@ -377,7 +443,7 @@
             }
         }
 
-        // --- SPRACH- & KAMERA-SYSTEM ---
+        // --- SPRACH- & KAMERA-SYSTEM (SPRACHSTEUERUNG) ---
         const speechIndicator = document.getElementById('speech-indicator');
         const jarvisResponse = document.getElementById('jarvis-response');
 
@@ -392,13 +458,39 @@
             recognition.onresult = (event) => {
                 const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
                 speechIndicator.textContent = `Erkannt: "${transcript}"`;
-                processVoiceCommandWithOpenRouter(transcript);
+                processVoiceCommandWithOpenRouter(transcript, true); // Mit Sprachausgabe
             };
             recognition.onend = () => { try { recognition.start(); } catch(e){} };
             try { recognition.start(); } catch(e){}
         }
 
-        async function processVoiceCommandWithOpenRouter(userQuery) {
+        // --- CHAT MODUS HANDLING ---
+        chatSendBtn.addEventListener('click', sendChatMessage);
+        chatInputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        function sendChatMessage() {
+            const text = chatInputField.value.trim();
+            if (!text) return;
+
+            // Nachricht im Chat hinzufügen
+            appendChatMessage(text, 'user');
+            chatInputField.value = '';
+
+            // An AI übergeben (ohne Sprachausgabe, da leiser Modus)
+            processVoiceCommandWithOpenRouter(text, false);
+        }
+
+        function appendChatMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg ${sender}`;
+            msgDiv.textContent = (sender === 'user' ? `${userName}: ` : 'JARVIS: ') + text;
+            chatMessagesBox.appendChild(msgDiv);
+            chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
+        }
+
+        async function processVoiceCommandWithOpenRouter(userQuery, speakOutLoud) {
             if (!apiKey) return;
             try {
                 jarvisResponse.textContent = `Analysiere Sektor für: ${userQuery}...`;
@@ -444,20 +536,26 @@ Antworte AUSSCHLIESSLICH im JSON-Format (kein Markdown drumherum):
                 myGlobe.pointOfView({ lat: result.lat, lng: result.lng, altitude: 1.2 }, 1500);
                 myGlobe.htmlElementsData([{ name: result.location, lat: result.lat, lng: result.lng }]);
 
-                // KAMERA-FENSTER WIRD JETZT ERST EINGEBLNDET (Da eine Kamera aufgerufen wurde)
+                // Kamera-Fenster einblenden & Bild laden
                 const camBox = document.getElementById('live-cam-wrapper');
                 camBox.style.display = 'flex';
                 document.getElementById('cam-title').textContent = `CCTV FEED: ${result.location.toUpperCase()}`;
                 
                 const screenContainer = document.getElementById('cam-screen-container');
-                screenContainer.innerHTML = `<video src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" autoplay loop muted playsinline></video>`;
+                screenContainer.innerHTML = `<img src="https://picsum.photos/seed/${encodeURIComponent(result.location)}/600/400" alt="Live Feed">`;
 
-                speakJarvis(result.speech);
+                // Nur sprechen wenn per Sprachbefehl gestartet, sonst nur in den Chat schreiben
+                if (speakOutLoud) {
+                    speakJarvis(result.speech);
+                } else {
+                    appendChatMessage(result.speech, 'jarvis');
+                }
 
                 setTimeout(() => { myGlobe.controls().autoRotate = true; }, 12000);
 
             } catch (err) {
                 jarvisResponse.textContent = "Ort verarbeitet.";
+                if (!speakOutLoud) appendChatMessage("Ort verarbeitet.", 'jarvis');
             }
         }
 
