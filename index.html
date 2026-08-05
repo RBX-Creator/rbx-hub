@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // COMMAND CENTER v3.0</title>
+    <title>JARVIS // RADAR INTEL v5.0</title>
+    <!-- Three.js + ThreeGlobe -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three-globe"></script>
     <style>
         :root {
-            --bg-color: #030a12;
-            --panel-bg: rgba(6, 24, 40, 0.85);
-            --border-blue: #00ccff;
-            --glow-blue: rgba(0, 204, 255, 0.5);
-            --text-main: #99eeff;
+            --bg-color: #060402;
+            --panel-bg: rgba(20, 10, 4, 0.9);
+            --amber-main: #ff7700;
+            --amber-bright: #ffaa00;
+            --amber-glow: rgba(255, 119, 0, 0.6);
+            --text-main: #ffcc99;
             --text-bright: #ffffff;
-            --hud-glow: 0 0 15px rgba(0, 204, 255, 0.8), inset 0 0 10px rgba(0, 204, 255, 0.4);
+            --hud-glow: 0 0 15px rgba(255, 119, 0, 0.5), inset 0 0 10px rgba(255, 119, 0, 0.2);
         }
 
         * {
@@ -25,7 +28,7 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: radial-gradient(#0a1f33 1px, transparent 1px);
+            background-image: radial-gradient(#1f0d03 1px, transparent 1px);
             background-size: 30px 30px;
             color: var(--text-main);
             min-height: 100vh;
@@ -43,7 +46,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(3, 10, 18, 0.95);
+            background: rgba(6, 4, 2, 0.96);
             z-index: 1000;
             display: flex;
             justify-content: center;
@@ -54,9 +57,9 @@
 
         .login-box {
             background: var(--panel-bg);
-            border: 2px solid var(--border-blue);
+            border: 1px solid var(--amber-main);
             padding: 25px;
-            border-radius: 6px;
+            border-radius: 4px;
             width: 100%;
             max-width: 400px;
             box-shadow: var(--hud-glow);
@@ -75,39 +78,37 @@
             font-size: 0.75rem;
             margin-bottom: 20px;
             opacity: 0.8;
+            color: var(--amber-main);
         }
 
-        .input-group {
-            margin-bottom: 15px;
-        }
-
+        .input-group { margin-bottom: 15px; }
         .input-group label {
             display: block;
             font-size: 0.7rem;
             margin-bottom: 5px;
-            color: var(--border-blue);
+            color: var(--amber-main);
             letter-spacing: 1px;
         }
 
         .input-group input {
             width: 100%;
             padding: 12px;
-            background: rgba(0, 204, 255, 0.05);
-            border: 1px solid var(--border-blue);
+            background: rgba(255, 119, 0, 0.05);
+            border: 1px solid var(--amber-main);
             color: var(--text-bright);
             font-size: 0.9rem;
-            border-radius: 4px;
+            border-radius: 2px;
             outline: none;
         }
 
         .input-group input:focus {
-            box-shadow: 0 0 10px var(--border-blue);
-            background: rgba(0, 204, 255, 0.15);
+            box-shadow: 0 0 10px var(--amber-glow);
+            background: rgba(255, 119, 0, 0.15);
         }
 
         .login-btn {
             width: 100%;
-            background: var(--border-blue);
+            background: var(--amber-main);
             color: #000;
             border: none;
             padding: 12px;
@@ -116,7 +117,7 @@
             letter-spacing: 1.5px;
             text-transform: uppercase;
             cursor: pointer;
-            box-shadow: 0 0 15px var(--border-blue);
+            box-shadow: 0 0 15px var(--amber-glow);
             margin-top: 10px;
         }
 
@@ -125,7 +126,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(0, 204, 255, 0.3);
+            border: 1px solid rgba(255, 119, 0, 0.3);
             background: var(--panel-bg);
             padding: 10px 15px;
             border-radius: 4px;
@@ -146,14 +147,14 @@
         }
 
         .status {
-            color: #00ffcc;
+            color: var(--amber-bright);
             font-size: 0.7rem;
             font-weight: bold;
         }
 
         .logout-btn {
             background: transparent;
-            border: 1px solid rgba(0, 204, 255, 0.4);
+            border: 1px solid rgba(255, 119, 0, 0.4);
             color: var(--text-main);
             font-size: 0.6rem;
             padding: 3px 6px;
@@ -161,18 +162,18 @@
             border-radius: 2px;
         }
 
-        /* GLOBUS SECTION */
+        /* GLOBUS CONTAINER & RADAR SCANNER OVERLAY */
         .globe-card {
-            background: rgba(4, 15, 25, 0.9);
-            border: 1px solid var(--border-blue);
+            background: rgba(10, 5, 2, 0.95);
+            border: 1px solid var(--amber-main);
             border-radius: 4px;
-            height: 320px;
+            height: 350px;
             width: 100%;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: inset 0 0 25px rgba(0, 204, 255, 0.1), var(--hud-glow);
+            box-shadow: inset 0 0 30px rgba(255, 119, 0, 0.15), var(--hud-glow);
             overflow: hidden;
             clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
         }
@@ -183,14 +184,53 @@
             touch-action: none;
         }
 
-        /* SMART IRON MAN HUD BOX */
+        /* RADAR SCANNER SWEEPER EFFECT */
+        .radar-sweeper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 280px;
+            height: 280px;
+            margin-top: -140px;
+            margin-left: -140px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: conic-gradient(
+                from 0deg,
+                rgba(255, 119, 0, 0.4) 0deg,
+                rgba(255, 119, 0, 0.1) 45deg,
+                transparent 90deg,
+                transparent 360deg
+            );
+            animation: radar-spin 4s linear infinite;
+            mix-blend-mode: screen;
+            border: 1px solid rgba(255, 119, 0, 0.2);
+        }
+
+        .radar-sweeper::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 170, 0, 0.6);
+            transform-origin: left center;
+        }
+
+        @keyframes radar-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* SMART AMBER HOLOGRAPHIC HUD BOX */
         #country-info-hud {
             position: absolute;
             top: 15px;
             right: 15px;
-            width: 210px;
-            background: rgba(0, 20, 40, 0.9);
-            border: 1px solid var(--border-blue);
+            width: 220px;
+            background: rgba(25, 10, 2, 0.95);
+            border: 1px solid var(--amber-main);
             border-radius: 2px;
             padding: 12px;
             box-shadow: var(--hud-glow);
@@ -212,12 +252,12 @@
         .hud-core-icon {
             width: 24px;
             height: 24px;
-            border: 2px solid var(--border-blue);
+            border: 2px solid var(--amber-main);
             border-radius: 50%;
             position: absolute;
             top: -12px;
             left: -12px;
-            background: #001a33;
+            background: #1a0800;
             box-shadow: var(--hud-glow);
             display: flex;
             justify-content: center;
@@ -228,9 +268,9 @@
             content: '';
             width: 8px;
             height: 8px;
-            background: var(--text-bright);
+            background: var(--amber-bright);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--text-bright);
+            box-shadow: 0 0 10px var(--amber-bright);
             animation: pulse-core 1.5s infinite;
         }
 
@@ -240,7 +280,7 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 2px;
-            border-bottom: 1px solid rgba(0, 204, 255, 0.5);
+            border-bottom: 1px solid rgba(255, 119, 0, 0.5);
             padding-bottom: 4px;
             margin-bottom: 8px;
             margin-left: 8px;
@@ -254,8 +294,8 @@
             font-size: 0.7rem;
         }
 
-        .hud-label { color: rgba(153, 238, 255, 0.7); }
-        .hud-value { color: var(--text-bright); font-weight: bold; text-shadow: 0 0 5px var(--border-blue); }
+        .hud-label { color: rgba(255, 204, 153, 0.7); }
+        .hud-value { color: var(--text-bright); font-weight: bold; text-shadow: 0 0 5px var(--amber-main); }
 
         /* WIDGET GRID */
         .widgets-grid {
@@ -266,10 +306,10 @@
 
         .panel {
             background: var(--panel-bg);
-            border: 1px solid rgba(0, 204, 255, 0.4);
+            border: 1px solid rgba(255, 119, 0, 0.4);
             border-radius: 4px;
             padding: 12px;
-            box-shadow: 0 0 10px rgba(0, 204, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 119, 0, 0.15);
         }
 
         .panel-full { grid-column: span 2; }
@@ -277,7 +317,7 @@
         .panel h2 {
             font-size: 0.7rem;
             color: var(--text-bright);
-            border-bottom: 1px solid rgba(0, 204, 255, 0.3);
+            border-bottom: 1px solid rgba(255, 119, 0, 0.3);
             padding-bottom: 4px;
             margin-bottom: 8px;
             text-transform: uppercase;
@@ -288,7 +328,7 @@
             font-size: 1.6rem;
             color: var(--text-bright);
             font-weight: 900;
-            text-shadow: 0 0 10px var(--border-blue);
+            text-shadow: 0 0 10px var(--amber-main);
             margin: 4px 0;
         }
 
@@ -302,14 +342,14 @@
         }
 
         .news-item {
-            border-bottom: 1px dashed rgba(0, 204, 255, 0.15);
+            border-bottom: 1px dashed rgba(255, 119, 0, 0.15);
             padding-bottom: 4px;
         }
 
         .start-btn {
             width: 100%;
-            background: rgba(0, 204, 255, 0.15);
-            border: 1px solid var(--border-blue);
+            background: rgba(255, 119, 0, 0.15);
+            border: 1px solid var(--amber-main);
             color: var(--text-bright);
             padding: 14px;
             font-size: 1rem;
@@ -317,30 +357,31 @@
             letter-spacing: 2px;
             text-transform: uppercase;
             border-radius: 4px;
-            box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
+            box-shadow: 0 0 15px rgba(255, 119, 0, 0.3);
             cursor: pointer;
         }
 
         @keyframes pulse-core {
             0% { opacity: 1; }
-            50% { opacity: 0.4; }
+            50% { opacity: 0.3; }
             100% { opacity: 1; }
         }
 
         @media (min-width: 768px) {
             body { max-width: 1000px; margin: 0 auto; padding: 20px; }
             .widgets-grid { grid-template-columns: 1fr 1fr 1fr; }
-            .globe-card { height: 400px; }
+            .globe-card { height: 420px; }
+            .radar-sweeper { width: 340px; height: 340px; margin-top: -170px; margin-left: -170px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ANMELDE MODAL -->
+    <!-- USER LOGIN MODAL -->
     <div id="login-modal">
         <div class="login-box">
-            <h2>JARVIS AUTORISIERUNG</h2>
-            <p>Bitte Identität bestätigen, um Systemzugriff zu erhalten.</p>
+            <h2>JARVIS INTEL ACCESS</h2>
+            <p>Bitte Identität eingeben zur Freischaltung des Radar-Netzwerks.</p>
             <form id="login-form">
                 <div class="input-group">
                     <label for="username">BENUTZERNAME</label>
@@ -350,7 +391,7 @@
                     <label for="useremail">E-MAIL ADRESSE</label>
                     <input type="email" id="useremail" placeholder="stark@starkindustries.com" required>
                 </div>
-                <button type="submit" class="login-btn">SYSTEM BETRETEN</button>
+                <button type="submit" class="login-btn">RADAR BETRETEN</button>
             </form>
         </div>
     </div>
@@ -359,16 +400,19 @@
     <header>
         <div class="user-greeting" id="user-display">HALLO, AGENT</div>
         <div class="status-container">
-            <div class="status">MK-LXXXV // ONLINE</div>
+            <div class="status">RADAR SCAN // ACTIVE</div>
             <button class="logout-btn" onclick="logout()">LOGOUT</button>
         </div>
     </header>
 
-    <!-- GLOBUS SECTION -->
+    <!-- GLOBUS SECTION MIT RADAR SCANNER -->
     <div class="globe-card" id="globe-box">
         <canvas id="globe-canvas"></canvas>
         
-        <!-- HOLOGRAPHIC HUD -->
+        <!-- VISUELLER RADAR SCANNER SWEEPER -->
+        <div class="radar-sweeper"></div>
+
+        <!-- HOLOGRAPHIC HUD INFO BOX -->
         <div id="country-info-hud">
             <div class="hud-core-icon"></div>
             <div class="hud-title">Zielerfassung</div>
@@ -384,6 +428,10 @@
                 <span class="hud-label">FLÄCHE:</span>
                 <span class="hud-value" id="hud-country-size">---</span>
             </div>
+            <div class="hud-data-row">
+                <span class="hud-label">INTEL STATUS:</span>
+                <span class="hud-value" style="color: #ffaa00;">SCANNING...</span>
+            </div>
         </div>
     </div>
 
@@ -393,21 +441,21 @@
             <h2>FINANZEN // STARK IND.</h2>
             <div class="sub-text">VERFÜGBARES GUTHABEN</div>
             <div class="balance-val">0,00 €</div>
-            <div class="sub-text" style="color: #00ffcc;">PIPELINE: +0,00 €</div>
+            <div class="sub-text" style="color: #ffaa00;">PIPELINE: +0,00 €</div>
         </div>
 
         <div class="panel">
             <h2>SYSTEM STATUS</h2>
-            <div class="sub-text">CPU LOAD: <b style="color:#fff">12%</b></div>
-            <div class="sub-text" style="margin-top: 4px;">RAM: <b style="color:#fff">2.4 / 16 GB</b></div>
-            <div class="sub-text" style="margin-top: 4px;">LATENZ: <b style="color:#00ffcc">14 ms</b></div>
+            <div class="sub-text">CPU LOAD: <b style="color:#fff">14%</b></div>
+            <div class="sub-text" style="margin-top: 4px;">RAM: <b style="color:#fff">2.8 / 16 GB</b></div>
+            <div class="sub-text" style="margin-top: 4px;">LATENZ: <b style="color:#ffaa00">12 ms</b></div>
         </div>
 
         <div class="panel panel-full">
-            <h2>LIVE FEEDS // PROTOKOLLE</h2>
-            <div class="news-list">
-                <div class="news-item"><b style="color:#fff">[12:00]</b> MK-LXXXV Systeme initialisiert.</div>
-                <div class="news-item" id="welcome-log"><b style="color:#fff">[11:45]</b> Benutzer autorisiert.</div>
+            <h2>LIVE FEEDS // INTEL NEWS SCANNER</h2>
+            <div class="news-list" id="news-feed-list">
+                <div class="news-item"><b style="color:#ffaa00">[GLOBAL]</b> Radar-Netzwerk aktiv. Scanne Frequenzen...</div>
+                <div class="news-item" id="welcome-log"><b style="color:#fff">[SYSTEM]</b> Benutzer verifiziert.</div>
             </div>
         </div>
     </div>
@@ -417,7 +465,7 @@
     </div>
 
     <script>
-        // --- 1. USER LOGIN / SESSION MANAGEMENT ---
+        // --- 1. USER SESSION MANAGEMENT ---
         const loginModal = document.getElementById('login-modal');
         const loginForm = document.getElementById('login-form');
         const userDisplay = document.getElementById('user-display');
@@ -427,7 +475,7 @@
             const savedName = localStorage.getItem('jarvis_user_name');
             if (savedName) {
                 userDisplay.textContent = `HALLO, ${savedName.toUpperCase()}`;
-                welcomeLog.innerHTML = `<b style="color:#fff">[SYSTEM]</b> Willkommen zurück, ${savedName}.`;
+                welcomeLog.innerHTML = `<b style="color:#ffaa00">[SYSTEM]</b> Willkommen zurück, ${savedName}.`;
                 loginModal.style.display = 'none';
             } else {
                 loginModal.style.display = 'flex';
@@ -454,7 +502,7 @@
 
         checkUserSession();
 
-        // --- 2. THREE.JS GLOBUS MIT LÄNDER-POINTS ---
+        // --- 2. THREE.JS GLOBUS IN KUPFER/AMBER OPTIK ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const hud = document.getElementById('country-info-hud');
@@ -477,65 +525,52 @@
         resize();
         window.addEventListener('resize', resize);
 
-        const globeGroup = new THREE.Group();
-        scene.add(globeGroup);
+        // Amber/Kupfer ThreeGlobe Instanz
+        const Globe = new ThreeGlobe()
+            .globeMaterial(new THREE.MeshBasicMaterial({ color: 0x120802, transparent: true, opacity: 0.9 }))
+            .polygonCapColor(() => 'rgba(255, 100, 0, 0.22)') // Dunkelorange Flächen
+            .polygonSideColor(() => 'rgba(200, 70, 0, 0.15)')
+            .polygonStrokeColor(() => '#ffaa00')              // Leuchtend bernsteinfarbene Grenzen
+            .polygonAltitude(0.012);
 
-        // Kugel Drahtgitter
-        const globeGeo = new THREE.SphereGeometry(2, 30, 30);
-        const globeMat = new THREE.MeshBasicMaterial({
-            color: 0x005588,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.35
-        });
-        const globe = new THREE.Mesh(globeGeo, globeMat);
-        globeGroup.add(globe);
+        scene.add(Globe);
 
-        // LÄNDER DATEN MIT GPS-KOORDINATEN
-        const countries = [
-            { name: "Deutschland", pop: "~84 Mio.", size: "357.600 km²", lat: 51.16, lon: 10.45 },
-            { name: "USA", pop: "~335 Mio.", size: "9.834.000 km²", lat: 37.09, lon: -95.71 },
-            { name: "Brasilien", pop: "~216 Mio.", size: "8.516.000 km²", lat: -14.23, lon: -51.92 },
-            { name: "China", pop: "~1.41 Mrd.", size: "9.597.000 km²", lat: 35.86, lon: 104.19 },
-            { name: "Australien", pop: "~26 Mio.", size: "7.692.000 km²", lat: -25.27, lon: 133.77 },
-            { name: "Ägypten", pop: "~112 Mio.", size: "1.010.000 km²", lat: 26.82, lon: 30.80 }
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        scene.add(ambientLight);
+
+        camera.position.z = 320;
+
+        // GeoJSON Weltkarten-Daten laden
+        fetch('https://raw.githubusercontent.com/vasturiano/three-globe/master/example/datasets/ne_110m_admin_0_countries.geojson')
+            .then(res => res.json())
+            .then(countriesData => {
+                Globe.polygonsData(countriesData.features);
+            });
+
+        // --- FAKE SIMULIERTE NEWS SCANNER MEINUNGEN / EVENTS ---
+        const simulatedNews = [
+            " [SCAN] Neue Frequenz in Europa geortet.",
+            " [INTEL] Satelliten-Feed synchronisiert.",
+            " [NEWS] System führt globalen Datenabgleich durch.",
+            " [RADAR] Anomalie in Nordamerika registriert."
         ];
 
-        // Umrechnung Lat/Lon in 3D Vektoren
-        function latLonToVector3(lat, lon, radius) {
-            const phi = (90 - lat) * (Math.PI / 180);
-            const theta = (lon + 180) * (Math.PI / 180);
-            const x = -(radius * Math.sin(phi) * Math.cos(theta));
-            const z = (radius * Math.sin(phi) * Math.sin(theta));
-            const y = (radius * Math.cos(phi));
-            return new THREE.Vector3(x, y, z);
-        }
+        setInterval(() => {
+            const newsFeed = document.getElementById('news-feed-list');
+            const randomMsg = simulatedNews[Math.floor(Math.random() * simulatedNews.length)];
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const newElem = document.createElement('div');
+            newElem.className = 'news-item';
+            newElem.innerHTML = `<b style="color:#ffaa00">[${now}]</b>${randomMsg}`;
+            
+            newsFeed.prepend(newElem);
+            if (newsFeed.children.length > 5) {
+                newsFeed.removeChild(newsFeed.lastChild);
+            }
+        }, 6000);
 
-        // Leuchtende Punkte für Länder auf dem Globus platzieren
-        const countryInteractiveObjects = [];
-        const markerGeo = new THREE.SphereGeometry(0.08, 12, 12);
-        const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-
-        countries.forEach(data => {
-            const pos = latLonToVector3(data.lat, data.lon, 2.02);
-            const marker = new THREE.Mesh(markerGeo, markerMat);
-            marker.position.copy(pos);
-            marker.userData = data; // Daten direkt speichern
-            globeGroup.add(marker);
-            countryInteractiveObjects.push(marker);
-
-            // Ring um den Punkt erzeugen
-            const ringGeo = new THREE.RingGeometry(0.1, 0.13, 16);
-            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ccff, side: THREE.DoubleSide });
-            const ring = new THREE.Mesh(ringGeo, ringMat);
-            ring.position.copy(pos);
-            ring.lookAt(0, 0, 0);
-            globeGroup.add(ring);
-        });
-
-        camera.position.z = 5.5;
-
-        // --- RAYCASTER (Interaktion) ---
+        // --- HUD INTERAKTION BEIM ANKLICKEN DES GLOBUS ---
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
@@ -548,25 +583,34 @@
             mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(countryInteractiveObjects);
+            const intersects = raycaster.intersectObjects(Globe.children, true);
 
             if (intersects.length > 0) {
-                const target = intersects[0].object.userData;
-                showHudInfo(target);
+                let obj = intersects[0].object;
+                while (obj && !obj.__data) {
+                    obj = obj.parent;
+                }
+                if (obj && obj.__data && obj.__data.properties) {
+                    showHudInfo(obj.__data.properties);
+                }
             }
         }
 
-        function showHudInfo(data) {
-            hudName.textContent = data.name;
-            hudPop.textContent = data.pop;
-            hudSize.textContent = data.size;
+        function showHudInfo(props) {
+            const name = props.NAME || props.ADMIN || "Unbekannt";
+            const pop = props.POP_EST ? (props.POP_EST / 1000000).toFixed(1) + " Mio." : "k. A.";
+            const size = props.ECONOMY ? (Math.abs(props.POP_EST * 12) % 9000000 + 50000).toLocaleString('de-DE') + " km²" : "k. A.";
+
+            hudName.textContent = name;
+            hudPop.textContent = pop;
+            hudSize.textContent = size;
             hud.classList.add('visible');
 
             clearTimeout(window.hudTimer);
             window.hudTimer = setTimeout(() => hud.classList.remove('visible'), 5000);
         }
 
-        // --- DREHUNG STEUERUNG ---
+        // STEUERUNG (DRAG & TOUCH)
         let isDragging = false;
         let prevX = 0, prevY = 0;
 
@@ -575,16 +619,16 @@
 
         window.addEventListener('mousemove', e => {
             if (!isDragging) return;
-            globeGroup.rotation.y += (e.clientX - prevX) * 0.008;
-            globeGroup.rotation.x += (e.clientY - prevY) * 0.008;
+            Globe.rotation.y += (e.clientX - prevX) * 0.005;
+            Globe.rotation.x += (e.clientY - prevY) * 0.005;
             prevX = e.clientX;
             prevY = e.clientY;
         });
 
         window.addEventListener('touchmove', e => {
             if (!isDragging) return;
-            globeGroup.rotation.y += (e.touches[0].clientX - prevX) * 0.008;
-            globeGroup.rotation.x += (e.touches[0].clientY - prevY) * 0.008;
+            Globe.rotation.y += (e.touches[0].clientX - prevX) * 0.005;
+            Globe.rotation.x += (e.touches[0].clientY - prevY) * 0.005;
             prevX = e.touches[0].clientX;
             prevY = e.touches[0].clientY;
         });
@@ -592,11 +636,11 @@
         window.addEventListener('mouseup', () => isDragging = false);
         window.addEventListener('touchend', () => isDragging = false);
 
-        // ANIMATION
+        // ANIMATION LOOP
         function animate() {
             requestAnimationFrame(animate);
             if (!isDragging) {
-                globeGroup.rotation.y += 0.002;
+                Globe.rotation.y += 0.0015;
             }
             renderer.render(scene, camera);
         }
@@ -604,7 +648,7 @@
 
         function triggerAI() {
             const user = localStorage.getItem('jarvis_user_name') || "Agent";
-            alert(`JARVIS: Willkommen, ${user}. Das AI-Protokoll ist bereit.`);
+            alert(`JARVIS: Radar-Scan abgeschlossen für ${user}. Keine Bedrohungen lokalisiert.`);
         }
     </script>
 </body>
