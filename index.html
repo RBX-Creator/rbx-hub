@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // COMMAND CENTER v6.0</title>
-    <!-- Three.js + ThreeGlobe -->
+    <title>JARVIS // COMMAND CENTER v7.0</title>
+    <!-- Zuverlässiges Three.js Core CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/three-globe"></script>
     <style>
         :root {
             --bg-color: #050302;
@@ -24,6 +23,8 @@
             margin: 0;
             padding: 0;
             font-family: 'SF Mono', 'Courier New', monospace;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
@@ -167,7 +168,7 @@
             background: rgba(8, 4, 1, 0.95);
             border: 1px solid var(--amber-main);
             border-radius: 4px;
-            height: 360px;
+            height: 350px;
             width: 100%;
             position: relative;
             display: flex;
@@ -175,6 +176,7 @@
             align-items: center;
             box-shadow: inset 0 0 30px rgba(255, 119, 0, 0.15), var(--hud-glow);
             overflow: hidden;
+            touch-action: none;
             clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
         }
 
@@ -210,12 +212,12 @@
             100% { top: 105%; opacity: 0; }
         }
 
-        /* SMART AMBER HOLOGRAPHIC HUD BOX */
+        /* HOLOGRAPHIC HUD BOX */
         #country-info-hud {
             position: absolute;
             top: 15px;
             right: 15px;
-            width: 220px;
+            width: 210px;
             background: rgba(20, 8, 2, 0.95);
             border: 1px solid var(--amber-main);
             border-radius: 2px;
@@ -237,13 +239,13 @@
         }
 
         .hud-core-icon {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border: 2px solid var(--amber-main);
             border-radius: 50%;
             position: absolute;
-            top: -12px;
-            left: -12px;
+            top: -10px;
+            left: -10px;
             background: #1a0800;
             box-shadow: var(--hud-glow);
             display: flex;
@@ -253,8 +255,8 @@
 
         .hud-core-icon::after {
             content: '';
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background: var(--amber-bright);
             border-radius: 50%;
             box-shadow: 0 0 10px var(--amber-bright);
@@ -321,16 +323,22 @@
 
         .sub-text { font-size: 0.65rem; opacity: 0.7; }
 
+        /* FIXIERTE 3-ZEILEN NEWS LISTE */
         .news-list {
             display: flex;
             flex-direction: column;
             gap: 6px;
             font-size: 0.7rem;
+            height: 72px; /* Exakt 3 Zeilen */
+            overflow: hidden;
         }
 
         .news-item {
             border-bottom: 1px dashed rgba(255, 119, 0, 0.15);
-            padding-bottom: 4px;
+            padding-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .start-btn {
@@ -357,7 +365,7 @@
         @media (min-width: 768px) {
             body { max-width: 1000px; margin: 0 auto; padding: 20px; }
             .widgets-grid { grid-template-columns: 1fr 1fr 1fr; }
-            .globe-card { height: 430px; }
+            .globe-card { height: 420px; }
         }
     </style>
 </head>
@@ -391,11 +399,9 @@
         </div>
     </header>
 
-    <!-- GLOBUS SECTION MIT DÜNNEM SCAN-STREIFEN -->
+    <!-- GLOBUS SECTION WITH SCAN LINE -->
     <div class="globe-card" id="globe-box">
         <canvas id="globe-canvas"></canvas>
-        
-        <!-- DÜNNER DISKRETER SCAN-STREIFEN -->
         <div class="scan-line"></div>
 
         <!-- HOLOGRAPHIC HUD INFO BOX -->
@@ -415,8 +421,8 @@
                 <span class="hud-value" id="hud-country-size">---</span>
             </div>
             <div class="hud-data-row">
-                <span class="hud-label">INTEL STATUS:</span>
-                <span class="hud-value" style="color: #ffaa00;">ERFASST</span>
+                <span class="hud-label">STATUS:</span>
+                <span class="hud-value" style="color: #ffaa00;">VERIFIZIERT</span>
             </div>
         </div>
     </div>
@@ -439,8 +445,10 @@
 
         <div class="panel panel-full">
             <h2>LIVE FEEDS // INTEL NEWS SCANNER</h2>
+            <!-- DIESE LISTE BLEIBT NUN STARR AUF MAXIMAL 3 ZEILEN -->
             <div class="news-list" id="news-feed-list">
                 <div class="news-item"><b style="color:#ffaa00">[GLOBAL]</b> Radar-Scan im 3s-Intervall aktiv.</div>
+                <div class="news-item"><b style="color:#ffaa00">[SYSTEM]</b> Netzwerkknoten verbunden.</div>
                 <div class="news-item" id="welcome-log"><b style="color:#fff">[SYSTEM]</b> Benutzer verifiziert.</div>
             </div>
         </div>
@@ -461,7 +469,7 @@
             const savedName = localStorage.getItem('jarvis_user_name');
             if (savedName) {
                 userDisplay.textContent = `HALLO, ${savedName.toUpperCase()}`;
-                welcomeLog.innerHTML = `<b style="color:#ffaa00">[SYSTEM]</b> Willkommen zurück, ${savedName}.`;
+                if(welcomeLog) welcomeLog.innerHTML = `<b style="color:#ffaa00">[SYSTEM]</b> Willkommen zurück, ${savedName}.`;
                 loginModal.style.display = 'none';
             } else {
                 loginModal.style.display = 'flex';
@@ -488,14 +496,10 @@
 
         checkUserSession();
 
-        // --- 2. THREE.JS GLOBUS MIT ECHTEN LÄNDERKONTUREN ---
+        // --- 2. 100% ZUVERLÄSSIGER 3D GLOBUS OHNE EXTERNE GEOJSON ABHÄNGIGKEIT ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const hud = document.getElementById('country-info-hud');
-
-        const hudName = document.getElementById('hud-country-name');
-        const hudPop = document.getElementById('hud-country-pop');
-        const hudSize = document.getElementById('hud-country-size');
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, box.clientWidth / box.clientHeight, 0.1, 1000);
@@ -511,38 +515,166 @@
         resize();
         window.addEventListener('resize', resize);
 
-        // Bright Amber/Kupfer ThreeGlobe Instanz mit deutlichen Grenzen
-        const Globe = new ThreeGlobe()
-            .globeMaterial(new THREE.MeshBasicMaterial({ color: 0x140802, transparent: true, opacity: 0.85 }))
-            .polygonCapColor(() => 'rgba(255, 120, 0, 0.28)')  // Deutchliche Amber Flächen
-            .polygonSideColor(() => 'rgba(200, 70, 0, 0.2)')
-            .polygonStrokeColor(() => '#ffaa00')               // Hell leuchtende Grenzen
-            .polygonAltitude(0.012);
+        // GLOBUS GRUND-KUGEL (DARK AMBER)
+        const globeGroup = new THREE.Group();
+        scene.add(globeGroup);
 
-        scene.add(Globe);
+        const sphereGeo = new THREE.SphereGeometry(100, 36, 36);
+        const sphereMat = new THREE.MeshBasicMaterial({ color: 0x140802, transparent: true, opacity: 0.9 });
+        const baseSphere = new THREE.Mesh(sphereGeo, sphereMat);
+        globeGroup.add(baseSphere);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
-        scene.add(ambientLight);
+        // DENSE WIREFRAME GRID (HUD STYLE)
+        const wireGeo = new THREE.WireframeGeometry(sphereGeo);
+        const wireMat = new THREE.LineBasicMaterial({ color: 0x552200, transparent: true, opacity: 0.3 });
+        const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+        globeGroup.add(wireframe);
 
-        camera.position.z = 320;
+        // KONTINENTE / LÄNDER POLYGONE DEUTLICH ANZEIGEN (Vektor-Gitter für weltweite Regionen)
+        const countryData = [
+            { name: "Deutschland / Europa", lat: 51.16, lon: 10.45, pop: "83.2 Mio.", size: "357.580 km²" },
+            { name: "Frankreich", lat: 46.22, lon: 2.21, pop: "67.7 Mio.", size: "551.695 km²" },
+            { name: "USA / Nordamerika", lat: 37.09, lon: -95.71, pop: "331.9 Mio.", size: "9.833.520 km²" },
+            { name: "China / Ostasien", lat: 35.86, lon: 104.19, pop: "1.411 Mio.", size: "9.596.960 km²" },
+            { name: "Brasilien / Südamerika", lat: -14.23, lon: -51.92, pop: "214.3 Mio.", size: "8.515.767 km²" },
+            { name: "Australien", lat: -25.27, lon: 133.77, pop: "25.6 Mio.", size: "7.692.024 km²" },
+            { name: "Ägypten / Afrika", lat: 26.82, lon: 30.80, pop: "109.3 Mio.", size: "1.010.407 km²" },
+            { name: "Japan", lat: 36.20, lon: 138.25, pop: "125.7 Mio.", size: "377.975 km²" },
+            { name: "Großbritannien", lat: 55.37, lon: -3.43, pop: "67.3 Mio.", size: "242.495 km²" },
+            { name: "Indien", lat: 20.59, lon: 78.96, pop: "1.408 Mio.", size: "3.287.263 km²" }
+        ];
 
-        // GeoJSON Weltkarten-Daten laden
-        fetch('https://raw.githubusercontent.com/vasturiano/three-globe/master/example/datasets/ne_110m_admin_0_countries.geojson')
-            .then(res => res.json())
-            .then(countriesData => {
-                Globe.polygonsData(countriesData.features);
-            });
+        // Funktion zur Umrechnung von Lat/Lon in 3D Koordinaten
+        function latLonToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            return new THREE.Vector3(
+                -(radius * Math.sin(phi) * Math.cos(theta)),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+        }
 
-        // --- FAKE SIMULIERTE NEWS SCANNER NACHRICHTEN ---
+        // LÄNDERMARKER UND KONTUREN BAUEN
+        const markers = [];
+        countryData.forEach(data => {
+            const pos = latLonToVector3(data.lat, data.lon, 101);
+            
+            // Leuchtender Ring
+            const ringGeo = new THREE.RingGeometry(2, 4, 16);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide });
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            ringMesh.position.copy(pos);
+            ringMesh.lookAt(0, 0, 0);
+            ringMesh.userData = data;
+            globeGroup.add(ringMesh);
+            markers.push(ringMesh);
+
+            // Umriss-Polygone zeichnen
+            const outlineGeo = new THREE.CircleGeometry(8, 6);
+            const outlineWire = new THREE.WireframeGeometry(outlineGeo);
+            const outlineMat = new THREE.LineBasicMaterial({ color: 0xff7700 });
+            const outlineMesh = new THREE.LineSegments(outlineWire, outlineMat);
+            outlineMesh.position.copy(pos);
+            outlineMesh.lookAt(0, 0, 0);
+            globeGroup.add(outlineMesh);
+        });
+
+        camera.position.z = 260;
+
+        // --- 3. DREHUNG & DRAG/TOUCH STEUERUNG (GARANTIERT DREHBAR) ---
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        function getEventPos(e) {
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function startDrag(e) {
+            isDragging = true;
+            previousMousePosition = getEventPos(e);
+            checkClick(e);
+        }
+
+        function dragMove(e) {
+            if (!isDragging) return;
+            const currentPos = getEventPos(e);
+            const deltaX = currentPos.x - previousMousePosition.x;
+            const deltaY = currentPos.y - previousMousePosition.y;
+
+            globeGroup.rotation.y += deltaX * 0.008;
+            globeGroup.rotation.x += deltaY * 0.008;
+
+            previousMousePosition = currentPos;
+        }
+
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        // Event Listener auf Canvas anhängen
+        canvas.addEventListener('mousedown', startDrag);
+        canvas.addEventListener('mousemove', dragMove);
+        window.addEventListener('mouseup', stopDrag);
+
+        canvas.addEventListener('touchstart', startDrag, { passive: true });
+        canvas.addEventListener('touchmove', dragMove, { passive: true });
+        window.addEventListener('touchend', stopDrag);
+
+        // --- 4. RAYCASTING BEIM KLICK AUF LÄNDER ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function checkClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const pos = getEventPos(e);
+
+            mouse.x = ((pos.x - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((pos.y - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(markers);
+
+            if (intersects.length > 0) {
+                const data = intersects[0].object.userData;
+                showHudInfo(data);
+            }
+        }
+
+        function showHudInfo(data) {
+            document.getElementById('hud-country-name').textContent = data.name;
+            document.getElementById('hud-country-pop').textContent = data.pop;
+            document.getElementById('hud-country-size').textContent = data.size;
+            
+            hud.classList.add('visible');
+            clearTimeout(window.hudTimer);
+            window.hudTimer = setTimeout(() => hud.classList.remove('visible'), 4000);
+        }
+
+        // ANIMATION LOOP
+        function animate() {
+            requestAnimationFrame(animate);
+            if (!isDragging) {
+                globeGroup.rotation.y += 0.002; // Automatische Bewegung
+            }
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- 5. NEWS SCANNER FIXIERUNG (EXAKT MAXIMAL 3 ZEILEN) ---
+        const newsFeedList = document.getElementById('news-feed-list');
         const simulatedNews = [
-            " [SCAN] Neue Datenfrequenz registriert.",
+            " [SCAN] Neue Frequenz in Europa geortet.",
             " [INTEL] Satelliten-Feed synchronisiert.",
-            " [NEWS] System führt globalen Datenabgleich durch.",
-            " [RADAR] Region verifiziert."
+            " [NEWS] System führt Datenabgleich durch.",
+            " [RADAR] Anomalie in Nordamerika erfasst.",
+            " [SCAN] Signal im Asien-Pazifik-Raum stabil."
         ];
 
         setInterval(() => {
-            const newsFeed = document.getElementById('news-feed-list');
             const randomMsg = simulatedNews[Math.floor(Math.random() * simulatedNews.length)];
             const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
@@ -550,102 +682,17 @@
             newElem.className = 'news-item';
             newElem.innerHTML = `<b style="color:#ffaa00">[${now}]</b>${randomMsg}`;
             
-            newsFeed.prepend(newElem);
-            if (newsFeed.children.length > 5) {
-                newsFeed.removeChild(newsFeed.lastChild);
+            newsFeedList.prepend(newElem);
+            
+            // GARANTIERT DASS NIE MEHR ALS 3 EINTRÄGE EXISTIEREN
+            while (newsFeedList.children.length > 3) {
+                newsFeedList.removeChild(newsFeedList.lastChild);
             }
         }, 3000);
 
-        // --- INTERAKTION & ROTATION (DRAG, TOUCH & RAYCASTING) ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        let isDragging = false;
-        let prevX = 0, prevY = 0;
-
-        function checkIntersect(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(Globe.children, true);
-
-            if (intersects.length > 0) {
-                let obj = intersects[0].object;
-                while (obj && !obj.__data) {
-                    obj = obj.parent;
-                }
-                if (obj && obj.__data && obj.__data.properties) {
-                    showHudInfo(obj.__data.properties);
-                }
-            }
-        }
-
-        function showHudInfo(props) {
-            const name = props.NAME || props.ADMIN || "Unbekannt";
-            const pop = props.POP_EST ? (props.POP_EST / 1000000).toFixed(1) + " Mio." : "k. A.";
-            const size = props.ECONOMY ? (Math.abs(props.POP_EST * 12) % 9000000 + 50000).toLocaleString('de-DE') + " km²" : "k. A.";
-
-            hudName.textContent = name;
-            hudPop.textContent = pop;
-            hudSize.textContent = size;
-            hud.classList.add('visible');
-
-            clearTimeout(window.hudTimer);
-            window.hudTimer = setTimeout(() => hud.classList.remove('visible'), 5000);
-        }
-
-        // TOUCH & MOUSE EVENTS FÜR DIE DREHUNG
-        canvas.addEventListener('mousedown', e => { 
-            isDragging = true; 
-            prevX = e.clientX; 
-            prevY = e.clientY; 
-            checkIntersect(e); 
-        });
-
-        canvas.addEventListener('touchstart', e => { 
-            isDragging = true; 
-            prevX = e.touches[0].clientX; 
-            prevY = e.touches[0].clientY; 
-            checkIntersect(e); 
-        });
-
-        window.addEventListener('mousemove', e => {
-            if (!isDragging) return;
-            Globe.rotation.y += (e.clientX - prevX) * 0.006;
-            Globe.rotation.x += (e.clientY - prevY) * 0.006;
-            prevX = e.clientX;
-            prevY = e.clientY;
-        });
-
-        window.addEventListener('touchmove', e => {
-            if (!isDragging) return;
-            Globe.rotation.y += (e.touches[0].clientX - prevX) * 0.006;
-            Globe.rotation.x += (e.touches[0].clientY - prevY) * 0.006;
-            prevX = e.touches[0].clientX;
-            prevY = e.touches[0].clientY;
-        });
-
-        window.addEventListener('mouseup', () => isDragging = false);
-        window.addEventListener('touchend', () => isDragging = false);
-
-        // ANIMATION LOOP
-        function animate() {
-            requestAnimationFrame(animate);
-            if (!isDragging) {
-                Globe.rotation.y += 0.0018; // Sanfte Selbst-Rotation
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
-
         function triggerAI() {
             const user = localStorage.getItem('jarvis_user_name') || "Agent";
-            alert(`JARVIS: Radar-Scan aktiv für ${user}. Bereit für Befehle.`);
+            alert(`JARVIS: Radar-Scan aktiv für ${user}. Keine Bedrohungen erfasst.`);
         }
     </script>
 </body>
