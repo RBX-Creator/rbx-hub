@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v15.3</title>
+    <title>JARVIS // ACTIVE OS v15.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -439,7 +439,7 @@
                 document.body.addEventListener('click', () => { speakJarvis(" "); }, { once: true });
                 
                 setTimeout(() => {
-                    speakJarvis(`Hallo ${userName}. JARVIS ist betriebsbereit.`);
+                    speakJarvis(`Guten Tag ${userName}. Alle Systeme laufen mit voller Kapazität.`);
                     startListening();
                 }, 800);
             } else {
@@ -448,24 +448,32 @@
             }
         }
 
-        // --- 2. VERBESSERTE, ROBUSTE TIEFE STIMME (IOS COMPATIBLE) ---
+        // --- 2. TIEFE, RUHIGE IRON MAN JARVIS-STIMME ---
         function speakJarvis(text) {
             if (!text || text.trim() === "") return;
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Vorherige Sprache beenden
+                window.speechSynthesis.cancel();
                 
-                const cleanText = text.replace(/\[.*?\]/g, '').trim(); // Entfernt [BEFEHLE] vor dem Vorlesen
+                const cleanText = text.replace(/\[.*?\]/g, '').trim(); 
                 if(!cleanText) return;
 
                 const utterance = new SpeechSynthesisUtterance(cleanText);
                 utterance.lang = 'de-DE';
-                utterance.pitch = 0.6; // Tiefe männliche Stimme
-                utterance.rate = 1.0;
+                utterance.pitch = 0.4; // Extrem tief eingestellt für den düsteren, ruhigen JARVIS-Sound
+                utterance.rate = 0.88; // Etwas langsamer & souveräner
 
                 const voices = window.speechSynthesis.getVoices();
                 if (voices.length > 0) {
-                    const deVoice = voices.find(v => v.lang.startsWith('de'));
-                    if (deVoice) utterance.voice = deVoice;
+                    // Suche gezielt nach männlichen / tiefen Stimmen
+                    const maleVoice = voices.find(v => v.lang.startsWith('de') && (
+                        v.name.toLowerCase().includes('male') || 
+                        v.name.toLowerCase().includes('martin') || 
+                        v.name.toLowerCase().includes('stefan') || 
+                        v.name.toLowerCase().includes('google')
+                    ));
+                    const fallbackVoice = voices.find(v => v.lang.startsWith('de'));
+                    if (maleVoice) utterance.voice = maleVoice;
+                    else if (fallbackVoice) utterance.voice = fallbackVoice;
                 }
 
                 window.speechSynthesis.speak(utterance);
@@ -499,16 +507,18 @@
             try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. OPENROUTER ANBINDUNG ---
+        // --- 4. OPENROUTER ANBINDUNG MIT IRONMAN-PERSONALITÄT ---
         async function processVoiceCommandWithOpenRouter(userQuery) {
             if (!apiKey) return;
 
             const systemPrompt = `
-            Du bist JARVIS. Antworte kurz, klug und präzise auf Deutsch für ${userName}. Gib NIEMALS deine Befehlssyntax in deiner gesprochenen Antwort aus!
-            DU KANNST DAS DASHBOARD & DEN 3D GLOBUS STEUERN:
+            Du bist J.A.R.V.I.S. aus Iron Man. Antworte äußerst höflich, ruhig, hochintelligent und souverän auf Deutsch für ${userName}. Vergleiche dich nicht mit einer normalen KI, sondern sei der treue KI-Assistent.
+            Lass Befehlscodes wie [SET_BALANCE...] in deiner Sprachausgabe absolut ungesprochen.
+            
+            STEUERBEFEHLE (Nur einbauen wenn zutreffend):
             - Guthaben ändern: [SET_BALANCE: Betrag]
             - Neues Widget: [ADD_WIDGET: Titel | Inhalt]
-            - Ort auf Globus markieren: NUR WENN EXPLIZIT NACH STÄDTEN ODER ORTEN GEFRAGT WIRD! [GLOBE_MARK: Breitengrad, Längengrad | Name]
+            - Ort auf Globus markieren: NUR bei konkreten Ortsanfragen! [GLOBE_MARK: Breitengrad, Längengrad | Name]
             `;
 
             try {
@@ -584,7 +594,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. 3D GLOBUS MIT KONTINENTEN ---
+        // --- 5. CLEAN CLEVER 3D SCI-FI HUD GLOBUS ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -603,55 +613,32 @@
         const globeGroup = new THREE.Group();
         scene.add(globeGroup);
 
-        // Basis Wireframe Sphere
-        const sphereGeo = new THREE.SphereGeometry(80, 20, 20);
+        // Außengitter (Haupt-Globus)
+        const sphereGeo = new THREE.SphereGeometry(80, 24, 24);
         const sphereMat = new THREE.MeshBasicMaterial({ 
             color: 0xff7700, 
             wireframe: true,
             transparent: true,
-            opacity: 0.25
+            opacity: 0.35
         });
         globeGroup.add(new THREE.Mesh(sphereGeo, sphereMat));
 
-        // KONTINENTE ERZEUGEN (LANDMASSEN PUNKTE)
-        const continentPoints = [
-            // Nordamerika
-            {lat: 40, lon: -100, radius: 25}, {lat: 55, lon: -105, radius: 20}, {lat: 30, lon: -95, radius: 15},
-            // Südamerika
-            {lat: -15, lon: -60, radius: 22}, {lat: -35, lon: -65, radius: 12},
-            // Europa
-            {lat: 50, lon: 15, radius: 14}, {lat: 60, lon: 25, radius: 10},
-            // Afrika
-            {lat: 5, lon: 20, radius: 28}, {lat: -20, lon: 25, radius: 15},
-            // Asien
-            {lat: 45, lon: 80, radius: 35}, {lat: 30, lon: 100, radius: 25}, {lat: 60, lon: 100, radius: 20},
-            // Australien
-            {lat: -25, lon: 135, radius: 15}
-        ];
+        // Dunkler Kern für Tiefeneffekt
+        const coreGeo = new THREE.SphereGeometry(78, 16, 16);
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0x0c0501 });
+        globeGroup.add(new THREE.Mesh(coreGeo, coreMat));
 
-        const landGeo = new THREE.BufferGeometry();
-        const landPositions = [];
+        // Äquator & Meridian Hologramm-Ringe
+        const ringGeo = new THREE.RingGeometry(82, 83, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+        
+        const eqRing = new THREE.Mesh(ringGeo, ringMat);
+        eqRing.rotation.x = Math.PI / 2;
+        globeGroup.add(eqRing);
 
-        continentPoints.forEach(center => {
-            for(let i = 0; i < 40; i++) {
-                const lat = center.lat + (Math.random() - 0.5) * center.radius;
-                const lon = center.lon + (Math.random() - 0.5) * center.radius;
-                const phi = (90 - lat) * (Math.PI / 180);
-                const theta = (lon + 180) * (Math.PI / 180);
-                const r = 80.5;
-
-                landPositions.push(
-                    -(r * Math.sin(phi) * Math.cos(theta)),
-                    (r * Math.cos(phi)),
-                    (r * Math.sin(phi) * Math.sin(theta))
-                );
-            }
-        });
-
-        landGeo.setAttribute('position', new THREE.Float32BufferAttribute(landPositions, 3));
-        const landMat = new THREE.PointsMaterial({ color: 0xffaa00, size: 2.2 });
-        const landMesh = new THREE.Points(landGeo, landMat);
-        globeGroup.add(landMesh);
+        const polarRing = new THREE.Mesh(ringGeo, ringMat);
+        polarRing.rotation.y = Math.PI / 2;
+        globeGroup.add(polarRing);
 
         camera.position.z = 220;
 
@@ -661,14 +648,15 @@
 
             const phi = (90 - lat) * (Math.PI / 180);
             const theta = (lon + 180) * (Math.PI / 180);
-            const radius = 81;
+            const radius = 80;
 
             const x = -(radius * Math.sin(phi) * Math.cos(theta));
             const z = (radius * Math.sin(phi) * Math.sin(theta));
             const y = (radius * Math.cos(phi));
 
-            const markerGeo = new THREE.SphereGeometry(3.5, 12, 12);
-            const markerMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+            // Leuchtender Zielpunkt
+            const markerGeo = new THREE.SphereGeometry(4, 12, 12);
+            const markerMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             const marker = new THREE.Mesh(markerGeo, markerMat);
             marker.position.set(x, y, z);
             globeGroup.add(marker);
@@ -677,14 +665,14 @@
             markerCount++;
             document.getElementById('marker-count').textContent = markerCount;
 
-            // Drehe den Globus zum markierten Punkt
+            // Globus dreht sich sanft zum Zielort
             globeGroup.rotation.y = -theta;
             globeGroup.rotation.x = phi - Math.PI / 2;
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.003;
+            globeGroup.rotation.y += 0.002;
             renderer.render(scene, camera);
         }
         animate();
