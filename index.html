@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JARVIS // MARK-85 HUD OS</title>
     <script src="//unpkg.com/globe.gl"></script>
-    <!-- MediaPipe Hands -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
@@ -21,16 +20,7 @@
             --text-bright: #ffffff;
             --hud-glow: 0 0 15px rgba(255, 102, 0, 0.4), inset 0 0 10px rgba(255, 102, 0, 0.2);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'SF Mono', 'Courier New', monospace;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'SF Mono', 'Courier New', monospace; user-select: none; -webkit-user-select: none; }
         body {
             background-color: var(--bg-color);
             background-image: radial-gradient(#1f0a02 1px, transparent 1px);
@@ -43,20 +33,17 @@
             gap: 12px;
             overflow-x: hidden;
         }
-
         #login-modal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(4, 2, 1, 0.96); z-index: 1000;
             display: flex; justify-content: center; align-items: center;
             padding: 20px; backdrop-filter: blur(8px);
         }
-
         .login-box {
             background: var(--panel-bg); border: 1px solid var(--amber-main);
             padding: 25px; border-radius: 4px; width: 100%; max-width: 420px;
             box-shadow: var(--hud-glow);
         }
-
         .login-box h2 { color: var(--text-bright); font-size: 1.0rem; margin-bottom: 4px; letter-spacing: 2px; }
         .step-indicator { font-size: 0.65rem; color: var(--amber-bright); margin-bottom: 15px; letter-spacing: 1px; }
         .wizard-step { display: none; min-height: 120px; }
@@ -86,7 +73,6 @@
         .header-right { display: flex; align-items: center; gap: 8px; }
         .status { color: var(--amber-bright); font-size: 0.7rem; font-weight: bold; display: none; }
         @media(min-width: 480px) { .status { display: block; } }
-        
         .header-btn { background: rgba(255, 102, 0, 0.15); border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.65rem; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-weight: bold; }
         .header-btn:hover { background: var(--amber-main); color: #000; }
 
@@ -99,11 +85,7 @@
         .status-left { display: flex; align-items: center; gap: 8px; }
         .pulse-dot { width: 8px; height: 8px; background: var(--amber-bright); border-radius: 50%; box-shadow: 0 0 8px var(--amber-bright); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
-        
-        .test-voice-btn {
-            background: var(--amber-main); color: #000; border: none; padding: 4px 8px;
-            font-size: 0.65rem; font-weight: bold; border-radius: 3px; cursor: pointer;
-        }
+        .test-voice-btn { background: var(--amber-main); color: #000; border: none; padding: 4px 8px; font-size: 0.65rem; font-weight: bold; border-radius: 3px; cursor: pointer; }
         .response-text { color: var(--text-bright); font-size: 0.8rem; line-height: 1.4; margin-top: 4px; }
 
         #chat-modal {
@@ -114,8 +96,7 @@
         .chat-container {
             background: var(--panel-bg); border: 1px solid var(--amber-main);
             width: 100%; max-width: 500px; height: 80vh; max-height: 600px;
-            border-radius: 4px; display: flex; flex-direction: column; box-shadow: var(--hud-glow);
-            overflow: hidden;
+            border-radius: 4px; display: flex; flex-direction: column; box-shadow: var(--hud-glow); overflow: hidden;
         }
         .chat-header-bar {
             background: rgba(255, 102, 0, 0.15); padding: 10px 15px;
@@ -123,40 +104,24 @@
             border-bottom: 1px solid var(--amber-main); font-size: 0.75rem; color: var(--text-bright); font-weight: bold;
         }
         .close-chat-btn { background: transparent; border: 1px solid var(--amber-main); color: var(--amber-bright); padding: 2px 8px; cursor: pointer; font-size: 0.7rem; border-radius: 2px; }
-        .chat-messages {
-            flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.75rem;
-        }
+        .chat-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.75rem; }
         .chat-msg { max-width: 85%; padding: 8px 12px; border-radius: 4px; line-height: 1.4; word-break: break-word; }
         .chat-msg.user { background: rgba(255, 102, 0, 0.2); border: 1px solid var(--amber-main); color: var(--text-bright); align-self: flex-end; }
         .chat-msg.jarvis { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,102,0,0.4); color: var(--text-main); align-self: flex-start; }
-        .chat-input-area {
-            padding: 10px; background: rgba(0,0,0,0.5); border-top: 1px solid var(--amber-main); display: flex; gap: 8px;
-        }
-        .chat-input-area input {
-            flex: 1; padding: 10px; background: rgba(255,102,0,0.05); border: 1px solid var(--amber-main);
-            color: var(--text-bright); font-size: 0.8rem; outline: none; border-radius: 3px;
-        }
-        .chat-send-btn {
-            background: var(--amber-main); color: #000; border: none; padding: 0 15px; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 0.75rem;
-        }
+        .chat-input-area { padding: 10px; background: rgba(0,0,0,0.5); border-top: 1px solid var(--amber-main); display: flex; gap: 8px; }
+        .chat-input-area input { flex: 1; padding: 10px; background: rgba(255,102,0,0.05); border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.8rem; outline: none; border-radius: 3px; }
+        .chat-send-btn { background: var(--amber-main); color: #000; border: none; padding: 0 15px; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 0.75rem; }
 
         .live-cam-box {
-            display: none; 
-            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--amber-main);
+            display: none; background: rgba(0, 0, 0, 0.9); border: 1px solid var(--amber-main);
             border-radius: 4px; padding: 8px; box-shadow: var(--hud-glow); flex-direction: column; gap: 6px;
         }
         .cam-header { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--amber-bright); }
-        .cam-screen {
-            width: 100%; height: 240px; background: #000; border: 1px solid rgba(255,102,0,0.3);
-            position: relative; overflow: hidden;
-        }
-        .cam-screen video, .cam-screen canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
-        }
+        .cam-screen { width: 100%; height: 240px; background: #000; border: 1px solid rgba(255,102,0,0.3); position: relative; overflow: hidden; }
+        .cam-screen video, .cam-screen canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
         .cam-screen canvas { z-index: 5; pointer-events: none; }
         .hud-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 4;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4;
             background: linear-gradient(rgba(18, 16, 14, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 4px, 6px 100%;
         }
@@ -166,7 +131,6 @@
             animation: spin 10s linear infinite; pointer-events: none; z-index: 6;
         }
         @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-
         .gesture-label {
             position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85);
             border: 1px solid var(--amber-main); color: var(--amber-bright);
@@ -179,25 +143,19 @@
             box-shadow: var(--hud-glow); overflow: hidden;
         }
         #globe-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-
         .globe-target-info {
             position: absolute; top: 10px; left: 10px; font-size: 0.65rem;
             color: var(--amber-bright); background: rgba(0,0,0,0.85);
             padding: 6px 10px; border: 1px solid var(--amber-main); border-radius: 3px;
             letter-spacing: 1px; z-index: 10; pointer-events: none;
         }
-
-        .mode-selector {
-            position: absolute; bottom: 10px; left: 10px; display: flex; gap: 6px; z-index: 10; flex-wrap: wrap;
-        }
+        .mode-selector { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 6px; z-index: 10; flex-wrap: wrap; }
         .mode-btn {
             background: rgba(18, 8, 2, 0.9); border: 1px solid var(--amber-main);
             color: var(--amber-bright); font-size: 0.55rem; padding: 6px 8px;
             border-radius: 3px; cursor: pointer; font-weight: bold; transition: all 0.2s;
         }
-        .mode-btn:hover, .mode-btn.active {
-            background: var(--amber-main); color: #000; box-shadow: 0 0 10px var(--amber-glow);
-        }
+        .mode-btn:hover, .mode-btn.active { background: var(--amber-main); color: #000; box-shadow: 0 0 10px var(--amber-glow); }
 
         .swipe-section-title { font-size: 0.65rem; color: var(--amber-bright); letter-spacing: 1px; margin-top: 5px; }
         .swipe-container { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
@@ -211,12 +169,12 @@
         .panel h2 { font-size: 0.75rem; color: var(--text-bright); border-bottom: 1px solid rgba(255, 102, 0, 0.3); padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
         .balance-val { font-size: 1.8rem; color: var(--text-bright); font-weight: 900; text-shadow: 0 0 10px var(--amber-main); }
         .sub-text { font-size: 0.65rem; opacity: 0.7; }
-
         @media (min-width: 768px) { .panel { flex: 0 0 45%; } }
     </style>
 </head>
 <body>
 
+    <!-- LOGIN -->
     <div id="login-modal">
         <div class="login-box">
             <h2>JARVIS MARK-85 INITIALISIERUNG</h2>
@@ -226,7 +184,7 @@
                 <p class="step-desc">Willkommen. Wie darf JARVIS Sie ansprechen?</p>
                 <div class="input-group">
                     <label>BENUTZERNAME</label>
-                    <input type="text" id="username" value="Vida" required>
+                    <input type="text" id="username" placeholder="z.B. Master" value="" required>
                 </div>
             </div>
 
@@ -255,10 +213,11 @@
         </div>
     </div>
 
+    <!-- CHAT MODAL -->
     <div id="chat-modal">
         <div class="chat-container">
             <div class="chat-header-bar">
-                <span>💬 SILENTER CHAT-MODUS (KEIN AUDIO)</span>
+                <span>💬 SILENTER CHAT-MODUS</span>
                 <button class="close-chat-btn" id="close-chat-btn">SCHLIESSEN</button>
             </div>
             <div class="chat-messages" id="chat-messages-box">
@@ -271,8 +230,9 @@
         </div>
     </div>
 
+    <!-- HEADER -->
     <header>
-        <div class="user-greeting" id="user-display">HALLO, VIDA</div>
+        <div class="user-greeting" id="user-display">HALLO</div>
         <div class="header-right">
             <div class="status">JARVIS ACTIVE</div>
             <button class="header-btn" id="open-chat-btn">💬 CHAT</button>
@@ -280,6 +240,7 @@
         </div>
     </header>
 
+    <!-- VOICE STATUS -->
     <div class="voice-status">
         <div class="status-header">
             <div class="status-left">
@@ -288,23 +249,22 @@
             </div>
             <button class="test-voice-btn" onclick="testVoiceManual()">TEST VOICE</button>
         </div>
-        <div class="response-text" id="jarvis-response">System bereit. Alle Sensoren online.</div>
+        <div class="response-text" id="jarvis-response">System bereit.</div>
     </div>
 
+    <!-- LIVE CAM -->
     <div class="live-cam-box" id="live-cam-wrapper">
         <div class="cam-header">
             <span id="cam-title">HELMET CAM // LIVE FEED</span>
             <span id="cam-rec">REC ● LIVE</span>
         </div>
-        <div class="cam-screen" id="cam-screen-container">
-            <!-- video + canvas werden hier eingefügt -->
-        </div>
+        <div class="cam-screen" id="cam-screen-container"></div>
     </div>
 
+    <!-- GLOBE -->
     <div class="globe-card">
         <div class="globe-target-info" id="globe-info">STATUS: RADAR AKTIV</div>
         <div id="globe-container"></div>
-        
         <div class="mode-selector">
             <button class="mode-btn active" onclick="setGlobeMode('tech')">TECH GRID</button>
             <button class="mode-btn" onclick="setGlobeMode('dark')">DARK MODE</button>
@@ -312,55 +272,403 @@
     </div>
 
     <div class="swipe-section-title">SYSTEM PANELS (WISCHEN) ◄ ►</div>
-
-    <div class="swipe-container" id="widget-carousel">
+    <div class="swipe-container">
         <div class="panel">
             <h2>FINANZEN // GUTHABEN</h2>
             <div class="sub-text">VERFÜGBAR</div>
-            <div class="balance-val" id="balance-display">10,00 €</div>
-            <div class="sub-text" style="color: #ffaa00; margin-top:5px;">ATOMISCH GESICHERT</div>
+            <div class="balance-val">10,00 €</div>
+            <div class="sub-text" style="color:#ffaa00;margin-top:5px;">ATOMISCH GESICHERT</div>
         </div>
-
         <div class="panel">
             <h2>SYSTEM STATUS // HUD</h2>
             <div class="sub-text">POWER CORE: <b style="color:#ffaa00">100% ONLINE</b></div>
-            <div class="sub-text" style="margin-top: 4px;">INTEGRITÄT: <b style="color:#fff">99.8%</b></div>
-            <div class="sub-text" style="margin-top: 4px;">AKTIVER ORT: <b style="color:#ffaa00" id="marker-count">KEINER</b></div>
-            <div class="sub-text" style="margin-top: 4px;">WETTER: <b style="color:#ffaa00" id="weather-display">—</b></div>
-            <div class="sub-text" style="margin-top: 4px;">GESTE: <b style="color:#ffaa00" id="gesture-status">—</b></div>
+            <div class="sub-text" style="margin-top:4px;">INTEGRITÄT: <b style="color:#fff">99.8%</b></div>
+            <div class="sub-text" style="margin-top:4px;">AKTIVER ORT: <b style="color:#ffaa00" id="marker-count">KEINER</b></div>
+            <div class="sub-text" style="margin-top:4px;">WETTER: <b style="color:#ffaa00" id="weather-display">—</b></div>
+            <div class="sub-text" style="margin-top:4px;">GESTE: <b style="color:#ffaa00" id="gesture-status">—</b></div>
         </div>
     </div>
 
-    <script>
-        let currentStep = 1;
-        const totalSteps = 4;
-        let userName = localStorage.getItem('jarvis_user_name') || 'Vida';
-        let apiKey = localStorage.getItem('jarvis_openrouter_key');
-        let currentStream = null;
-        let hands = null;
-        let camera = null;
-        let lastGesture = null;
-        let gestureCooldown = 0;
+<script>
+    // ========== LOGIN WIZARD (GEFIXT) ==========
+    let currentStep = 1;
+    const totalSteps = 4;
+    let userName = localStorage.getItem('jarvis_user_name') || '';
+    let apiKey = localStorage.getItem('jarvis_openrouter_key') || '';
 
-        const loginModal = document.getElementById('login-modal');
-        const userDisplay = document.getElementById('user-display');
-        const nextBtn = document.getElementById('next-btn');
-        const prevBtn = document.getElementById('prev-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const stepIndicator = document.getElementById('step-indicator');
-        const chatModal = document.getElementById('chat-modal');
-        const openChatBtn = document.getElementById('open-chat-btn');
-        const closeChatBtn = document.getElementById('close-chat-btn');
-        const chatInputField = document.getElementById('chat-input-field');
-        const chatSendBtn = document.getElementById('chat-send-btn');
-        const chatMessagesBox = document.getElementById('chat-messages-box');
+    const loginModal = document.getElementById('login-modal');
+    const userDisplay = document.getElementById('user-display');
+    const nextBtn = document.getElementById('next-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const stepIndicator = document.getElementById('step-indicator');
 
-        openChatBtn.addEventListener('click', () => { chatModal.style.display = 'flex'; chatInputField.focus(); });
-        closeChatBtn.addEventListener('click', () => { chatModal.style.display = 'none'; });
+    function updateWizard() {
+        document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active-step'));
+        document.getElementById('step-' + currentStep).classList.add('active-step');
+        stepIndicator.textContent = 'SCHRITT ' + currentStep + ' VON ' + totalSteps;
+        prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
+        nextBtn.textContent = currentStep === totalSteps ? 'SYSTEM STARTEN' : 'WEITER';
+    }
 
-        document.getElementById('username').value = userName;
+    nextBtn.addEventListener('click', function() {
+        if (currentStep === 1) {
+            const name = document.getElementById('username').value.trim();
+            if (!name) {
+                alert('Bitte einen Namen eingeben.');
+                return;
+            }
+            userName = name;
+        }
 
-        function updateWizard() {
-            document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active-step'));
-            document.getElementById(`step-${currentStep}`).classList.add('active-step');
-            stepIndicator.textContent = `SCHRITT ${
+        if (currentStep === totalSteps) {
+            const key = document.getElementById('apikey').value.trim();
+            if (!key) {
+                alert('API-Schlüssel ist erforderlich.');
+                return;
+            }
+            apiKey = key;
+            localStorage.setItem('jarvis_user_name', userName);
+            localStorage.setItem('jarvis_openrouter_key', apiKey);
+            initSystem();
+        } else {
+            currentStep++;
+            updateWizard();
+        }
+    });
+
+    prevBtn.addEventListener('click', function() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateWizard();
+        }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        localStorage.clear();
+        location.reload();
+    });
+
+    // Chat
+    document.getElementById('open-chat-btn').addEventListener('click', () => {
+        document.getElementById('chat-modal').style.display = 'flex';
+    });
+    document.getElementById('close-chat-btn').addEventListener('click', () => {
+        document.getElementById('chat-modal').style.display = 'none';
+    });
+
+    // ========== RESTLICHE FUNKTIONEN ==========
+    let currentStream = null;
+    let hands = null;
+    let camera = null;
+    let lastGesture = null;
+    let gestureCooldown = 0;
+
+    function getTimeGreeting() {
+        const h = new Date().getHours();
+        if (h < 12) return 'Guten Morgen';
+        if (h < 18) return 'Guten Tag';
+        return 'Guten Abend';
+    }
+
+    function initSystem() {
+        if (userName && apiKey) {
+            userDisplay.textContent = 'HALLO, ' + userName.toUpperCase();
+            loginModal.style.display = 'none';
+            setTimeout(() => {
+                speakJarvis(getTimeGreeting() + ', ' + userName + '. Alle Systeme sind online. Ich höre zu.');
+                startListening();
+            }, 500);
+        } else {
+            loginModal.style.display = 'flex';
+            updateWizard();
+        }
+    }
+
+    function speakJarvis(text) {
+        if (!text) return;
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text.replace(/\[.*?\]/g, '').trim());
+            u.lang = 'de-DE';
+            u.pitch = 0.72;
+            u.rate = 0.98;
+            const voices = window.speechSynthesis.getVoices();
+            const de = voices.find(v => v.lang.startsWith('de'));
+            if (de) u.voice = de;
+            window.speechSynthesis.speak(u);
+        }
+    }
+
+    function testVoiceManual() {
+        speakJarvis('Systemtest erfolgreich, ' + userName + '.');
+    }
+
+    // Globe
+    const myGlobe = Globe()(document.getElementById('globe-container'))
+        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+        .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+        .backgroundColor('rgba(0,0,0,0)')
+        .htmlElementsData([])
+        .htmlLat(d => d.lat)
+        .htmlLng(d => d.lng)
+        .htmlElement(d => {
+            const el = document.createElement('div');
+            el.innerHTML = '<div style="background:rgba(0,0,0,0.9);border:1px solid #ff6600;color:#ffaa00;padding:4px 8px;font-size:9px;border-radius:3px;">🛰️ ' + d.name + '</div>';
+            return el;
+        });
+    myGlobe.controls().autoRotate = true;
+    myGlobe.controls().autoRotateSpeed = 0.4;
+
+    function setGlobeMode(mode) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        if (window.event && window.event.target) window.event.target.classList.add('active');
+        if (mode === 'tech') {
+            myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg');
+            document.getElementById('globe-info').textContent = 'STATUS: CYBERNETIC GRID AKTIV';
+        } else {
+            myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg');
+            document.getElementById('globe-info').textContent = 'STATUS: DARK MODE AKTIV';
+        }
+    }
+
+    // Speech
+    function startListening() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) return;
+        const rec = new SR();
+        rec.lang = 'de-DE';
+        rec.continuous = true;
+        rec.interimResults = false;
+        rec.onresult = (e) => {
+            const t = e.results[e.results.length - 1][0].transcript.trim().toLowerCase();
+            document.getElementById('speech-indicator').textContent = 'Erkannt: "' + t + '"';
+            processCommand(t, true);
+        };
+        rec.onend = () => { try { rec.start(); } catch(e){} };
+        try { rec.start(); } catch(e){}
+    }
+
+    document.getElementById('chat-send-btn').addEventListener('click', sendChat);
+    document.getElementById('chat-input-field').addEventListener('keypress', e => { if (e.key === 'Enter') sendChat(); });
+
+    function sendChat() {
+        const t = document.getElementById('chat-input-field').value.trim();
+        if (!t) return;
+        appendChat(t, 'user');
+        document.getElementById('chat-input-field').value = '';
+        processCommand(t, false);
+    }
+
+    function appendChat(text, who) {
+        const d = document.createElement('div');
+        d.className = 'chat-msg ' + who;
+        d.textContent = (who === 'user' ? userName + ': ' : 'JARVIS: ') + text;
+        document.getElementById('chat-messages-box').appendChild(d);
+        document.getElementById('chat-messages-box').scrollTop = 9999;
+    }
+
+    function stopCamera() {
+        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+        currentStream = null;
+        if (camera) { try { camera.stop(); } catch(e){} camera = null; }
+        hands = null;
+    }
+
+    // Hand Tracking
+    function onHandResults(results) {
+        const canvas = document.getElementById('hand-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            for (const lm of results.multiHandLandmarks) {
+                drawConnectors(ctx, lm, HAND_CONNECTIONS, { color: '#ff6600', lineWidth: 2 });
+                drawLandmarks(ctx, lm, { color: '#ffaa00', lineWidth: 1, radius: 3 });
+                const g = detectGesture(lm);
+                if (g && g !== lastGesture && Date.now() > gestureCooldown) {
+                    lastGesture = g;
+                    gestureCooldown = Date.now() + 1800;
+                    handleGesture(g);
+                }
+            }
+        } else {
+            lastGesture = null;
+            document.getElementById('gesture-status').textContent = '—';
+        }
+        ctx.restore();
+    }
+
+    function detectGesture(lm) {
+        const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+        const wrist = lm[0];
+        const closed = dist(lm[8], lm[5]) < 0.08 && dist(lm[12], lm[9]) < 0.08 && dist(lm[16], lm[13]) < 0.08;
+        if (closed) return 'fist';
+        const open = dist(lm[8], wrist) > 0.25 && dist(lm[12], wrist) > 0.25 && dist(lm[16], wrist) > 0.22;
+        if (open) return 'open';
+        const peace = dist(lm[8], wrist) > 0.22 && dist(lm[12], wrist) > 0.22 && dist(lm[16], lm[13]) < 0.1;
+        if (peace) return 'peace';
+        const thumb = lm[4].y < lm[3].y && dist(lm[8], lm[5]) < 0.1;
+        if (thumb) return 'thumbsup';
+        return null;
+    }
+
+    function handleGesture(g) {
+        const el = document.getElementById('gesture-status');
+        let s = '';
+        if (g === 'open') { el.textContent = 'OFFENE HAND'; s = 'Repulsoren bereit, Sir.'; }
+        if (g === 'fist') { el.textContent = 'FAUST'; s = 'Energie geladen. Power Core 100 Prozent.'; }
+        if (g === 'peace') {
+            el.textContent = 'PEACE';
+            s = 'Wechsle Anzeige-Modus.';
+            const isTech = document.querySelector('.mode-btn.active')?.textContent.includes('TECH');
+            setGlobeMode(isTech ? 'dark' : 'tech');
+        }
+        if (g === 'thumbsup') { el.textContent = 'DAUMEN HOCH'; s = 'Systemstatus optimal, ' + userName + '.'; }
+        if (s) {
+            document.getElementById('jarvis-response').textContent = s;
+            speakJarvis(s);
+        }
+    }
+
+    async function startHelmetCam(speech) {
+        stopCamera();
+        const box = document.getElementById('live-cam-wrapper');
+        const cont = document.getElementById('cam-screen-container');
+        box.style.display = 'flex';
+        document.getElementById('cam-title').textContent = 'HELMET CAM // LIVE FEED';
+
+        cont.innerHTML = `
+            <video id="helmet-video" autoplay playsinline muted style="transform:scaleX(-1)"></video>
+            <canvas id="hand-canvas" style="transform:scaleX(-1)"></canvas>
+            <div class="hud-overlay"></div>
+            <div class="crosshair"></div>
+            <div class="gesture-label">Hand-Tracking aktiv</div>
+        `;
+
+        const video = document.getElementById('helmet-video');
+        const canvas = document.getElementById('hand-canvas');
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false });
+            currentStream = stream;
+            video.srcObject = stream;
+            video.onloadedmetadata = () => { canvas.width = video.videoWidth; canvas.height = video.videoHeight; };
+
+            hands = new Hands({ locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/' + f });
+            hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.6 });
+            hands.onResults(onHandResults);
+
+            camera = new Camera(video, {
+                onFrame: async () => { if (hands) await hands.send({ image: video }); },
+                width: 640, height: 480
+            });
+            camera.start();
+
+            if (speech) document.getElementById('jarvis-response').textContent = speech;
+        } catch (e) {
+            cont.innerHTML = '<div style="color:#ff6600;padding:20px;text-align:center">Kamera nicht verfügbar</div>';
+        }
+    }
+
+    async function fetchWeather(lat, lng) {
+        try {
+            const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code&timezone=auto`);
+            const d = await r.json();
+            const map = {0:'Klar',1:'Klar',2:'Bewölkt',3:'Bewölkt',61:'Regen',63:'Regen',80:'Schauer',95:'Gewitter'};
+            return { temp: Math.round(d.current.temperature_2m), condition: map[d.current.weather_code] || '—' };
+        } catch(e) { return null; }
+    }
+
+    async function processCommand(query, speak) {
+        if (!apiKey) return;
+        document.getElementById('jarvis-response').textContent = 'Verarbeite...';
+
+        try {
+            const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + apiKey.trim(),
+                    'HTTP-Referer': location.href,
+                    'X-Title': 'JARVIS',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'meta-llama/llama-3.3-70b-instruct',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: `Du bist J.A.R.V.I.S. für ${userName}. Antworte NUR als JSON.
+Typen:
+- Ort: {"type":"location","location":"Name","lat":Zahl,"lng":Zahl,"speech":"Satz"}
+- Wetter: {"type":"weather","location":"Name","lat":Zahl,"lng":Zahl,"speech":"Satz"}
+- Kamera / "öffne deine Augen": {"type":"camera","speech":"Satz"}
+- Sonst: {"type":"chat","speech":"Satz"}
+Bei "öffne deine Augen" immer type camera.`
+                        },
+                        { role: 'user', content: query }
+                    ]
+                })
+            });
+
+            const data = await res.json();
+            let raw = data.choices[0].message.content.trim().replace(/```json|```/g, '');
+            let result;
+            try { result = JSON.parse(raw); } catch(e) { result = { type: 'chat', speech: raw.slice(0, 150) }; }
+
+            if (result.type === 'location' || result.type === 'weather') {
+                stopCamera();
+                document.getElementById('globe-info').textContent = (result.type === 'weather' ? 'WETTER: ' : 'LIVE: ') + result.location.toUpperCase();
+                document.getElementById('marker-count').textContent = result.location.toUpperCase();
+                myGlobe.controls().autoRotate = false;
+                myGlobe.pointOfView({ lat: result.lat, lng: result.lng, altitude: 1.3 }, 1500);
+                myGlobe.htmlElementsData([{ name: result.location, lat: result.lat, lng: result.lng }]);
+
+                document.getElementById('live-cam-wrapper').style.display = 'flex';
+                document.getElementById('cam-title').textContent = result.location.toUpperCase();
+                document.getElementById('cam-screen-container').innerHTML = `
+                    <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${result.lng-0.04},${result.lat-0.04},${result.lng+0.04},${result.lat+0.04}&layer=mapnik"
+                        style="width:100%;height:100%;border:none;filter:invert(90%) hue-rotate(180deg) contrast(120%)"></iframe>
+                    <div class="hud-overlay"></div><div class="crosshair"></div>`;
+
+                const w = await fetchWeather(result.lat, result.lng);
+                if (w) document.getElementById('weather-display').textContent = w.temp + '°C • ' + w.condition;
+
+                const speech = result.speech + (w ? ` ${w.temp} Grad, ${w.condition}.` : '');
+                document.getElementById('jarvis-response').textContent = speech;
+                if (speak) speakJarvis(speech); else appendChat(speech, 'jarvis');
+                setTimeout(() => myGlobe.controls().autoRotate = true, 12000);
+            }
+            else if (result.type === 'camera') {
+                const s = result.speech || 'Helmet-Cam online. Sichtverhältnisse optimal.';
+                await startHelmetCam(s);
+                if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            }
+            else {
+                document.getElementById('jarvis-response').textContent = result.speech;
+                if (speak) speakJarvis(result.speech); else appendChat(result.speech, 'jarvis');
+            }
+        } catch (e) {
+            const f = 'Systemfehler. Ich bin trotzdem da.';
+            document.getElementById('jarvis-response').textContent = f;
+            if (speak) speakJarvis(f);
+        }
+    }
+
+    // Start
+    if (userName && apiKey) {
+        initSystem();
+    } else {
+        loginModal.style.display = 'flex';
+        updateWizard();
+    }
+
+    if ('speechSynthesis' in window) {
+        speechSynthesis.getVoices();
+        speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
+</script>
+</body>
+</html>
