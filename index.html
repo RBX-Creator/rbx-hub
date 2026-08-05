@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v15.4</title>
+    <title>JARVIS // MARK-85 HUD OS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --bg-color: #050302;
-            --panel-bg: rgba(18, 9, 3, 0.9);
-            --amber-main: #ff7700;
+            --bg-color: #040201;
+            --panel-bg: rgba(18, 8, 2, 0.92);
+            --amber-main: #ff6600;
             --amber-bright: #ffaa00;
-            --amber-glow: rgba(255, 119, 0, 0.6);
+            --amber-glow: rgba(255, 102, 0, 0.6);
             --text-main: #ffcc99;
             --text-bright: #ffffff;
-            --hud-glow: 0 0 15px rgba(255, 119, 0, 0.4), inset 0 0 10px rgba(255, 119, 0, 0.2);
+            --hud-glow: 0 0 15px rgba(255, 102, 0, 0.4), inset 0 0 10px rgba(255, 102, 0, 0.2);
         }
 
         * {
@@ -28,8 +28,8 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: radial-gradient(#1c0c03 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-image: radial-gradient(#1f0a02 1px, transparent 1px);
+            background-size: 25px 25px;
             color: var(--text-main);
             min-height: 100vh;
             padding: 12px;
@@ -42,258 +42,122 @@
         /* LOGIN OVERLAY WIZARD */
         #login-modal {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(5, 3, 2, 0.96);
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(4, 2, 1, 0.96);
             z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            backdrop-filter: blur(8px);
+            display: flex; justify-content: center; align-items: center;
+            padding: 20px; backdrop-filter: blur(8px);
         }
 
         .login-box {
             background: var(--panel-bg);
             border: 1px solid var(--amber-main);
-            padding: 25px;
-            border-radius: 4px;
-            width: 100%;
-            max-width: 420px;
+            padding: 25px; border-radius: 4px; width: 100%; max-width: 420px;
             box-shadow: var(--hud-glow);
         }
 
-        .login-box h2 {
-            color: var(--text-bright);
-            font-size: 1.0rem;
-            margin-bottom: 4px;
-            letter-spacing: 2px;
-        }
-
-        .step-indicator {
-            font-size: 0.65rem;
-            color: var(--amber-bright);
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-
+        .login-box h2 { color: var(--text-bright); font-size: 1.0rem; margin-bottom: 4px; letter-spacing: 2px; }
+        .step-indicator { font-size: 0.65rem; color: var(--amber-bright); margin-bottom: 15px; letter-spacing: 1px; }
         .wizard-step { display: none; min-height: 120px; }
         .wizard-step.active-step { display: block; }
-
-        .step-desc {
-            font-size: 0.8rem;
-            line-height: 1.4;
-            color: var(--text-main);
-            margin-bottom: 15px;
-        }
-
+        .step-desc { font-size: 0.8rem; line-height: 1.4; color: var(--text-main); margin-bottom: 15px; }
         .step-link {
-            display: inline-block;
-            padding: 10px 14px;
-            background: rgba(255, 119, 0, 0.15);
-            border: 1px solid var(--amber-main);
-            color: var(--text-bright);
-            text-decoration: none;
-            font-size: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            font-weight: bold;
+            display: inline-block; padding: 10px 14px; background: rgba(255, 102, 0, 0.15);
+            border: 1px solid var(--amber-main); color: var(--text-bright); text-decoration: none;
+            font-size: 0.75rem; border-radius: 4px; margin-bottom: 10px; font-weight: bold;
         }
-
         .input-group { margin-bottom: 15px; }
-        .input-group label {
-            display: block;
-            font-size: 0.7rem;
-            margin-bottom: 5px;
-            color: var(--amber-main);
-        }
-
+        .input-group label { display: block; font-size: 0.7rem; margin-bottom: 5px; color: var(--amber-main); }
         .input-group input {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255, 119, 0, 0.05);
-            border: 1px solid var(--amber-main);
-            color: var(--text-bright);
-            font-size: 0.9rem;
-            outline: none;
+            width: 100%; padding: 12px; background: rgba(255, 102, 0, 0.05);
+            border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.9rem; outline: none;
         }
-
         .wizard-controls { display: flex; gap: 10px; margin-top: 15px; }
-
-        .nav-btn {
-            width: 35%;
-            background: transparent;
-            border: 1px solid var(--amber-main);
-            color: var(--amber-main);
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .login-btn {
-            flex: 1;
-            background: var(--amber-main);
-            color: #000;
-            border: none;
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 15px var(--amber-glow);
-        }
+        .nav-btn { width: 35%; background: transparent; border: 1px solid var(--amber-main); color: var(--amber-main); padding: 12px; font-weight: bold; cursor: pointer; }
+        .login-btn { flex: 1; background: var(--amber-main); color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px var(--amber-glow); }
 
         /* HEADER */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255, 119, 0, 0.4);
-            background: var(--panel-bg);
-            padding: 10px 15px;
-            border-radius: 4px;
-            box-shadow: var(--hud-glow);
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255, 102, 0, 0.4); background: var(--panel-bg);
+            padding: 10px 15px; border-radius: 4px; box-shadow: var(--hud-glow);
         }
-
-        .user-greeting {
-            color: var(--text-bright);
-            font-size: 0.85rem;
-            font-weight: 800;
-        }
-
+        .user-greeting { color: var(--text-bright); font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; }
         .header-right { display: flex; align-items: center; gap: 10px; }
         .status { color: var(--amber-bright); font-size: 0.7rem; font-weight: bold; }
-
-        .logout-btn {
-            background: rgba(255, 119, 0, 0.15);
-            border: 1px solid var(--amber-main);
-            color: var(--text-bright);
-            font-size: 0.65rem;
-            padding: 4px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .logout-btn { background: rgba(255, 102, 0, 0.15); border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.65rem; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-weight: bold; }
 
         /* LIVE VOICE & CHAT STATUS */
         .voice-status {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-size: 0.75rem;
-            color: var(--amber-bright);
-            padding: 10px 14px;
-            background: rgba(255, 119, 0, 0.1);
-            border: 1px solid var(--amber-main);
-            border-radius: 4px;
-            box-shadow: var(--hud-glow);
+            display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem;
+            color: var(--amber-bright); padding: 10px 14px; background: rgba(255, 102, 0, 0.1);
+            border: 1px solid var(--amber-main); border-radius: 4px; box-shadow: var(--hud-glow);
         }
-
         .status-header { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .pulse-dot { width: 8px; height: 8px; background: var(--amber-bright); border-radius: 50%; box-shadow: 0 0 8px var(--amber-bright); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+        .response-text { color: var(--text-bright); font-size: 0.8rem; line-height: 1.4; margin-top: 4px; }
 
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--amber-bright);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--amber-bright);
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; }
-            100% { opacity: 0.3; }
-        }
-
-        .response-text {
-            color: var(--text-bright);
-            font-size: 0.8rem;
-            line-height: 1.4;
-            margin-top: 4px;
-        }
-
-        /* 3D GLOBUS CONTAINER */
+        /* 3D GLOBUS & HOLOGRAM DISPLAY */
         .globe-card {
-            background: rgba(8, 4, 1, 0.95);
-            border: 1px solid var(--amber-main);
-            border-radius: 4px;
-            height: 300px;
-            width: 100%;
-            position: relative;
-            box-shadow: var(--hud-glow);
-            overflow: hidden;
+            background: rgba(6, 3, 1, 0.95); border: 1px solid var(--amber-main);
+            border-radius: 4px; height: 320px; width: 100%; position: relative;
+            box-shadow: var(--hud-glow); overflow: hidden;
         }
-
         #globe-canvas { width: 100% !important; height: 100% !important; }
 
+        /* IRON MAN HUD OVERLAYS ON GLOBE */
         .globe-target-info {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            font-size: 0.65rem;
-            color: var(--amber-bright);
-            background: rgba(0,0,0,0.7);
-            padding: 4px 8px;
-            border: 1px solid var(--amber-main);
-            border-radius: 3px;
-        }
-
-        /* HORIZONTALES WISCH-SYSTEM */
-        .swipe-section-title {
-            font-size: 0.65rem;
-            color: var(--amber-bright);
+            position: absolute; top: 10px; left: 10px; font-size: 0.65rem;
+            color: var(--amber-bright); background: rgba(0,0,0,0.8);
+            padding: 6px 10px; border: 1px solid var(--amber-main); border-radius: 3px;
             letter-spacing: 1px;
-            margin-top: 5px;
         }
 
-        .swipe-container {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            padding-bottom: 10px;
-            -webkit-overflow-scrolling: touch;
+        .hud-metrics-overlay {
+            position: absolute; bottom: 10px; right: 10px; font-size: 0.65rem;
+            color: var(--text-bright); background: rgba(10, 4, 1, 0.85);
+            padding: 8px 12px; border: 1px solid var(--amber-main); border-radius: 3px;
+            display: flex; flex-direction: column; gap: 4px; text-align: right;
         }
+        .hud-metrics-overlay b { color: var(--amber-bright); }
 
+        /* SIRI / JARVIS HOLOGRAM AUDIO ORB */
+        .jarvis-orb-container {
+            display: flex; justify-content: center; align-items: center;
+            padding: 10px; background: var(--panel-bg); border: 1px solid rgba(255, 102, 0, 0.3);
+            border-radius: 4px; gap: 15px;
+        }
+        .orb-wrapper { position: relative; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; }
+        .orb-core {
+            width: 18px; height: 18px; background: var(--amber-bright); border-radius: 50%;
+            box-shadow: 0 0 15px var(--amber-bright), 0 0 30px var(--amber-main);
+            animation: orbPulse 1.5s infinite ease-in-out;
+        }
+        .orb-ring {
+            position: absolute; width: 38px; height: 38px; border: 2px dashed var(--amber-main);
+            border-radius: 50%; animation: spin 4s linear infinite;
+        }
+        @keyframes orbPulse { 0%, 100% { transform: scale(0.8); opacity: 0.7; } 50% { transform: scale(1.2); opacity: 1; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .orb-label { font-size: 0.7rem; color: var(--amber-bright); letter-spacing: 1.5px; font-weight: bold; }
+
+        /* WIDGET CAROUSEL */
+        .swipe-section-title { font-size: 0.65rem; color: var(--amber-bright); letter-spacing: 1px; margin-top: 5px; }
+        .swipe-container { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
         .swipe-container::-webkit-scrollbar { height: 4px; }
-        .swipe-container::-webkit-scrollbar-thumb {
-            background: var(--amber-main);
-            border-radius: 2px;
-        }
-
+        .swipe-container::-webkit-scrollbar-thumb { background: var(--amber-main); border-radius: 2px; }
         .panel {
-            flex: 0 0 85%;
-            scroll-snap-align: start;
-            background: var(--panel-bg);
-            border: 1px solid rgba(255, 119, 0, 0.4);
-            border-radius: 4px;
-            padding: 15px;
-            box-shadow: 0 0 10px rgba(255, 119, 0, 0.15);
-            min-height: 140px;
+            flex: 0 0 85%; scroll-snap-align: start; background: var(--panel-bg);
+            border: 1px solid rgba(255, 102, 0, 0.4); border-radius: 4px; padding: 15px;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.15); min-height: 130px;
         }
-
-        .panel h2 {
-            font-size: 0.75rem;
-            color: var(--text-bright);
-            border-bottom: 1px solid rgba(255, 119, 0, 0.3);
-            padding-bottom: 4px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .balance-val {
-            font-size: 1.8rem;
-            color: var(--text-bright);
-            font-weight: 900;
-            text-shadow: 0 0 10px var(--amber-main);
-        }
-
+        .panel h2 { font-size: 0.75rem; color: var(--text-bright); border-bottom: 1px solid rgba(255, 102, 0, 0.3); padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
+        .balance-val { font-size: 1.8rem; color: var(--text-bright); font-weight: 900; text-shadow: 0 0 10px var(--amber-main); }
         .sub-text { font-size: 0.65rem; opacity: 0.7; }
 
-        @media (min-width: 768px) {
-            .panel { flex: 0 0 45%; }
-        }
+        @media (min-width: 768px) { .panel { flex: 0 0 45%; } }
     </style>
 </head>
 <body>
@@ -301,11 +165,11 @@
     <!-- USER LOGIN MODAL -->
     <div id="login-modal">
         <div class="login-box">
-            <h2>JARVIS SYSTEM INITIALISIERUNG</h2>
+            <h2>JARVIS MARK-85 INITIALISIERUNG</h2>
             <div class="step-indicator" id="step-indicator">SCHRITT 1 VON 4</div>
 
             <div class="wizard-step active-step" id="step-1">
-                <p class="step-desc">Willkommen, Agent. Wie lautet Ihr Rufname für das System?</p>
+                <p class="step-desc">Willkommen, Sir. Wie darf JARVIS Sie ansprechen?</p>
                 <div class="input-group">
                     <label>BENUTZERNAME</label>
                     <input type="text" id="username" placeholder="z. B. Master" required>
@@ -350,40 +214,54 @@
     <div class="voice-status">
         <div class="status-header">
             <div class="pulse-dot"></div>
-            <span id="speech-indicator">JARVIS hört zu... Sprich mit mir!</span>
+            <span id="speech-indicator">JARVIS ist online. Ich höre zu, Sir.</span>
         </div>
-        <div class="response-text" id="jarvis-response">System bereit.</div>
+        <div class="response-text" id="jarvis-response">Systeme laufen auf 100%. Bereit für Befehle.</div>
     </div>
 
-    <!-- GLOBUS -->
+    <!-- 3D GLOBUS & HOLOGRAMM DISPLAY -->
     <div class="globe-card" id="globe-box">
         <canvas id="globe-canvas"></canvas>
-        <div class="globe-target-info" id="globe-info">TARGET: GLOBAL HUD</div>
+        <div class="globe-target-info" id="globe-info">HUD STATUS: STANDBY</div>
+        <div class="hud-metrics-overlay" id="hud-metrics">
+            <div>MODE: <b>GLOBAL SCANNER</b></div>
+            <div>STATUS: <b>OPTIMAL</b></div>
+        </div>
     </div>
 
-    <div class="swipe-section-title">WIDGETS (NACH LINKS/RECHTS WISCHEN) ◄ ►</div>
+    <!-- JARVIS SIRI-LIKE AUDIO ORB -->
+    <div class="jarvis-orb-container">
+        <div class="orb-wrapper">
+            <div class="orb-ring"></div>
+            <div class="orb-core" id="orb-core-elem"></div>
+        </div>
+        <div>
+            <div class="orb-label">JARVIS SPEECH CORE</div>
+            <div style="font-size: 0.6rem; opacity: 0.7;">VOICE INPUT & HOLOGRAM RESPONSE</div>
+        </div>
+    </div>
+
+    <div class="swipe-section-title">SYSTEM PANELS (WISCHEN) ◄ ►</div>
 
     <!-- DASHBOARD -->
     <div class="swipe-container" id="widget-carousel">
-        
         <div class="panel">
             <h2>FINANZEN // GUTHABEN</h2>
             <div class="sub-text">VERFÜGBAR</div>
-            <div class="balance-val" id="balance-display">0,00 €</div>
-            <div class="sub-text" style="color: #ffaa00; margin-top:5px;">STATUS: STABIL</div>
+            <div class="balance-val" id="balance-display">10,00 €</div>
+            <div class="sub-text" style="color: #ffaa00; margin-top:5px;">STARK ATOMISCH GESICHERT</div>
         </div>
 
         <div class="panel">
-            <h2>SYSTEM STATUS</h2>
-            <div class="sub-text">CPU: <b style="color:#fff">12%</b></div>
-            <div class="sub-text" style="margin-top: 4px;">RAM: <b style="color:#fff">3.1 / 16 GB</b></div>
-            <div class="sub-text" style="margin-top: 4px;">GLOBUS MARKER: <b style="color:#ffaa00" id="marker-count">0</b></div>
+            <h2>SUIT STATUS // MARK-85</h2>
+            <div class="sub-text">POWER CORE: <b style="color:#ffaa00">100% ARC REACTOR</b></div>
+            <div class="sub-text" style="margin-top: 4px;">SYSTEM TEMPERATUR: <b style="color:#fff">36.5° C</b></div>
+            <div class="sub-text" style="margin-top: 4px;">TARGET MARKER: <b style="color:#ffaa00" id="marker-count">0</b></div>
         </div>
-
     </div>
 
     <script>
-        // --- 1. WIZARD LOGIK ---
+        // --- 1. WIZARD & INITIALISIERUNG ---
         let currentStep = 1;
         const totalSteps = 4;
 
@@ -401,18 +279,17 @@
             document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active-step'));
             document.getElementById(`step-${currentStep}`).classList.add('active-step');
             stepIndicator.textContent = `SCHRITT ${currentStep} VON ${totalSteps}`;
-
             prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
-            nextBtn.textContent = (currentStep === totalSteps) ? 'FERTIGSTELLEN' : 'WEITER';
+            nextBtn.textContent = (currentStep === totalSteps) ? 'SYSTEM STARTEN' : 'WEITER';
         }
 
         nextBtn.addEventListener('click', () => {
             if (currentStep === 1 && !document.getElementById('username').value.trim()) {
-                alert("Bitte gib einen Namen ein."); return;
+                alert("Bitte nennen Sie Ihren Namen, Sir."); return;
             }
             if (currentStep === totalSteps) {
                 const inputKey = document.getElementById('apikey').value.trim();
-                if (!inputKey) { alert("Bitte gib den Key ein."); return; }
+                if (!inputKey) { alert("API-Schlüssel erforderlich."); return; }
                 userName = document.getElementById('username').value;
                 apiKey = inputKey;
                 localStorage.setItem('jarvis_user_name', userName);
@@ -425,11 +302,7 @@
         });
 
         prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
-
-        logoutBtn.addEventListener('click', () => {
-            localStorage.clear();
-            location.reload();
-        });
+        logoutBtn.addEventListener('click', () => { localStorage.clear(); location.reload(); });
 
         function initSystem() {
             if (userName && apiKey) {
@@ -439,7 +312,7 @@
                 document.body.addEventListener('click', () => { speakJarvis(" "); }, { once: true });
                 
                 setTimeout(() => {
-                    speakJarvis(`Guten Tag ${userName}. Alle Systeme laufen mit voller Kapazität.`);
+                    speakJarvis(`Guten Tag ${userName}. JARVIS steht Ihnen vollständig zur Verfügung. Wie kann ich helfen, Sir?`);
                     startListening();
                 }, 800);
             } else {
@@ -448,7 +321,7 @@
             }
         }
 
-        // --- 2. TIEFE, RUHIGE IRON MAN JARVIS-STIMME ---
+        // --- 2. TIEFE TONY-STARK JARVIS STIMME ---
         function speakJarvis(text) {
             if (!text || text.trim() === "") return;
             if ('speechSynthesis' in window) {
@@ -459,12 +332,15 @@
 
                 const utterance = new SpeechSynthesisUtterance(cleanText);
                 utterance.lang = 'de-DE';
-                utterance.pitch = 0.4; // Extrem tief eingestellt für den düsteren, ruhigen JARVIS-Sound
-                utterance.rate = 0.88; // Etwas langsamer & souveräner
+                utterance.pitch = 0.38; // Sehr tiefer, ruhiger, autonomer Ton
+                utterance.rate = 0.88;
+
+                const orbCore = document.getElementById('orb-core-elem');
+                utterance.onstart = () => { if(orbCore) orbCore.style.transform = "scale(1.6)"; };
+                utterance.onend = () => { if(orbCore) orbCore.style.transform = "scale(1.0)"; };
 
                 const voices = window.speechSynthesis.getVoices();
                 if (voices.length > 0) {
-                    // Suche gezielt nach männlichen / tiefen Stimmen
                     const maleVoice = voices.find(v => v.lang.startsWith('de') && (
                         v.name.toLowerCase().includes('male') || 
                         v.name.toLowerCase().includes('martin') || 
@@ -479,16 +355,15 @@
                 window.speechSynthesis.speak(utterance);
             }
         }
-        window.speechSynthesis.onvoiceschanged = () => {};
 
-        // --- 3. DAUERHAFTE SPRACHERKENNUNG ---
+        // --- 3. CONTINUOUS SPEECH RECOGNITION ---
         const speechIndicator = document.getElementById('speech-indicator');
         const jarvisResponse = document.getElementById('jarvis-response');
 
         function startListening() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                speechIndicator.textContent = "Spracherkennung wird vom Browser nicht unterstützt.";
+                speechIndicator.textContent = "Spracherkennung vom Browser nicht unterstützt.";
                 return;
             }
 
@@ -507,18 +382,32 @@
             try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. OPENROUTER ANBINDUNG MIT IRONMAN-PERSONALITÄT ---
+        // --- 4. OPENROUTER INTELLIGENZ & ROUTEN-BERECHNUNG ---
+        const REGIONS = {
+            "europa": { lat: 50.0, lon: 10.0, name: "Europa" },
+            "asien": { lat: 34.0, lon: 100.0, name: "Asien" },
+            "nordamerika": { lat: 40.0, lon: -100.0, name: "Nordamerika" },
+            "suedamerika": { lat: -15.0, lon: -60.0, name: "Südamerika" },
+            "afrika": { lat: 0.0, lon: 20.0, name: "Afrika" },
+            "australien": { lat: -25.0, lon: 135.0, name: "Australien" },
+            "tokio": { lat: 35.67, lon: 139.65, name: "Tokio" },
+            "berlin": { lat: 52.52, lon: 13.40, name: "Berlin" },
+            "new york": { lat: 40.71, lon: -74.00, name: "New York" }
+        };
+
         async function processVoiceCommandWithOpenRouter(userQuery) {
             if (!apiKey) return;
 
             const systemPrompt = `
-            Du bist J.A.R.V.I.S. aus Iron Man. Antworte äußerst höflich, ruhig, hochintelligent und souverän auf Deutsch für ${userName}. Vergleiche dich nicht mit einer normalen KI, sondern sei der treue KI-Assistent.
-            Lass Befehlscodes wie [SET_BALANCE...] in deiner Sprachausgabe absolut ungesprochen.
+            Du bist J.A.R.V.I.S. (Just A Rather Very Intelligent System). Antworte extrem selbstbewusst, hochintelligent, ruhig und mit feinem britischen Humor auf Deutsch für ${userName}.
+            Sprich den Benutzer gelegentlich mit "Sir" an.
+            Lass Befehlscodes in deinen gesprochenen Sätzen KOMPLETT weg!
             
-            STEUERBEFEHLE (Nur einbauen wenn zutreffend):
+            STEUERBEFEHLE (Bau sie in deiner Textantwort ein):
             - Guthaben ändern: [SET_BALANCE: Betrag]
             - Neues Widget: [ADD_WIDGET: Titel | Inhalt]
-            - Ort auf Globus markieren: NUR bei konkreten Ortsanfragen! [GLOBE_MARK: Breitengrad, Längengrad | Name]
+            - Einzelnen Ort markieren/anzeigen: [SHOW_LOCATION: Ort] (z.B. Asien, Europa, Tokio, Berlin, etc.)
+            - Route zwischen 2 Orten berechnen: [CALC_ROUTE: Ort1 | Ort2] (z.B. Asien | Europa)
             `;
 
             try {
@@ -547,6 +436,7 @@
                 const data = await response.json();
                 let reply = data.choices[0].message.content;
 
+                // Befehls-Handling
                 if (reply.includes('[SET_BALANCE:')) {
                     const match = reply.match(/\[SET_BALANCE:\s*(.*?)\]/);
                     if (match) {
@@ -563,16 +453,30 @@
                     }
                 }
 
-                if (reply.includes('[GLOBE_MARK:')) {
-                    const match = reply.match(/\[GLOBE_MARK:\s*([\d\.-]+),\s*([\d\.-]+)\|(.*?)\]/);
+                if (reply.includes('[CALC_ROUTE:')) {
+                    const match = reply.match(/\[CALC_ROUTE:\s*(.*?)\|(.*?)\]/);
                     if (match) {
-                        const lat = parseFloat(match[1]);
-                        const lon = parseFloat(match[2]);
-                        const name = match[3].trim();
-                        if (!isNaN(lat) && !isNaN(lon)) {
-                            addGlobeMarker(lat, lon, name);
-                        }
-                        reply = reply.replace(/\[GLOBE_MARK:.*?\]/, '');
+                        const originKey = match[1].trim().toLowerCase();
+                        const destKey = match[2].trim().toLowerCase();
+                        drawRouteOnGlobe(originKey, destKey);
+                        reply = reply.replace(/\[CALC_ROUTE:.*?\]/, '');
+                    }
+                } else if (reply.includes('[SHOW_LOCATION:')) {
+                    const match = reply.match(/\[SHOW_LOCATION:\s*(.*?)\]/);
+                    if (match) {
+                        const locKey = match[1].trim().toLowerCase();
+                        showSingleLocation(locKey);
+                        reply = reply.replace(/\[SHOW_LOCATION:.*?\]/, '');
+                    }
+                }
+
+                // Automatische Fallback-Erkennung im Text (falls KI Befehle vergessen sollte)
+                const queryLower = userQuery.toLowerCase();
+                if (queryLower.includes("von") && queryLower.includes("nach") || queryLower.includes("wie lange brauche ich")) {
+                    if (queryLower.includes("asien") && queryLower.includes("europa")) drawRouteOnGlobe("asien", "europa");
+                } else if (queryLower.includes("wo ist") || queryLower.includes("wo liegt")) {
+                    for(let r in REGIONS) {
+                        if(queryLower.includes(r)) showSingleLocation(r);
                     }
                 }
 
@@ -581,7 +485,7 @@
 
             } catch (err) {
                 console.error(err);
-                jarvisResponse.textContent = "Verbindungsfehler!";
+                jarvisResponse.textContent = "Verbindungsfehler, Sir.";
             }
         }
 
@@ -594,7 +498,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. CLEAN CLEVER 3D SCI-FI HUD GLOBUS ---
+        // --- 5. DYNAMISCHES 3D HOLOGRAMM & ROUTEN-SYSTEM ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -613,71 +517,114 @@
         const globeGroup = new THREE.Group();
         scene.add(globeGroup);
 
-        // Außengitter (Haupt-Globus)
+        // Kugel
         const sphereGeo = new THREE.SphereGeometry(80, 24, 24);
-        const sphereMat = new THREE.MeshBasicMaterial({ 
-            color: 0xff7700, 
-            wireframe: true,
-            transparent: true,
-            opacity: 0.35
-        });
+        const sphereMat = new THREE.MeshBasicMaterial({ color: 0xff6600, wireframe: true, transparent: true, opacity: 0.3 });
         globeGroup.add(new THREE.Mesh(sphereGeo, sphereMat));
 
-        // Dunkler Kern für Tiefeneffekt
         const coreGeo = new THREE.SphereGeometry(78, 16, 16);
-        const coreMat = new THREE.MeshBasicMaterial({ color: 0x0c0501 });
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0x080301 });
         globeGroup.add(new THREE.Mesh(coreGeo, coreMat));
-
-        // Äquator & Meridian Hologramm-Ringe
-        const ringGeo = new THREE.RingGeometry(82, 83, 64);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
-        
-        const eqRing = new THREE.Mesh(ringGeo, ringMat);
-        eqRing.rotation.x = Math.PI / 2;
-        globeGroup.add(eqRing);
-
-        const polarRing = new THREE.Mesh(ringGeo, ringMat);
-        polarRing.rotation.y = Math.PI / 2;
-        globeGroup.add(polarRing);
 
         camera.position.z = 220;
 
-        let markerCount = 0;
-        function addGlobeMarker(lat, lon, name) {
-            if (isNaN(lat) || isNaN(lon)) return;
+        let activeRouteLine = null;
+        let activeMarkers = [];
 
+        function clearGlobeDynamicElements() {
+            if (activeRouteLine) { globeGroup.remove(activeRouteLine); activeRouteLine = null; }
+            activeMarkers.forEach(m => globeGroup.remove(m));
+            activeMarkers = [];
+        }
+
+        function latLonToVector3(lat, lon, radius = 81) {
             const phi = (90 - lat) * (Math.PI / 180);
             const theta = (lon + 180) * (Math.PI / 180);
-            const radius = 80;
+            return new THREE.Vector3(
+                -(radius * Math.sin(phi) * Math.cos(theta)),
+                (radius * Math.cos(phi)),
+                (radius * Math.sin(phi) * Math.sin(theta))
+            );
+        }
 
-            const x = -(radius * Math.sin(phi) * Math.cos(theta));
-            const z = (radius * Math.sin(phi) * Math.sin(theta));
-            const y = (radius * Math.cos(phi));
-
-            // Leuchtender Zielpunkt
-            const markerGeo = new THREE.SphereGeometry(4, 12, 12);
-            const markerMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        function addMarkerAt(pos, color = 0xffaa00) {
+            const markerGeo = new THREE.SphereGeometry(3.5, 12, 12);
+            const markerMat = new THREE.MeshBasicMaterial({ color: color });
             const marker = new THREE.Mesh(markerGeo, markerMat);
-            marker.position.set(x, y, z);
+            marker.position.copy(pos);
             globeGroup.add(marker);
+            activeMarkers.push(marker);
+        }
 
-            document.getElementById('globe-info').textContent = `TARGET: ${name.toUpperCase()} (${lat}°, ${lon}°)`;
-            markerCount++;
-            document.getElementById('marker-count').textContent = markerCount;
+        function showSingleLocation(key) {
+            const target = REGIONS[key] || REGIONS["asien"];
+            clearGlobeDynamicElements();
 
-            // Globus dreht sich sanft zum Zielort
+            const pos = latLonToVector3(target.lat, target.lon);
+            addMarkerAt(pos, 0xffaa00);
+
+            document.getElementById('globe-info').textContent = `TARGET ACQUIRED: ${target.name.toUpperCase()}`;
+            document.getElementById('hud-metrics').innerHTML = `
+                <div>REGION: <b>${target.name}</b></div>
+                <div>LAT/LON: <b>${target.lat}°, ${target.lon}°</b></div>
+            `;
+
+            const theta = (target.lon + 180) * (Math.PI / 180);
+            const phi = (90 - target.lat) * (Math.PI / 180);
             globeGroup.rotation.y = -theta;
             globeGroup.rotation.x = phi - Math.PI / 2;
         }
 
+        function drawRouteOnGlobe(originKey, destKey) {
+            const startLoc = REGIONS[originKey] || REGIONS["asien"];
+            const endLoc = REGIONS[destKey] || REGIONS["europa"];
+
+            clearGlobeDynamicElements();
+
+            const startPos = latLonToVector3(startLoc.lat, startLoc.lon);
+            const endPos = latLonToVector3(endLoc.lat, endLoc.lon);
+
+            addMarkerAt(startPos, 0xffaa00);
+            addMarkerAt(endPos, 0xff3300);
+
+            // Gekrümmter Flugweg (Arc-Linie)
+            const mid = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
+            const dist = startPos.distanceTo(endPos);
+            mid.normalize().multiplyScalar(80 + dist * 0.3); // Bogen über dem Globus
+
+            const curve = new THREE.QuadraticBezierCurve3(startPos, mid, endPos);
+            const points = curve.getPoints(50);
+            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+            const lineMat = new THREE.LineDashedMaterial({ color: 0xffaa00, dashSize: 3, gapSize: 1.5 });
+            
+            activeRouteLine = new THREE.Line(lineGeo, lineMat);
+            activeRouteLine.computeLineDistances();
+            globeGroup.add(activeRouteLine);
+
+            // Realistische Entfernungs- & Zeit-Berechnung
+            const approxDistKm = Math.round(dist * 70); 
+            const flightHours = (approxDistKm / 850).toFixed(1); // Linienflugzeuge ~850 km/h
+
+            document.getElementById('globe-info').textContent = `ROUTE: ${startLoc.name.toUpperCase()} ➔ ${endLoc.name.toUpperCase()}`;
+            document.getElementById('hud-metrics').innerHTML = `
+                <div>DISTANZ: <b>${approxDistKm} KM</b></div>
+                <div>FLUGZEIT: <b>~${flightHours} STUNDEN</b></div>
+                <div>MARK-85 MACH 3: <b>~${(flightHours/4).toFixed(1)} STUNDEN</b></div>
+            `;
+
+            // Kamera auf Routenmitte ausrichten
+            const midTheta = ((startLoc.lon + endLoc.lon)/2 + 180) * (Math.PI / 180);
+            globeGroup.rotation.y = -midTheta;
+        }
+
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.002;
+            globeGroup.rotation.y += 0.0015;
             renderer.render(scene, camera);
         }
         animate();
 
-        // START
+        // SYSTEMSTART
         initSystem();
     </script>
 </body>
