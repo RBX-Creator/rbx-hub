@@ -229,7 +229,7 @@
         </div>
     </div>
 
-    <!-- JARVIS SPEECH CORE ORB (Audio-Freischaltung für iOS) -->
+    <!-- JARVIS SPEECH CORE ORB -->
     <div class="jarvis-orb-container" id="orb-trigger">
         <div class="orb-wrapper">
             <div class="orb-ring"></div>
@@ -303,7 +303,6 @@
         prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
         logoutBtn.addEventListener('click', () => { localStorage.clear(); location.reload(); });
 
-        // Manuelles Freischalten von Audio für iOS Safari per Klick auf den Orb
         document.getElementById('orb-trigger').addEventListener('click', () => {
             speakJarvis("Audio-System aktiv, Sir. Bereit für Befehle.");
         });
@@ -392,16 +391,15 @@
             if (!apiKey) return;
 
             const systemPrompt = `
-            Du bist J.A.R.V.I.S. Antworte EXTREM KURZ, präzise und direkt auf den Punkt (maximal 1 bis 2 kurze Sätze) für ${userName}. Kein Geschwätz!
-            Lass Steuerbefehle in deiner gesprochenen Antwort vollständig weg!
+            Du bist J.A.R.V.I.S. Antworte EXTREM KURZ, präzise und direkt auf den Punkt (1 kurzer Satz) für ${userName}.
+            DU MUSST bei Standort- oder Routenwünschen ZWINGEND einen Befehl ans Ende deiner Antwort hängen!
             
-            STEUERBEFEHLE (nutze sie passend zur Anfrage):
-            - Guthaben ändern: [SET_BALANCE: Betrag]
-            - Neues Widget: [ADD_WIDGET: Titel | Inhalt]
-            - Einzelnen Ort anzeigen: [SHOW_LOCATION: Ort aus der Liste oder Welt]
-            - Route berechnen/zeichnen: [CALC_ROUTE: Ort1 | Ort2]
+            Verfügbare Orte: europa, asien, nordamerika, suedamerika, afrika, australien, tokio, berlin, new york, mecklenburg-vorpommern.
             
-            Verfügbare Orte für Routen/Standorte: europa, asien, nordamerika, suedamerika, afrika, australien, tokio, berlin, new york, mecklenburg-vorpommern.
+            Beispiele für Befehle am Ende:
+            - Wenn der Nutzer einen Ort sehen will: [SHOW_LOCATION: berlin]
+            - Wenn der Nutzer eine Route will: [CALC_ROUTE: tokio | new york]
+            - Guthaben ändern: [SET_BALANCE: 50,00 €]
             `;
 
             try {
@@ -549,6 +547,7 @@
                 <div>LAT/LON: <b>${target.lat}°, ${target.lon}°</b></div>
             `;
 
+            // Exakte Drehung der Kugel auf den Breitengrad & Längengrad
             const theta = (target.lon + 180) * (Math.PI / 180);
             const phi = (90 - target.lat) * (Math.PI / 180);
             globeGroup.rotation.y = -theta;
@@ -591,11 +590,15 @@
 
             const midTheta = ((startLoc.lon + endLoc.lon)/2 + 180) * (Math.PI / 180);
             globeGroup.rotation.y = -midTheta;
+            globeGroup.rotation.x = 0;
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.0015;
+            // Sobald kein aktives Element stört, rotiert die Kugel sanft weiter
+            if(activeMarkers.length === 0 && !activeRouteLine) {
+                globeGroup.rotation.y += 0.0015;
+            }
             renderer.render(scene, camera);
         }
         animate();
