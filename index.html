@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v15.0</title>
+    <title>JARVIS // ACTIVE OS v15.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -436,11 +436,10 @@
                 userDisplay.textContent = `HALLO, ${userName.toUpperCase()}`;
                 loginModal.style.display = 'none';
                 
-                // Audio Context un-muten bei Interaktion
                 document.body.addEventListener('click', () => { speakJarvis(""); }, { once: true });
                 
                 setTimeout(() => {
-                    speakJarvis(`Hallo ${userName}. JARVIS v15 ist voll einsatzbereit.`);
+                    speakJarvis(`Hallo ${userName}. JARVIS ist voll einsatzbereit.`);
                     startListening();
                 }, 800);
             } else {
@@ -449,17 +448,16 @@
             }
         }
 
-        // --- 2. VERBESSERTE SPRACHAUSGABE (TTS) ---
+        // --- 2. SPRACHAUSGABE (TTS) ---
         function speakJarvis(text) {
             if (!text) return;
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Vorherige Sprache stoppen
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'de-DE';
                 utterance.pitch = 0.95;
                 utterance.rate = 1.0;
 
-                // Stimme auf Deutsch erzwingen
                 const voices = window.speechSynthesis.getVoices();
                 const deVoice = voices.find(v => v.lang.includes('de'));
                 if (deVoice) utterance.voice = deVoice;
@@ -536,7 +534,6 @@
                 const data = await response.json();
                 let reply = data.choices[0].message.content;
 
-                // Befehl: Guthaben
                 if (reply.includes('[SET_BALANCE:')) {
                     const match = reply.match(/\[SET_BALANCE:\s*(.*?)\]/);
                     if (match) {
@@ -545,7 +542,6 @@
                     }
                 }
 
-                // Befehl: Widget
                 if (reply.includes('[ADD_WIDGET:')) {
                     const match = reply.match(/\[ADD_WIDGET:\s*(.*?)\|(.*?)\]/);
                     if (match) {
@@ -554,7 +550,6 @@
                     }
                 }
 
-                // Befehl: Globus Marker
                 if (reply.includes('[GLOBE_MARK:')) {
                     const match = reply.match(/\[GLOBE_MARK:\s*(.*?), (.*?)\|(.*?)\]/);
                     if (match) {
@@ -584,7 +579,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. HELLER 3D GLOBUS & INTERAKTIVE MARKER ---
+        // --- 5. HELLER 3D GLOBUS ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -594,7 +589,6 @@
         function resize() {
             renderer.setSize(box.clientWidth, box.clientHeight, false);
             camera.aspect = box.clientWidth / box.clientHeight;
-            camera.updatePointer?;
             camera.updateProjectionMatrix();
         }
         resize();
@@ -603,7 +597,6 @@
         const globeGroup = new THREE.Group();
         scene.add(globeGroup);
 
-        // HELLER ORANGE-GLÜHENDER WIREFRAME GLOBUS
         const sphereGeo = new THREE.SphereGeometry(80, 24, 24);
         const sphereMat = new THREE.MeshBasicMaterial({ 
             color: 0xff7700, 
@@ -614,7 +607,6 @@
         const baseSphere = new THREE.Mesh(sphereGeo, sphereMat);
         globeGroup.add(baseSphere);
 
-        // INNERER KERN FÜR TIEFE
         const coreGeo = new THREE.SphereGeometry(78, 16, 16);
         const coreMat = new THREE.MeshBasicMaterial({ color: 0x110500 });
         globeGroup.add(new THREE.Mesh(coreGeo, coreMat));
@@ -623,7 +615,6 @@
 
         let markerCount = 0;
         function addGlobeMarker(lat, lon, name) {
-            // Umrechnung von Koordinaten (Lat/Lon) in 3D Vektor
             const phi = (90 - lat) * (Math.PI / 180);
             const theta = (lon + 180) * (Math.PI / 180);
             const radius = 80;
@@ -632,14 +623,12 @@
             const z = (radius * Math.sin(phi) * Math.sin(theta));
             const y = (radius * Math.cos(phi));
 
-            // Marker-Punkt (Rot/Gelb leuchtend)
             const markerGeo = new THREE.SphereGeometry(3, 12, 12);
             const markerMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
             const marker = new THREE.Mesh(markerGeo, markerMat);
             marker.position.set(x, y, z);
             globeGroup.add(marker);
 
-            // Pulsierender Ring um den Marker
             const ringGeo = new THREE.RingGeometry(4, 6, 16);
             const ringMat = new THREE.MeshBasicMaterial({ color: 0xff2200, side: THREE.DoubleSide });
             const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -647,19 +636,17 @@
             ring.lookAt(0,0,0);
             globeGroup.add(ring);
 
-            // HUD Info aktualisieren
             document.getElementById('globe-info').textContent = `TARGET ACQUIRED: ${name.toUpperCase()} (${lat}°, ${lon}°)`;
             markerCount++;
             document.getElementById('marker-count').textContent = markerCount;
 
-            // Drehe den Globus sanft zum Punkt
             globeGroup.rotation.y = -theta;
             globeGroup.rotation.x = phi - Math.PI / 2;
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.003; // Sanfte permanente Rotation
+            globeGroup.rotation.y += 0.003;
             renderer.render(scene, camera);
         }
         animate();
