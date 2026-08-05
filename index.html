@@ -102,10 +102,25 @@
         }
         .response-text { color: var(--text-bright); font-size: 0.8rem; line-height: 1.4; margin-top: 4px; }
 
+        /* LIVE KAMERA DISPLAY (NEU: Direkt sichtbarer Stream) */
+        .live-cam-box {
+            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--amber-main);
+            border-radius: 4px; padding: 8px; box-shadow: var(--hud-glow); display: flex; flex-direction: column; gap: 6px;
+        }
+        .cam-header { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--amber-bright); }
+        .cam-screen {
+            width: 100%; height: 160px; background: #000; border: 1px solid rgba(255,102,0,0.3);
+            position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .cam-screen iframe {
+            width: 100%; height: 100%; border: none; pointer-events: none; filter: sepia(100%) hue-rotate(300deg) saturate(300%) contrast(1.2);
+        }
+        .cam-placeholder { color: var(--amber-main); font-size: 0.7rem; text-align: center; padding: 10px; }
+
         /* TECH GLOBUS CONTAINER */
         .globe-card {
             background: rgba(6, 3, 1, 0.95); border: 1px solid var(--amber-main);
-            border-radius: 4px; height: 350px; width: 100%; position: relative;
+            border-radius: 4px; height: 280px; width: 100%; position: relative;
             box-shadow: var(--hud-glow); overflow: hidden;
         }
         #globe-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
@@ -201,11 +216,22 @@
         <div class="status-header">
             <div class="status-left">
                 <div class="pulse-dot"></div>
-                <span id="speech-indicator">JARVIS online. (Sprich Befehle wie "Zeige Kamera Tokio")</span>
+                <span id="speech-indicator">JARVIS online. (Sprich: "Zeige Kamera Tokio" etc.)</span>
             </div>
             <button class="test-voice-btn" onclick="testVoiceManual()">TEST VOICE</button>
         </div>
         <div class="response-text" id="jarvis-response">Systeme bereit für Befehle.</div>
+    </div>
+
+    <!-- NEU: DIREKTER SICHTBARER LIVE-KAMERA STREAM -->
+    <div class="live-cam-box">
+        <div class="cam-header">
+            <span id="cam-title">CCTV FEED: STANDBY</span>
+            <span>REC ● LIVE</span>
+        </div>
+        <div class="cam-screen" id="cam-screen-container">
+            <div class="cam-placeholder" id="cam-placeholder-text">WÄHLE ODER SAGE EINE KAMERA (z.B. London, Tokio, Berlin, New York)</div>
+        </div>
     </div>
 
     <!-- TECH-GLOBUS CONTAINER -->
@@ -215,8 +241,7 @@
         
         <div class="mode-selector">
             <button class="mode-btn active" onclick="setGlobeMode('tech')">TECH GRID</button>
-            <button class="mode-btn" onclick="setGlobeMode('cctv')">CCTV FEED</button>
-            <button class="mode-btn" onclick="setGlobeMode('matrix')">MATRIX</button>
+            <button class="mode-btn" onclick="setGlobeMode('cctv')">DARK MODE</button>
         </div>
     </div>
 
@@ -321,19 +346,18 @@
             speakJarvis(`Systemtest erfolgreich. Alle Subroutinen arbeiten im optimalen Bereich, ${userName}.`);
         }
 
-        // --- TECH-GLOBUS & KAMERAS ---
+        // --- STÄDTE & ECHTE VIDEO-FEEDS ---
         const CITIES = [
-            { name: "Berlin", lat: 52.52, lng: 13.40, alt: 1.2, camId: "CAM_BLN_01", desc: "Öffentlicher Feed: Brandenburger Tor Sektor." },
-            { name: "London", lat: 51.50, lng: -0.12, alt: 1.2, camId: "CAM_LDN_04", desc: "Öffentlicher Feed: Westminster Überwachung." },
-            { name: "New York", lat: 40.71, lng: -74.00, alt: 1.2, camId: "CAM_NYC_88", desc: "Öffentlicher Feed: Times Square Live-Cam." },
-            { name: "Tokio", lat: 35.67, lng: 139.65, alt: 1.2, camId: "CAM_TKO_09", desc: "Öffentlicher Feed: Shibuya Crossing Cam." },
-            { name: "Sydney", lat: -33.86, lng: 151.20, alt: 1.2, camId: "CAM_SYD_02", desc: "Öffentlicher Feed: Opera House Sektor." }
+            { name: "Berlin", lat: 52.52, lng: 13.40, alt: 1.2, camId: "CAM_BLN_01", url: "https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute=1&controls=0", desc: "Brandenburger Tor Live-Feed." },
+            { name: "London", lat: 51.50, lng: -0.12, alt: 1.2, camId: "CAM_LDN_04", url: "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1&controls=0", desc: "Westminster Überwachung aktiv." },
+            { name: "New York", lat: 40.71, lng: -74.00, alt: 1.2, camId: "CAM_NYC_88", url: "https://www.youtube.com/embed/Ad6Wz7pbb90?autoplay=1&mute=1&controls=0", desc: "Times Square Live-Cam." },
+            { name: "Tokio", lat: 35.67, lng: 139.65, alt: 1.2, camId: "CAM_TKO_09", url: "https://www.youtube.com/embed/1w7OgIMMRc4?autoplay=1&mute=1&controls=0", desc: "Shibuya Crossing Cam." },
+            { name: "Sydney", lat: -33.86, lng: 151.20, alt: 1.2, camId: "CAM_SYD_02", url: "https://www.youtube.com/embed/G3rGg3W3w_U?autoplay=1&mute=1&controls=0", desc: "Opera House Sektor." }
         ];
 
         const container = document.getElementById('globe-container');
         const myGlobe = Globe()
             (container)
-            // Tech-Style Globus Textur (Dunkler Hologramm / Cyberpunk-Look statt Foto)
             .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
             .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
             .backgroundColor('rgba(0,0,0,0)')
@@ -354,10 +378,16 @@
             myGlobe.controls().autoRotate = false;
             myGlobe.pointOfView({ lat: city.lat, lng: city.lng, altitude: city.alt }, 1500);
 
-            document.getElementById('globe-info').textContent = `LIVE FEED: ${city.camId} (${city.name.toUpperCase()})`;
+            document.getElementById('globe-info').textContent = `LIVE FEED: ${city.camId}`;
             document.getElementById('marker-count').textContent = city.camId;
+            document.getElementById('cam-title').textContent = `CCTV: ${city.camId} (${city.name.toUpperCase()})`;
             document.getElementById('jarvis-response').textContent = `${city.name}: ${city.desc}`;
-            speakJarvis(`Verbinde mit Live-Kamera ${city.name}. ${city.desc}`);
+
+            // Stream in das Kamera-Fenster laden
+            const screenContainer = document.getElementById('cam-screen-container');
+            screenContainer.innerHTML = `<iframe src="${city.url}" allow="autoplay"></iframe>`;
+
+            speakJarvis(`Live-Feed ${city.name} aufgeschaltet.`);
 
             setTimeout(() => { myGlobe.controls().autoRotate = true; }, 10000);
         }
@@ -371,14 +401,11 @@
                 document.getElementById('globe-info').textContent = "STATUS: CYBERNETIC GRID AKTIV";
             } else if (mode === 'cctv') {
                 myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg');
-                document.getElementById('globe-info').textContent = "STATUS: CCTV ÜBERWACHUNGS-NETZWERK";
-            } else if (mode === 'matrix') {
-                myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png');
-                document.getElementById('globe-info').textContent = "STATUS: TOPOLOGISCHES DRAHTGITTER";
+                document.getElementById('globe-info').textContent = "STATUS: DARK MODE AKTIV";
             }
         }
 
-        // Sprach- & KI-Steuerung mit automatischer Kameraerkennung
+        // Sprach- & KI-Steuerung
         const speechIndicator = document.getElementById('speech-indicator');
         const jarvisResponse = document.getElementById('jarvis-response');
 
@@ -394,7 +421,6 @@
                 const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
                 speechIndicator.textContent = `Erkannt: "${transcript}"`;
 
-                // Prüfen ob eine der Städte genannt wurde
                 let matchedCity = CITIES.find(c => transcript.includes(c.name.toLowerCase()));
                 if (matchedCity) {
                     focusCamera(matchedCity);
@@ -420,7 +446,7 @@
                     body: JSON.stringify({
                         model: "meta-llama/llama-3.3-70b-instruct",
                         messages: [
-                            { role: "system", content: `Du bist J.A.R.V.I.S., ein fortschrittliches HUD-System. Der Benutzer heißt ${userName}. Wenn der Benutzer nach Kameras, Städten oder Standorten fragt, weise ihn an, den Namen der Stadt zu nennen (z.B. Tokio, Berlin, London, New York, Sydney), damit du den Live-Feed aufschalten kannst. Antworte extrem kurz und professionell.` },
+                            { role: "system", content: `Du bist J.A.R.V.I.S., ein HUD-System. Der Benutzer heißt ${userName}. Nenne bei Fragen nach Städten oder Kameras direkt eine der verfügbaren Städte (Berlin, London, New York, Tokio, Sydney). Antworte extrem kurz.` },
                             { role: "user", content: userQuery }
                         ]
                     })
