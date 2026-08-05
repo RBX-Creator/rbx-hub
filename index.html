@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // COMMAND CENTER v2.1</title>
+    <title>JARVIS // COMMAND CENTER v3.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --bg-color: #030a12;
-            --panel-bg: rgba(6, 24, 40, 0.8);
+            --panel-bg: rgba(6, 24, 40, 0.85);
             --border-blue: #00ccff;
             --glow-blue: rgba(0, 204, 255, 0.5);
             --text-main: #99eeff;
             --text-bright: #ffffff;
-            /* Arc Reactor Farben */
             --hud-glow: 0 0 15px rgba(0, 204, 255, 0.8), inset 0 0 10px rgba(0, 204, 255, 0.4);
         }
 
@@ -21,7 +20,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Geist Mono', 'SF Mono', 'Courier New', monospace;
+            font-family: 'SF Mono', 'Courier New', monospace;
         }
 
         body {
@@ -34,7 +33,91 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            overflow: hidden;
+            overflow-x: hidden;
+        }
+
+        /* LOGIN OVERLAY */
+        #login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(3, 10, 18, 0.95);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+
+        .login-box {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-blue);
+            padding: 25px;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--hud-glow);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+        }
+
+        .login-box h2 {
+            color: var(--text-bright);
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .login-box p {
+            font-size: 0.75rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.7rem;
+            margin-bottom: 5px;
+            color: var(--border-blue);
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 204, 255, 0.05);
+            border: 1px solid var(--border-blue);
+            color: var(--text-bright);
+            font-size: 0.9rem;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            box-shadow: 0 0 10px var(--border-blue);
+            background: rgba(0, 204, 255, 0.15);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: var(--border-blue);
+            color: #000;
+            border: none;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--border-blue);
+            margin-top: 10px;
         }
 
         /* HEADER */
@@ -49,31 +132,33 @@
             box-shadow: var(--hud-glow);
         }
 
-        h1 {
+        .user-greeting {
             color: var(--text-bright);
-            font-size: 1rem;
-            letter-spacing: 1.5px;
+            font-size: 0.85rem;
             font-weight: 800;
-            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .status {
             color: #00ffcc;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: bold;
-            letter-spacing: 1px;
-            position: relative;
         }
 
-        .status::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #00ffcc;
-            border-radius: 50%;
-            margin-right: 6px;
-            box-shadow: 0 0 10px #00ffcc;
+        .logout-btn {
+            background: transparent;
+            border: 1px solid rgba(0, 204, 255, 0.4);
+            color: var(--text-main);
+            font-size: 0.6rem;
+            padding: 3px 6px;
+            cursor: pointer;
+            border-radius: 2px;
         }
 
         /* GLOBUS SECTION */
@@ -81,7 +166,7 @@
             background: rgba(4, 15, 25, 0.9);
             border: 1px solid var(--border-blue);
             border-radius: 4px;
-            height: 300px;
+            height: 320px;
             width: 100%;
             position: relative;
             display: flex;
@@ -98,25 +183,23 @@
             touch-action: none;
         }
 
-        /* --- SMART IRON MAN INFO BOX (HOLOGRAPHIC) --- */
+        /* SMART IRON MAN HUD BOX */
         #country-info-hud {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 200px;
-            background: rgba(0, 20, 40, 0.85);
+            top: 15px;
+            right: 15px;
+            width: 210px;
+            background: rgba(0, 20, 40, 0.9);
             border: 1px solid var(--border-blue);
             border-radius: 2px;
             padding: 12px;
             box-shadow: var(--hud-glow);
-            display: none; /* Am Anfang versteckt */
+            display: none;
             opacity: 0;
             transform: translateY(-10px) scale(0.95);
             transition: opacity 0.3s ease, transform 0.3s ease;
             z-index: 100;
-            pointer-events: none; /* Damit man durchklicken kann zum Globus */
-            
-            /* Stark-Style Abschrägung */
+            pointer-events: none;
             clip-path: polygon(0 0, 100% 0, 100% 100%, 15px 100%, 0 calc(100% - 15px));
         }
 
@@ -126,15 +209,14 @@
             transform: translateY(0) scale(1);
         }
 
-        /* Arc-Reactor Kern-Icon */
         .hud-core-icon {
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             border: 2px solid var(--border-blue);
             border-radius: 50%;
             position: absolute;
-            top: -15px;
-            left: -15px;
+            top: -12px;
+            left: -12px;
             background: #001a33;
             box-shadow: var(--hud-glow);
             display: flex;
@@ -144,46 +226,36 @@
 
         .hud-core-icon::after {
             content: '';
-            width: 12px;
-            height: 12px;
+            width: 8px;
+            height: 8px;
             background: var(--text-bright);
             border-radius: 50%;
-            box-shadow: 0 0 15px var(--text-bright);
-            animation: pulse-core 2s infinite;
+            box-shadow: 0 0 10px var(--text-bright);
+            animation: pulse-core 1.5s infinite;
         }
 
         .hud-title {
             color: var(--text-bright);
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 2px;
             border-bottom: 1px solid rgba(0, 204, 255, 0.5);
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-            margin-left: 10px;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+            margin-left: 8px;
         }
 
         .hud-data-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+            font-size: 0.7rem;
         }
 
-        .hud-label {
-            color: rgba(153, 238, 255, 0.7);
-            font-weight: bold;
-        }
-
-        .hud-value {
-            color: var(--text-bright);
-            text-align: right;
-            font-weight: bold;
-            text-shadow: 0 0 5px var(--border-blue);
-        }
+        .hud-label { color: rgba(153, 238, 255, 0.7); }
+        .hud-value { color: var(--text-bright); font-weight: bold; text-shadow: 0 0 5px var(--border-blue); }
 
         /* WIDGET GRID */
         .widgets-grid {
@@ -198,12 +270,9 @@
             border-radius: 4px;
             padding: 12px;
             box-shadow: 0 0 10px rgba(0, 204, 255, 0.2);
-            position: relative;
         }
 
-        .panel-full {
-            grid-column: span 2;
-        }
+        .panel-full { grid-column: span 2; }
 
         .panel h2 {
             font-size: 0.7rem;
@@ -216,35 +285,25 @@
         }
 
         .balance-val {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: var(--text-bright);
             font-weight: 900;
             text-shadow: 0 0 10px var(--border-blue);
             margin: 4px 0;
         }
 
-        .sub-text {
-            font-size: 0.65rem;
-            opacity: 0.7;
-        }
+        .sub-text { font-size: 0.65rem; opacity: 0.7; }
 
         .news-list {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
 
         .news-item {
             border-bottom: 1px dashed rgba(0, 204, 255, 0.15);
             padding-bottom: 4px;
-            color: var(--text-main);
-        }
-
-        /* BUTTON */
-        .btn-container {
-            margin-top: auto;
-            padding-top: 10px;
         }
 
         .start-btn {
@@ -253,73 +312,82 @@
             border: 1px solid var(--border-blue);
             color: var(--text-bright);
             padding: 14px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 900;
             letter-spacing: 2px;
             text-transform: uppercase;
             border-radius: 4px;
             box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
             cursor: pointer;
-            transition: all 0.2s ease;
         }
 
-        .start-btn:active {
-            background: var(--border-blue);
-            color: #000;
-            box-shadow: 0 0 25px var(--border-blue);
-            transform: scale(0.98);
-        }
-
-        /* ANIMATIONEN */
         @keyframes pulse-core {
-            0% { box-shadow: 0 0 5px var(--text-bright); opacity: 1; }
-            50% { box-shadow: 0 0 20px var(--border-blue); opacity: 0.8; }
-            100% { box-shadow: 0 0 5px var(--text-bright); opacity: 1; }
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
         }
 
-        /* DESKTOP OPTIMIERUNG */
         @media (min-width: 768px) {
-            body { max-width: 1100px; margin: 0 auto; padding: 20px; }
+            body { max-width: 1000px; margin: 0 auto; padding: 20px; }
             .widgets-grid { grid-template-columns: 1fr 1fr 1fr; }
-            .globe-card { height: 420px; }
-            #country-info-hud { width: 250px; padding: 15px; }
+            .globe-card { height: 400px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- ANMELDE MODAL -->
+    <div id="login-modal">
+        <div class="login-box">
+            <h2>JARVIS AUTORISIERUNG</h2>
+            <p>Bitte Identität bestätigen, um Systemzugriff zu erhalten.</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username">BENUTZERNAME</label>
+                    <input type="text" id="username" placeholder="z. B. Tony Stark" required>
+                </div>
+                <div class="input-group">
+                    <label for="useremail">E-MAIL ADRESSE</label>
+                    <input type="email" id="useremail" placeholder="stark@starkindustries.com" required>
+                </div>
+                <button type="submit" class="login-btn">SYSTEM BETRETEN</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER -->
     <header>
-        <h1>JARVIS // COMMAND CENTER</h1>
-        <div class="status">MK-LXXXV // ONLINE</div>
+        <div class="user-greeting" id="user-display">HALLO, AGENT</div>
+        <div class="status-container">
+            <div class="status">MK-LXXXV // ONLINE</div>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </div>
     </header>
 
-    <!-- GLOBUS SECTION MIT HOLOGRAPHISCHEM INFO-HUD -->
+    <!-- GLOBUS SECTION -->
     <div class="globe-card" id="globe-box">
         <canvas id="globe-canvas"></canvas>
         
-        <!-- SMART IRON MAN STYLE INFO BOX -->
+        <!-- HOLOGRAPHIC HUD -->
         <div id="country-info-hud">
-            <!-- Arc Reactor Icon -->
             <div class="hud-core-icon"></div>
-            
             <div class="hud-title">Zielerfassung</div>
-            
             <div class="hud-data-row">
-                <span class="hud-label">NAME:</span>
+                <span class="hud-label">LAND:</span>
                 <span class="hud-value" id="hud-country-name">---</span>
             </div>
             <div class="hud-data-row">
-                <span class="hud-label">POPULATION:</span>
+                <span class="hud-label">EINWOHNER:</span>
                 <span class="hud-value" id="hud-country-pop">---</span>
             </div>
             <div class="hud-data-row">
-                <span class="hud-label">AREA (KM²):</span>
+                <span class="hud-label">FLÄCHE:</span>
                 <span class="hud-value" id="hud-country-size">---</span>
             </div>
         </div>
     </div>
 
-    <!-- METRIKEN & KONTOSTAND -->
+    <!-- DASHBOARD PANELS -->
     <div class="widgets-grid">
         <div class="panel">
             <h2>FINANZEN // STARK IND.</h2>
@@ -331,7 +399,7 @@
         <div class="panel">
             <h2>SYSTEM STATUS</h2>
             <div class="sub-text">CPU LOAD: <b style="color:#fff">12%</b></div>
-            <div class="sub-text" style="margin-top: 4px;">RAM USAGE: <b style="color:#fff">2.4 / 16 GB</b></div>
+            <div class="sub-text" style="margin-top: 4px;">RAM: <b style="color:#fff">2.4 / 16 GB</b></div>
             <div class="sub-text" style="margin-top: 4px;">LATENZ: <b style="color:#00ffcc">14 ms</b></div>
         </div>
 
@@ -339,22 +407,58 @@
             <h2>LIVE FEEDS // PROTOKOLLE</h2>
             <div class="news-list">
                 <div class="news-item"><b style="color:#fff">[12:00]</b> MK-LXXXV Systeme initialisiert.</div>
-                <div class="news-item"><b style="color:#fff">[11:45]</b> Bio-Signatur bestätigt. Willkommen, Master.</div>
+                <div class="news-item" id="welcome-log"><b style="color:#fff">[11:45]</b> Benutzer autorisiert.</div>
             </div>
         </div>
     </div>
 
-    <div class="btn-container">
+    <div>
         <button class="start-btn" onclick="triggerAI()">JARVIS STARTEN</button>
     </div>
 
     <script>
-        // GLOBUS SETUP (Three.js)
+        // --- 1. USER LOGIN / SESSION MANAGEMENT ---
+        const loginModal = document.getElementById('login-modal');
+        const loginForm = document.getElementById('login-form');
+        const userDisplay = document.getElementById('user-display');
+        const welcomeLog = document.getElementById('welcome-log');
+
+        function checkUserSession() {
+            const savedName = localStorage.getItem('jarvis_user_name');
+            if (savedName) {
+                userDisplay.textContent = `HALLO, ${savedName.toUpperCase()}`;
+                welcomeLog.innerHTML = `<b style="color:#fff">[SYSTEM]</b> Willkommen zurück, ${savedName}.`;
+                loginModal.style.display = 'none';
+            } else {
+                loginModal.style.display = 'flex';
+            }
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('username').value;
+            const email = document.getElementById('useremail').value;
+
+            if (name && email) {
+                localStorage.setItem('jarvis_user_name', name);
+                localStorage.setItem('jarvis_user_email', email);
+                checkUserSession();
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('jarvis_user_name');
+            localStorage.removeItem('jarvis_user_email');
+            location.reload();
+        }
+
+        checkUserSession();
+
+        // --- 2. THREE.JS GLOBUS MIT LÄNDER-POINTS ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const hud = document.getElementById('country-info-hud');
 
-        // HUD Elemente
         const hudName = document.getElementById('hud-country-name');
         const hudPop = document.getElementById('hud-country-pop');
         const hudSize = document.getElementById('hud-country-size');
@@ -373,134 +477,134 @@
         resize();
         window.addEventListener('resize', resize);
 
-        // Kugel (Gitter-Globus)
-        const geometry = new THREE.SphereGeometry(2, 25, 25);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x00ccff,
+        const globeGroup = new THREE.Group();
+        scene.add(globeGroup);
+
+        // Kugel Drahtgitter
+        const globeGeo = new THREE.SphereGeometry(2, 30, 30);
+        const globeMat = new THREE.MeshBasicMaterial({
+            color: 0x005588,
             wireframe: true,
             transparent: true,
-            opacity: 0.6
+            opacity: 0.35
         });
-        const globe = new THREE.Mesh(geometry, material);
-        scene.add(globe);
+        const globe = new THREE.Mesh(globeGeo, globeMat);
+        globeGroup.add(globe);
 
-        camera.position.z = 6;
+        // LÄNDER DATEN MIT GPS-KOORDINATEN
+        const countries = [
+            { name: "Deutschland", pop: "~84 Mio.", size: "357.600 km²", lat: 51.16, lon: 10.45 },
+            { name: "USA", pop: "~335 Mio.", size: "9.834.000 km²", lat: 37.09, lon: -95.71 },
+            { name: "Brasilien", pop: "~216 Mio.", size: "8.516.000 km²", lat: -14.23, lon: -51.92 },
+            { name: "China", pop: "~1.41 Mrd.", size: "9.597.000 km²", lat: 35.86, lon: 104.19 },
+            { name: "Australien", pop: "~26 Mio.", size: "7.692.000 km²", lat: -25.27, lon: 133.77 },
+            { name: "Ägypten", pop: "~112 Mio.", size: "1.010.000 km²", lat: 26.82, lon: 30.80 }
+        ];
 
-        // --- INTERAKTIONS-LOGIK FÜR DIE LÄNDER ---
+        // Umrechnung Lat/Lon in 3D Vektoren
+        function latLonToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const z = (radius * Math.sin(phi) * Math.sin(theta));
+            const y = (radius * Math.cos(phi));
+            return new THREE.Vector3(x, y, z);
+        }
+
+        // Leuchtende Punkte für Länder auf dem Globus platzieren
+        const countryInteractiveObjects = [];
+        const markerGeo = new THREE.SphereGeometry(0.08, 12, 12);
+        const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+
+        countries.forEach(data => {
+            const pos = latLonToVector3(data.lat, data.lon, 2.02);
+            const marker = new THREE.Mesh(markerGeo, markerMat);
+            marker.position.copy(pos);
+            marker.userData = data; // Daten direkt speichern
+            globeGroup.add(marker);
+            countryInteractiveObjects.push(marker);
+
+            // Ring um den Punkt erzeugen
+            const ringGeo = new THREE.RingGeometry(0.1, 0.13, 16);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ccff, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.copy(pos);
+            ring.lookAt(0, 0, 0);
+            globeGroup.add(ring);
+        });
+
+        camera.position.z = 5.5;
+
+        // --- RAYCASTER (Interaktion) ---
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        // Vereinfachte Länderdaten (für Demo)
-        const countryData = [
-            { name: "Deutschland", pop: "~84 Mio.", size: "357.600", vec: new THREE.Vector3(1, 1.5, 1).normalize() },
-            { name: "USA", pop: "~335 Mio.", size: "9.834.000", vec: new THREE.Vector3(-1.5, 1, 1.5).normalize() },
-            { name: "China", pop: "~1.41 Mrd.", size: "9.597.000", vec: new THREE.Vector3(2, 1, -1).normalize() },
-            { name: "Brasilien", pop: "~216 Mio.", size: "8.516.000", vec: new THREE.Vector3(-0.5, -1.5, 2).normalize() }
-        ];
+        function handlePointer(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        // Ländertreffer prüfen
-        function checkCountryClick() {
+            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(globe);
+            const intersects = raycaster.intersectObjects(countryInteractiveObjects);
 
             if (intersects.length > 0) {
-                const clickPoint = intersects[0].point.normalize();
-                let closest = null;
-                let minDist = 0.5; // Klick-Radius
-
-                countryData.forEach(country => {
-                    const dist = clickPoint.distanceTo(country.vec);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        closest = country;
-                    }
-                });
-
-                if (closest) {
-                    showHudInfo(closest);
-                } else {
-                    hideHudInfo();
-                }
+                const target = intersects[0].object.userData;
+                showHudInfo(target);
             }
         }
 
-        // HUD Info anzeigen (Iron Man Style)
         function showHudInfo(data) {
             hudName.textContent = data.name;
             hudPop.textContent = data.pop;
             hudSize.textContent = data.size;
-            hud.classList.add('visible'); // Hologramm-Animation triggern
-            
-            // Auto-Hide nach 5 Sekunden
+            hud.classList.add('visible');
+
             clearTimeout(window.hudTimer);
-            window.hudTimer = setTimeout(hideHudInfo, 5000);
+            window.hudTimer = setTimeout(() => hud.classList.remove('visible'), 5000);
         }
 
-        function hideHudInfo() {
-            hud.classList.remove('visible');
-        }
-
-        // --- STEUERUNG (Touch & Maus) ---
+        // --- DREHUNG STEUERUNG ---
         let isDragging = false;
         let prevX = 0, prevY = 0;
-        let rotationSpeed = 0.006;
 
-        function startDrag(x, y) {
-            isDragging = true;
-            prevX = x;
-            prevY = y;
-            hideHudInfo(); // Info verstecken beim Drehen
-        }
+        box.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; handlePointer(e); });
+        box.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; handlePointer(e); });
 
-        function moveDrag(x, y) {
+        window.addEventListener('mousemove', e => {
             if (!isDragging) return;
-            const deltaX = x - prevX;
-            const deltaY = y - prevY;
-            globe.rotation.y += deltaX * rotationSpeed;
-            globe.rotation.x += deltaY * rotationSpeed;
-            prevX = x;
-            prevY = y;
-        }
-
-        function stopDrag() { isDragging = false; }
-
-        // Maus Events
-        box.addEventListener('mousedown', e => {
-            startDrag(e.clientX, e.clientY);
-            // Mausposition für Raycaster berechnen
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-            checkCountryClick(); // Klick auf Land prüfen
+            globeGroup.rotation.y += (e.clientX - prevX) * 0.008;
+            globeGroup.rotation.x += (e.clientY - prevY) * 0.008;
+            prevX = e.clientX;
+            prevY = e.clientY;
         });
-        window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
-        window.addEventListener('mouseup', stopDrag);
 
-        // Touch Events
-        box.addEventListener('touchstart', e => {
-            const touch = e.touches[0];
-            startDrag(touch.clientX, touch.clientY);
-            // Touchposition berechnen
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-            mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-            checkCountryClick();
+        window.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            globeGroup.rotation.y += (e.touches[0].clientX - prevX) * 0.008;
+            globeGroup.rotation.x += (e.touches[0].clientY - prevY) * 0.008;
+            prevX = e.touches[0].clientX;
+            prevY = e.touches[0].clientY;
         });
-        window.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX, e.touches[0].clientY));
-        window.addEventListener('touchend', stopDrag);
 
-        // ANIMATION LOOP
+        window.addEventListener('mouseup', () => isDragging = false);
+        window.addEventListener('touchend', () => isDragging = false);
+
+        // ANIMATION
         function animate() {
             requestAnimationFrame(animate);
             if (!isDragging) {
-                globe.rotation.y += 0.002; // Langsame Auto-Rotation
+                globeGroup.rotation.y += 0.002;
             }
             renderer.render(scene, camera);
         }
         animate();
 
         function triggerAI() {
-            alert("JARVIS: Systeme sind bereit. Warten auf Autorisierungscode, Master.");
+            const user = localStorage.getItem('jarvis_user_name') || "Agent";
+            alert(`JARVIS: Willkommen, ${user}. Das AI-Protokoll ist bereit.`);
         }
     </script>
 </body>
