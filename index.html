@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v11.0</title>
+    <title>JARVIS // ACTIVE OS v13.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -97,7 +97,7 @@
 
         .step-link {
             display: inline-block;
-            padding: 8px 12px;
+            padding: 10px 14px;
             background: rgba(255, 119, 0, 0.15);
             border: 1px solid var(--amber-main);
             color: var(--text-bright);
@@ -105,6 +105,7 @@
             font-size: 0.75rem;
             border-radius: 4px;
             margin-bottom: 10px;
+            font-weight: bold;
         }
 
         .input-group { margin-bottom: 15px; }
@@ -241,7 +242,7 @@
 
         #globe-canvas { width: 100% !important; height: 100% !important; }
 
-        /* HORIZONTALES WISCH-SYSTEM (SWIPE CONTAINER) */
+        /* HORIZONTALES WISCH-SYSTEM */
         .swipe-section-title {
             font-size: 0.65rem;
             color: var(--amber-bright);
@@ -336,22 +337,22 @@
 
             <!-- SCHRITT 2 -->
             <div class="wizard-step" id="step-2">
-                <p class="step-desc"><b>Schritt 1 zur API:</b> Gehe auf die Website von OpenAI und melde dich an oder erstelle einen Account.</p>
-                <a href="https://platform.openai.com" target="_blank" class="step-link">🔗 platform.openai.com öffnen</a>
+                <p class="step-desc"><b>Schritt 1: Gratis KI-Konto erstellen</b><br>Klicke unten, um dich bei OpenRouter kostenlos anzumelden (z.B. mit Google). Kein Guthaben nötig!</p>
+                <a href="https://openrouter.ai" target="_blank" class="step-link">🔗 OpenRouter.ai öffnen</a>
             </div>
 
             <!-- SCHRITT 3 -->
             <div class="wizard-step" id="step-3">
-                <p class="step-desc"><b>Schritt 2 zur API:</b> Navigiere zu "API Keys", klicke auf <b>"Create new secret key"</b> und kopiere den Key.</p>
-                <a href="https://platform.openai.com/api-keys" target="_blank" class="step-link">🔗 Direkt zu den API-Keys</a>
+                <p class="step-desc"><b>Schritt 2: Key generieren</b><br>Klicke auf "Create Key", gib einen beliebigen Namen ein und kopiere den fertigen Schlüssel.</p>
+                <a href="https://openrouter.ai/keys" target="_blank" class="step-link">🔗 Direkt zu den API-Keys</a>
             </div>
 
             <!-- SCHRITT 4 -->
             <div class="wizard-step" id="step-4">
-                <p class="step-desc"><b>Schritt 3 zur API:</b> Füge deinen kopierten Key (beginnt mit <code>sk-...</code>) hier ein.</p>
+                <p class="step-desc"><b>Schritt 3: Key einfügen</b><br>Füge deinen kopierten Schlüssel (beginnt mit <code>sk-or-v1-...</code>) hier ein.</p>
                 <div class="input-group">
-                    <label>OPENAI API KEY</label>
-                    <input type="password" id="apikey" placeholder="sk-..." required>
+                    <label>OPENROUTER API KEY</label>
+                    <input type="password" id="apikey" placeholder="sk-or-v1-..." required>
                 </div>
             </div>
 
@@ -429,7 +430,7 @@
         const stepIndicator = document.getElementById('step-indicator');
 
         let userName = localStorage.getItem('jarvis_user_name');
-        let apiKey = localStorage.getItem('jarvis_openai_key');
+        let apiKey = localStorage.getItem('jarvis_openrouter_key');
 
         function updateWizard() {
             document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active-step'));
@@ -452,7 +453,7 @@
             if (currentStep === totalSteps) {
                 const inputKey = document.getElementById('apikey').value.trim();
                 if (!inputKey) {
-                    alert("Bitte gib deinen OpenAI API Key ein.");
+                    alert("Bitte gib deinen OpenRouter Key ein.");
                     return;
                 }
 
@@ -460,7 +461,7 @@
                 apiKey = inputKey;
 
                 localStorage.setItem('jarvis_user_name', userName);
-                localStorage.setItem('jarvis_openai_key', apiKey);
+                localStorage.setItem('jarvis_openrouter_key', apiKey);
                 
                 initSystem();
             } else {
@@ -479,7 +480,7 @@
         // LOGOUT
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('jarvis_user_name');
-            localStorage.removeItem('jarvis_openai_key');
+            localStorage.removeItem('jarvis_openrouter_key');
             userName = null;
             apiKey = null;
             currentStep = 1;
@@ -494,7 +495,7 @@
                 loginModal.style.display = 'none';
                 
                 setTimeout(() => {
-                    speakJarvis(`Hallo ${userName}. JARVIS ist jetzt online.`);
+                    speakJarvis(`Hallo ${userName}. JARVIS ist jetzt einsatzbereit.`);
                     startListening();
                 }, 1000);
             } else {
@@ -534,7 +535,7 @@
             recognition.onresult = (event) => {
                 const transcript = event.results[event.results.length - 1][0].transcript.trim();
                 speechIndicator.textContent = `Verarbeitet: "${transcript}"`;
-                processVoiceCommandWithChatGPT(transcript);
+                processVoiceCommandWithOpenRouter(transcript);
             };
 
             recognition.onend = () => {
@@ -544,49 +545,47 @@
             try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. CHATGPT ANBINDUNG MIT VOLLER DIAGNOSE ---
-        async function processVoiceCommandWithChatGPT(userQuery) {
+        // --- 4. KOSTENLOSE OPENROUTER AI ANBINDUNG ---
+        async function processVoiceCommandWithOpenRouter(userQuery) {
             if (!apiKey) {
-                speechIndicator.textContent = "Kein API-Key vorhanden! Klicke auf Logout.";
+                speechIndicator.textContent = "Kein API-Key vorhanden! Klicke oben auf Logout.";
                 return;
             }
 
-            const cleanKey = apiKey.trim();
-
             const systemPrompt = `
-            Du bist JARVIS, das KI-System.
-            Der Benutzer heißt ${userName}. Antworte kurz auf Deutsch.
-            Guthaben ändern: [SET_BALANCE: Betrag] Antwort.
-            Neues Widget: [ADD_WIDGET: Titel | Inhalt] Antwort.
+            Du bist JARVIS, das hochentwickelte KI-System.
+            Der Benutzer heißt ${userName}. Antworte kurz und präzise auf Deutsch.
+            DU KANNST DIE WEBSEITE STEUERN:
+            - Guthaben ändern: [SET_BALANCE: Betrag] Deine Antwort.
+            - Neues Widget: [ADD_WIDGET: Titel | Inhalt] Deine Antwort.
             `;
 
             try {
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${cleanKey}`
+                        'Authorization': `Bearer ${apiKey.trim()}`,
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': 'JARVIS Web OS',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "gpt-3.5-turbo",
+                        model: "meta-llama/llama-3.3-70b-instruct:free",
                         messages: [
                             { role: "system", content: systemPrompt },
                             { role: "user", content: userQuery }
-                        ],
-                        max_tokens: 150
+                        ]
                     })
                 });
 
                 if (!response.ok) {
                     const errData = await response.json().catch(() => ({}));
-                    console.error("OpenAI Details:", errData);
+                    console.error("OpenRouter Details:", errData);
                     
                     if (response.status === 401) {
-                        speechIndicator.textContent = "API-Key ungültig! Bitte oben auf [LOGOUT] klicken und Key neu eingeben.";
-                    } else if (response.status === 429) {
-                        speechIndicator.textContent = "OpenAI Guthaben aufgebraucht (Quota Exceeded)!";
+                        speechIndicator.textContent = "API Key ungültig! Bitte oben auf [LOGOUT] klicken und erneuern.";
                     } else {
-                        speechIndicator.textContent = `API Fehler (${response.status}): ${errData.error?.message || 'Unbekannt'}`;
+                        speechIndicator.textContent = `API Fehler (${response.status}): Key prüfen.`;
                     }
                     return;
                 }
@@ -610,12 +609,12 @@
                     }
                 }
 
-                speechIndicator.textContent = "JARVIS antwortet...";
+                speechIndicator.textContent = reply;
                 speakJarvis(reply);
 
             } catch (err) {
                 console.error("Fetch Exception:", err);
-                speechIndicator.textContent = "Netzwerk/CORS Blockade. Bitte API Key auf [LOGOUT] prüfen.";
+                speechIndicator.textContent = "Verbindungsfehler zu OpenRouter!";
             }
         }
 
@@ -631,7 +630,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. 3D GLOBUS RENDERER (ORIGINALER DUNKLER LOOK) ---
+        // --- 5. 3D GLOBUS RENDERER (DUNKLER, DEZENTER LOOK) ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -650,7 +649,6 @@
         scene.add(globeGroup);
 
         const sphereGeo = new THREE.SphereGeometry(100, 22, 22);
-        // Dunkle Farbe & geringe Deckkraft wie zu Beginn
         const sphereMat = new THREE.MeshBasicMaterial({ 
             color: 0x441800, 
             wireframe: true,
