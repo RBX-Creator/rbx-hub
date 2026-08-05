@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v9.0</title>
+    <title>JARVIS // ACTIVE OS v10.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -170,10 +170,32 @@
             font-weight: 800;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .status {
             color: var(--amber-bright);
             font-size: 0.7rem;
             font-weight: bold;
+        }
+
+        .logout-btn {
+            background: rgba(255, 119, 0, 0.15);
+            border: 1px solid var(--amber-main);
+            color: var(--text-bright);
+            font-size: 0.65rem;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .logout-btn:active {
+            background: var(--amber-main);
+            color: #000;
         }
 
         /* LIVE VOICE INDICATOR */
@@ -344,7 +366,10 @@
     <!-- HEADER -->
     <header>
         <div class="user-greeting" id="user-display">HALLO, BENUTZER</div>
-        <div class="status">JARVIS ACTIVE</div>
+        <div class="header-right">
+            <div class="status">JARVIS ACTIVE</div>
+            <button class="logout-btn" id="logout-btn">LOGOUT</button>
+        </div>
     </header>
 
     <!-- VOICE INDICATOR -->
@@ -392,7 +417,7 @@
     </div>
 
     <script>
-        // --- 1. SCHRITT-FÜR-SCHRITT WIZARD LOGIK ---
+        // --- 1. WIZARD & LOGIN LOGIK ---
         let currentStep = 1;
         const totalSteps = 4;
 
@@ -400,6 +425,7 @@
         const userDisplay = document.getElementById('user-display');
         const nextBtn = document.getElementById('next-btn');
         const prevBtn = document.getElementById('prev-btn');
+        const logoutBtn = document.getElementById('logout-btn');
         const stepIndicator = document.getElementById('step-indicator');
 
         let userName = localStorage.getItem('jarvis_user_name');
@@ -450,14 +476,25 @@
             }
         });
 
+        // LOGOUT FUNCTION
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('jarvis_user_name');
+            localStorage.removeItem('jarvis_openai_key');
+            userName = null;
+            apiKey = null;
+            currentStep = 1;
+            document.getElementById('username').value = '';
+            document.getElementById('apikey').value = '';
+            location.reload();
+        });
+
         function initSystem() {
             if (userName && apiKey) {
                 userDisplay.textContent = `HALLO, ${userName.toUpperCase()}`;
                 loginModal.style.display = 'none';
                 
-                // AUTO-BEGRÜSSUNG MIT STIMME
                 setTimeout(() => {
-                    speakJarvis(`Hallo ${userName}. JARVIS ist jetzt online und einsatzbereit.`);
+                    speakJarvis(`Hallo ${userName}. JARVIS ist jetzt online.`);
                     startListening();
                 }, 1000);
             } else {
@@ -466,7 +503,7 @@
             }
         }
 
-        // --- 2. JARVIS STIMME (SPEECH SYNTHESIS) ---
+        // --- 2. JARVIS STIMME ---
         function speakJarvis(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -478,7 +515,7 @@
             }
         }
 
-        // --- 3. DAUERHAFTE SPRACHERKENNUNG (SPEECH RECOGNITION) ---
+        // --- 3. DAUERHAFTE SPRACHERKENNUNG ---
         const speechIndicator = document.getElementById('speech-indicator');
         let recognition;
 
@@ -501,13 +538,13 @@
             };
 
             recognition.onend = () => {
-                recognition.start();
+                try { recognition.start(); } catch(e){}
             };
 
-            recognition.start();
+            try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. CHATGPT ANBINDUNG (OPTIMIERT & FEHLERDIAGNOSE) ---
+        // --- 4. CHATGPT ANBINDUNG ---
         async function processVoiceCommandWithChatGPT(userQuery) {
             if (!apiKey) {
                 speechIndicator.textContent = "Kein API-Key vorhanden!";
@@ -516,13 +553,10 @@
 
             const systemPrompt = `
             Du bist JARVIS, das hochentwickelte KI-System.
-            Der Benutzer heißt ${userName}. Antworte kurz, hochpräzise und professionell auf Deutsch.
-            
+            Der Benutzer heißt ${userName}. Antworte kurz und präzise auf Deutsch.
             DU KANNST DIE WEBSEITE STEUERN:
-            - Wenn der User das Guthaben ändern möchte, antworte im Format:
-              [SET_BALANCE: Betrag] Deine gesprochene Antwort.
-            - Wenn der User ein neues Fenster/Widget hinzufügen möchte, antworte im Format:
-              [ADD_WIDGET: Titel | Inhalt] Deine gesprochene Antwort.
+            - Guthaben ändern: [SET_BALANCE: Betrag] Deine Antwort.
+            - Neues Widget: [ADD_WIDGET: Titel | Inhalt] Deine Antwort.
             `;
 
             try {
@@ -543,16 +577,15 @@
                 });
 
                 if (!response.ok) {
-                    const errData = await response.json();
-                    console.error("OpenAI API Fehler:", errData);
-                    speechIndicator.textContent = `API Fehler: ${errData.error?.message || response.statusText}`;
+                    const errData = await response.json().catch(() => ({}));
+                    console.error("OpenAI Error:", errData);
+                    speechIndicator.textContent = `Fehler: ${errData.error?.message || 'Ungültiger API-Key oder Guthaben erschöpft.'}`;
                     return;
                 }
 
                 const data = await response.json();
                 let reply = data.choices[0].message.content;
 
-                // 1. Guthaben verändern
                 if (reply.includes('[SET_BALANCE:')) {
                     const match = reply.match(/\[SET_BALANCE:\s*(.*?)\]/);
                     if (match) {
@@ -561,7 +594,6 @@
                     }
                 }
 
-                // 2. Neues Fenster dynamisch hinzufügen
                 if (reply.includes('[ADD_WIDGET:')) {
                     const match = reply.match(/\[ADD_WIDGET:\s*(.*?)\|(.*?)\]/);
                     if (match) {
@@ -575,7 +607,7 @@
 
             } catch (err) {
                 console.error(err);
-                speechIndicator.textContent = "Verbindungsfehler zu OpenAI!";
+                speechIndicator.textContent = "Netzwerkfehler zu OpenAI!";
             }
         }
 
@@ -591,7 +623,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. 3D GLOBUS RENDERER (MIT AMBER LEUCHTEN) ---
+        // --- 5. 3D GLOBUS RENDERER (DEZENT & ORIGINALER LOOK) ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -609,12 +641,12 @@
         const globeGroup = new THREE.Group();
         scene.add(globeGroup);
 
-        const sphereGeo = new THREE.SphereGeometry(100, 24, 24);
+        const sphereGeo = new THREE.SphereGeometry(100, 20, 20);
         const sphereMat = new THREE.MeshBasicMaterial({ 
             color: 0xff7700, 
             wireframe: true,
             transparent: true,
-            opacity: 0.5
+            opacity: 0.25
         });
         const baseSphere = new THREE.Mesh(sphereGeo, sphereMat);
         globeGroup.add(baseSphere);
@@ -623,12 +655,12 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.003;
+            globeGroup.rotation.y += 0.0025;
             renderer.render(scene, camera);
         }
         animate();
 
-        // SYSTEM STARTEN
+        // START
         initSystem();
     </script>
 </body>
