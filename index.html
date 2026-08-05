@@ -122,17 +122,18 @@
         }
         .hud-metrics-overlay b { color: var(--amber-bright); }
 
-        /* SIRI / JARVIS HOLOGRAM AUDIO ORB */
+        /* JARVIS SPEECH CORE ORB */
         .jarvis-orb-container {
             display: flex; justify-content: center; align-items: center;
             padding: 10px; background: var(--panel-bg); border: 1px solid rgba(255, 102, 0, 0.3);
-            border-radius: 4px; gap: 15px;
+            border-radius: 4px; gap: 15px; cursor: pointer;
         }
         .orb-wrapper { position: relative; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; }
         .orb-core {
             width: 18px; height: 18px; background: var(--amber-bright); border-radius: 50%;
             box-shadow: 0 0 15px var(--amber-bright), 0 0 30px var(--amber-main);
             animation: orbPulse 1.5s infinite ease-in-out;
+            transition: transform 0.2s ease;
         }
         .orb-ring {
             position: absolute; width: 38px; height: 38px; border: 2px dashed var(--amber-main);
@@ -214,12 +215,12 @@
     <div class="voice-status">
         <div class="status-header">
             <div class="pulse-dot"></div>
-            <span id="speech-indicator">JARVIS ist online. Ich höre zu, Sir.</span>
+            <span id="speech-indicator">JARVIS hört zu...</span>
         </div>
-        <div class="response-text" id="jarvis-response">Systeme laufen auf 100%. Bereit für Befehle.</div>
+        <div class="response-text" id="jarvis-response">Systeme bereit.</div>
     </div>
 
-    <!-- 3D GLOBUS & HOLOGRAMM DISPLAY -->
+    <!-- 3D GLOBUS & HOLOGRAM DISPLAY -->
     <div class="globe-card" id="globe-box">
         <canvas id="globe-canvas"></canvas>
         <div class="globe-target-info" id="globe-info">HUD STATUS: STANDBY</div>
@@ -230,14 +231,14 @@
     </div>
 
     <!-- JARVIS SIRI-LIKE AUDIO ORB -->
-    <div class="jarvis-orb-container">
+    <div class="jarvis-orb-container" id="orb-trigger">
         <div class="orb-wrapper">
             <div class="orb-ring"></div>
             <div class="orb-core" id="orb-core-elem"></div>
         </div>
         <div>
             <div class="orb-label">JARVIS SPEECH CORE</div>
-            <div style="font-size: 0.6rem; opacity: 0.7;">VOICE INPUT & HOLOGRAM RESPONSE</div>
+            <div style="font-size: 0.6rem; opacity: 0.7;">TIPPEN ZUM AUDIO-TEST / AKTIVIEREN</div>
         </div>
     </div>
 
@@ -285,7 +286,7 @@
 
         nextBtn.addEventListener('click', () => {
             if (currentStep === 1 && !document.getElementById('username').value.trim()) {
-                alert("Bitte nennen Sie Ihren Namen, Sir."); return;
+                alert("Bitte Namen eingeben."); return;
             }
             if (currentStep === totalSteps) {
                 const inputKey = document.getElementById('apikey').value.trim();
@@ -304,6 +305,10 @@
         prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
         logoutBtn.addEventListener('click', () => { localStorage.clear(); location.reload(); });
 
+        document.getElementById('orb-trigger').addEventListener('click', () => {
+            speakJarvis("Audio-System aktiv, Sir.");
+        });
+
         function initSystem() {
             if (userName && apiKey) {
                 userDisplay.textContent = `HALLO, ${userName.toUpperCase()}`;
@@ -312,16 +317,16 @@
                 document.body.addEventListener('click', () => { speakJarvis(" "); }, { once: true });
                 
                 setTimeout(() => {
-                    speakJarvis(`Guten Tag ${userName}. JARVIS steht Ihnen vollständig zur Verfügung. Wie kann ich helfen, Sir?`);
+                    speakJarvis(`Guten Tag, ${userName}. Alles betriebsbereit.`);
                     startListening();
-                }, 800);
+                }, 600);
             } else {
                 loginModal.style.display = 'flex';
                 updateWizard();
             }
         }
 
-        // --- 2. TIEFE TONY-STARK JARVIS STIMME ---
+        // --- 2. OPTIMIERTE STIMMAUSGABE (iOS-Stabil) ---
         function speakJarvis(text) {
             if (!text || text.trim() === "") return;
             if ('speechSynthesis' in window) {
@@ -332,38 +337,31 @@
 
                 const utterance = new SpeechSynthesisUtterance(cleanText);
                 utterance.lang = 'de-DE';
-                utterance.pitch = 0.38; // Sehr tiefer, ruhiger, autonomer Ton
-                utterance.rate = 0.88;
+                utterance.pitch = 0.75; // Stabilisierter Pitch für iOS Safari
+                utterance.rate = 1.0;   // Normale, flüssige Geschwindigkeit
 
                 const orbCore = document.getElementById('orb-core-elem');
-                utterance.onstart = () => { if(orbCore) orbCore.style.transform = "scale(1.6)"; };
+                utterance.onstart = () => { if(orbCore) orbCore.style.transform = "scale(1.5)"; };
                 utterance.onend = () => { if(orbCore) orbCore.style.transform = "scale(1.0)"; };
 
                 const voices = window.speechSynthesis.getVoices();
                 if (voices.length > 0) {
-                    const maleVoice = voices.find(v => v.lang.startsWith('de') && (
-                        v.name.toLowerCase().includes('male') || 
-                        v.name.toLowerCase().includes('martin') || 
-                        v.name.toLowerCase().includes('stefan') || 
-                        v.name.toLowerCase().includes('google')
-                    ));
-                    const fallbackVoice = voices.find(v => v.lang.startsWith('de'));
-                    if (maleVoice) utterance.voice = maleVoice;
-                    else if (fallbackVoice) utterance.voice = fallbackVoice;
+                    const deVoice = voices.find(v => v.lang.startsWith('de'));
+                    if (deVoice) utterance.voice = deVoice;
                 }
 
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // --- 3. CONTINUOUS SPEECH RECOGNITION ---
+        // --- 3. SPRACHERKENNUNG ---
         const speechIndicator = document.getElementById('speech-indicator');
         const jarvisResponse = document.getElementById('jarvis-response');
 
         function startListening() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                speechIndicator.textContent = "Spracherkennung vom Browser nicht unterstützt.";
+                speechIndicator.textContent = "Spracherkennung nicht unterstützt.";
                 return;
             }
 
@@ -382,7 +380,7 @@
             try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. OPENROUTER INTELLIGENZ & ROUTEN-BERECHNUNG ---
+        // --- 4. OPENROUTER INTELLIGENZ (KURZE ANTWORTEN) ---
         const REGIONS = {
             "europa": { lat: 50.0, lon: 10.0, name: "Europa" },
             "asien": { lat: 34.0, lon: 100.0, name: "Asien" },
@@ -399,15 +397,14 @@
             if (!apiKey) return;
 
             const systemPrompt = `
-            Du bist J.A.R.V.I.S. (Just A Rather Very Intelligent System). Antworte extrem selbstbewusst, hochintelligent, ruhig und mit feinem britischen Humor auf Deutsch für ${userName}.
-            Sprich den Benutzer gelegentlich mit "Sir" an.
-            Lass Befehlscodes in deinen gesprochenen Sätzen KOMPLETT weg!
+            Du bist J.A.R.V.I.S. Antworte EXTREM KURZ, präzise und direkt auf den Punkt (maximal 1 bis 2 kurze Sätze) für ${userName}. Kein Geschwätz!
+            Lass Steuerbefehle in deiner gesprochenen Antwort vollständig weg!
             
-            STEUERBEFEHLE (Bau sie in deiner Textantwort ein):
+            STEUERBEFEHLE (nur bei Bedarf verwenden):
             - Guthaben ändern: [SET_BALANCE: Betrag]
             - Neues Widget: [ADD_WIDGET: Titel | Inhalt]
-            - Einzelnen Ort markieren/anzeigen: [SHOW_LOCATION: Ort] (z.B. Asien, Europa, Tokio, Berlin, etc.)
-            - Route zwischen 2 Orten berechnen: [CALC_ROUTE: Ort1 | Ort2] (z.B. Asien | Europa)
+            - Einzelnen Ort anzeigen: [SHOW_LOCATION: Ort]
+            - Route berechnen: [CALC_ROUTE: Ort1 | Ort2]
             `;
 
             try {
@@ -429,14 +426,13 @@
                 });
 
                 if (!response.ok) {
-                    jarvisResponse.textContent = `Fehler (${response.status}): Bitte Key prüfen.`;
+                    jarvisResponse.textContent = `Fehler (${response.status}): Key prüfen.`;
                     return;
                 }
 
                 const data = await response.json();
                 let reply = data.choices[0].message.content;
 
-                // Befehls-Handling
                 if (reply.includes('[SET_BALANCE:')) {
                     const match = reply.match(/\[SET_BALANCE:\s*(.*?)\]/);
                     if (match) {
@@ -456,23 +452,19 @@
                 if (reply.includes('[CALC_ROUTE:')) {
                     const match = reply.match(/\[CALC_ROUTE:\s*(.*?)\|(.*?)\]/);
                     if (match) {
-                        const originKey = match[1].trim().toLowerCase();
-                        const destKey = match[2].trim().toLowerCase();
-                        drawRouteOnGlobe(originKey, destKey);
+                        drawRouteOnGlobe(match[1].trim().toLowerCase(), match[2].trim().toLowerCase());
                         reply = reply.replace(/\[CALC_ROUTE:.*?\]/, '');
                     }
                 } else if (reply.includes('[SHOW_LOCATION:')) {
                     const match = reply.match(/\[SHOW_LOCATION:\s*(.*?)\]/);
                     if (match) {
-                        const locKey = match[1].trim().toLowerCase();
-                        showSingleLocation(locKey);
+                        showSingleLocation(match[1].trim().toLowerCase());
                         reply = reply.replace(/\[SHOW_LOCATION:.*?\]/, '');
                     }
                 }
 
-                // Automatische Fallback-Erkennung im Text (falls KI Befehle vergessen sollte)
                 const queryLower = userQuery.toLowerCase();
-                if (queryLower.includes("von") && queryLower.includes("nach") || queryLower.includes("wie lange brauche ich")) {
+                if ((queryLower.includes("von") && queryLower.includes("nach")) || queryLower.includes("wie lange")) {
                     if (queryLower.includes("asien") && queryLower.includes("europa")) drawRouteOnGlobe("asien", "europa");
                 } else if (queryLower.includes("wo ist") || queryLower.includes("wo liegt")) {
                     for(let r in REGIONS) {
@@ -485,7 +477,7 @@
 
             } catch (err) {
                 console.error(err);
-                jarvisResponse.textContent = "Verbindungsfehler, Sir.";
+                jarvisResponse.textContent = "Verbindungsfehler.";
             }
         }
 
@@ -498,7 +490,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. DYNAMISCHES 3D HOLOGRAMM & ROUTEN-SYSTEM ---
+        // --- 5. 3D HOLOGRAMM & GLOBUS ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -517,7 +509,6 @@
         const globeGroup = new THREE.Group();
         scene.add(globeGroup);
 
-        // Kugel
         const sphereGeo = new THREE.SphereGeometry(80, 24, 24);
         const sphereMat = new THREE.MeshBasicMaterial({ color: 0xff6600, wireframe: true, transparent: true, opacity: 0.3 });
         globeGroup.add(new THREE.Mesh(sphereGeo, sphereMat));
@@ -563,7 +554,7 @@
             const pos = latLonToVector3(target.lat, target.lon);
             addMarkerAt(pos, 0xffaa00);
 
-            document.getElementById('globe-info').textContent = `TARGET ACQUIRED: ${target.name.toUpperCase()}`;
+            document.getElementById('globe-info').textContent = `TARGET: ${target.name.toUpperCase()}`;
             document.getElementById('hud-metrics').innerHTML = `
                 <div>REGION: <b>${target.name}</b></div>
                 <div>LAT/LON: <b>${target.lat}°, ${target.lon}°</b></div>
@@ -587,10 +578,9 @@
             addMarkerAt(startPos, 0xffaa00);
             addMarkerAt(endPos, 0xff3300);
 
-            // Gekrümmter Flugweg (Arc-Linie)
             const mid = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
             const dist = startPos.distanceTo(endPos);
-            mid.normalize().multiplyScalar(80 + dist * 0.3); // Bogen über dem Globus
+            mid.normalize().multiplyScalar(80 + dist * 0.3);
 
             const curve = new THREE.QuadraticBezierCurve3(startPos, mid, endPos);
             const points = curve.getPoints(50);
@@ -601,18 +591,15 @@
             activeRouteLine.computeLineDistances();
             globeGroup.add(activeRouteLine);
 
-            // Realistische Entfernungs- & Zeit-Berechnung
             const approxDistKm = Math.round(dist * 70); 
-            const flightHours = (approxDistKm / 850).toFixed(1); // Linienflugzeuge ~850 km/h
+            const flightHours = (approxDistKm / 850).toFixed(1);
 
             document.getElementById('globe-info').textContent = `ROUTE: ${startLoc.name.toUpperCase()} ➔ ${endLoc.name.toUpperCase()}`;
             document.getElementById('hud-metrics').innerHTML = `
                 <div>DISTANZ: <b>${approxDistKm} KM</b></div>
                 <div>FLUGZEIT: <b>~${flightHours} STUNDEN</b></div>
-                <div>MARK-85 MACH 3: <b>~${(flightHours/4).toFixed(1)} STUNDEN</b></div>
             `;
 
-            // Kamera auf Routenmitte ausrichten
             const midTheta = ((startLoc.lon + endLoc.lon)/2 + 180) * (Math.PI / 180);
             globeGroup.rotation.y = -midTheta;
         }
