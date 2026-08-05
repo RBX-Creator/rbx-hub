@@ -380,7 +380,7 @@
             try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. OPENROUTER INTELLIGENZ (KURZE ANTWORTEN) ---
+        // --- 4. OPENROUTER INTELLIGENZ (GARANTIERT KOSTENLOSES MODELL) ---
         const REGIONS = {
             "europa": { lat: 50.0, lon: 10.0, name: "Europa" },
             "asien": { lat: 34.0, lon: 100.0, name: "Asien" },
@@ -390,7 +390,8 @@
             "australien": { lat: -25.0, lon: 135.0, name: "Australien" },
             "tokio": { lat: 35.67, lon: 139.65, name: "Tokio" },
             "berlin": { lat: 52.52, lon: 13.40, name: "Berlin" },
-            "new york": { lat: 40.71, lon: -74.00, name: "New York" }
+            "new york": { lat: 40.71, lon: -74.00, name: "New York" },
+            "mecklenburg-vorpommern": { lat: 53.6, lon: 12.4, name: "Mecklenburg-Vorpommern" }
         };
 
         async function processVoiceCommandWithOpenRouter(userQuery) {
@@ -417,7 +418,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "openrouter/auto",
+                        model: "google/gemini-2.0-flash-lite-preview-02-05:free", // KOSTENLOSES MODELL GEWÄHLT!
                         messages: [
                             { role: "system", content: systemPrompt },
                             { role: "user", content: userQuery }
@@ -426,7 +427,7 @@
                 });
 
                 if (!response.ok) {
-                    jarvisResponse.textContent = `Fehler (${response.status}): Key prüfen.`;
+                    jarvisResponse.textContent = `Fehler (${response.status}): Key / API prüfen.`;
                     return;
                 }
 
