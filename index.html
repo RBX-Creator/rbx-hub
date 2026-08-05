@@ -140,7 +140,7 @@
             background: var(--amber-main); color: #000; border: none; padding: 0 15px; font-weight: bold; cursor: pointer; border-radius: 3px; font-size: 0.75rem;
         }
 
-        /* LIVE KAMERA DISPLAY */
+        /* LIVE KAMERA DISPLAY (ECHTE KARTE + HUD OVERLAY) */
         .live-cam-box {
             display: none; 
             background: rgba(0, 0, 0, 0.9); border: 1px solid var(--amber-main);
@@ -148,10 +148,25 @@
         }
         .cam-header { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--amber-bright); }
         .cam-screen {
-            width: 100%; height: 180px; background: #000; border: 1px solid rgba(255,102,0,0.3);
-            position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 200px; background: #000; border: 1px solid rgba(255,102,0,0.3);
+            position: relative; overflow: hidden;
         }
-        .cam-screen img { width: 100%; height: 100%; border: none; object-fit: cover; }
+        .cam-screen iframe {
+            width: 100%; height: 100%; border: none; filter: invert(90%) hue-rotate(180deg) contrast(120%);
+        }
+        /* HUD Fadenkreuz & Scanlines drüberlegen */
+        .hud-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 14, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 6px 100%;
+        }
+        .crosshair {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 40px; height: 40px; border: 1px dashed var(--amber-bright); border-radius: 50%;
+            animation: spin 10s linear infinite; pointer-events: none;
+        }
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
         /* TECH GLOBUS CONTAINER */
         .globe-card {
@@ -246,7 +261,7 @@
                 <button class="close-chat-btn" id="close-chat-btn">SCHLIESSEN</button>
             </div>
             <div class="chat-messages" id="chat-messages-box">
-                <div class="chat-msg jarvis">JARVIS: Chat-Kanal geöffnet. Du kannst fragen, was du möchtest, oder Orte suchen.</div>
+                <div class="chat-msg jarvis">JARVIS: Chat-Kanal geöffnet. Du kannst fragen, was du möchtest, oder Sektoren scannen.</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input-field" placeholder="Nachricht an JARVIS...">
@@ -274,16 +289,18 @@
             </div>
             <button class="test-voice-btn" onclick="testVoiceManual()">TEST VOICE</button>
         </div>
-        <div class="response-text" id="jarvis-response">System bereit. Kamera-Fenster öffnet sich nur bei Aufruf.</div>
+        <div class="response-text" id="jarvis-response">System bereit. Satelliten-Feed schaltet sich bei Ortsaufruf ein.</div>
     </div>
 
-    <!-- LIVE KAMERA DISPLAY -->
+    <!-- LIVE KAMERA DISPLAY (ECHTE SAT-KARTE IM HUD-DESIGN) -->
     <div class="live-cam-box" id="live-cam-wrapper">
         <div class="cam-header">
-            <span id="cam-title">CCTV FEED</span>
+            <span id="cam-title">SATELLITE RECON FEED</span>
             <span>REC ● LIVE</span>
         </div>
-        <div class="cam-screen" id="cam-screen-container"></div>
+        <div class="cam-screen" id="cam-screen-container">
+            <!-- Wird dynamisch mit der Live-Karte gefüllt -->
+        </div>
     </div>
 
     <!-- TECH-GLOBUS CONTAINER -->
@@ -409,7 +426,7 @@
         }
 
         function testVoiceManual() {
-            speakJarvis(`Systemtest erfolgreich, ${userName}. Kamera-Schnittstelle bereit.`);
+            speakJarvis(`Systemtest erfolgreich, ${userName}. Satelliten-Schnittstelle bereit.`);
         }
 
         // --- GLOBUS ---
@@ -424,7 +441,7 @@
             .htmlLng(d => d.lng)
             .htmlElement(d => {
                 const el = document.createElement('div');
-                el.innerHTML = `<div style="background: rgba(0,0,0,0.9); border: 1px solid #ff6600; color: #ffaa00; padding: 4px 8px; font-size: 9px; font-family: monospace; border-radius: 3px; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px rgba(255,102,0,0.7);">📷 ${d.name}</div>`;
+                el.innerHTML = `<div style="background: rgba(0,0,0,0.9); border: 1px solid #ff6600; color: #ffaa00; padding: 4px 8px; font-size: 9px; font-family: monospace; border-radius: 3px; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px rgba(255,102,0,0.7);">🛰️ ${d.name}</div>`;
                 return el;
             });
 
@@ -443,7 +460,7 @@
             }
         }
 
-        // --- SPRACH- & KAMERA-SYSTEM ---
+        // --- SPRACH- & KARTEN-SYSTEM ---
         const speechIndicator = document.getElementById('speech-indicator');
         const jarvisResponse = document.getElementById('jarvis-response');
 
@@ -490,7 +507,7 @@
         async function processVoiceCommandWithOpenRouter(userQuery, speakOutLoud) {
             if (!apiKey) return;
             try {
-                jarvisResponse.textContent = `Verarbeite Anfrage: ${userQuery}...`;
+                jarvisResponse.textContent = `Analysiere Sektor: ${userQuery}...`;
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -504,7 +521,7 @@
                         messages: [
                             { 
                                 role: "system", 
-                                content: `Du bist J.A.R.V.I.S., das KI-Betriebssystem für ${userName}. Du kannst normale Unterhaltungen führen, Fragen beantworten ODER Orte auf der Erde suchen.
+                                content: `Du bist J.A.R.V.I.S., das KI-Betriebssystem für ${userName}. 
 Prüfe die Eingabe des Nutzers:
 1. Wenn der Nutzer einen Ort (Stadt, Land, Region) sucht oder ansteuern will, antworte AUSSCHLIESSLICH als JSON im Format:
 {"type": "location", "location": "Name", "lat": Breitengrad, "lng": Längengrad, "speech": "Kurzer Satz"}
@@ -522,7 +539,6 @@ Prüfe die Eingabe des Nutzers:
                 const result = JSON.parse(rawContent);
 
                 if (result.type === "location") {
-                    // UI & Globus aktualisieren
                     document.getElementById('globe-info').textContent = `LIVE: ${result.location.toUpperCase()}`;
                     document.getElementById('marker-count').textContent = result.location.toUpperCase();
                     document.getElementById('jarvis-response').textContent = result.speech;
@@ -531,12 +547,17 @@ Prüfe die Eingabe des Nutzers:
                     myGlobe.pointOfView({ lat: result.lat, lng: result.lng, altitude: 1.2 }, 1500);
                     myGlobe.htmlElementsData([{ name: result.location, lat: result.lat, lng: result.lng }]);
 
+                    // Echte OpenStreetMap eingebettet, im militärischen Orange/Dark-HUD-Look gefiltert mit Fadenkreuz!
                     const camBox = document.getElementById('live-cam-wrapper');
                     camBox.style.display = 'flex';
-                    document.getElementById('cam-title').textContent = `CCTV FEED: ${result.location.toUpperCase()}`;
+                    document.getElementById('cam-title').textContent = `SATELLITE RECON: ${result.location.toUpperCase()}`;
                     
                     const screenContainer = document.getElementById('cam-screen-container');
-                    screenContainer.innerHTML = `<img src="https://picsum.photos/seed/${encodeURIComponent(result.location)}/600/400" alt="Live Feed">`;
+                    screenContainer.innerHTML = `
+                        <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${result.lng-0.05},${result.lat-0.05},${result.lng+0.05},${result.lat+0.05}&layer=mapnik"></iframe>
+                        <div class="hud-overlay"></div>
+                        <div class="crosshair"></div>
+                    `;
 
                     if (speakOutLoud) {
                         speakJarvis(result.speech);
@@ -546,7 +567,6 @@ Prüfe die Eingabe des Nutzers:
 
                     setTimeout(() => { myGlobe.controls().autoRotate = true; }, 12000);
                 } else {
-                    // Normale Chat-Antwort (ohne Kamera/Globus-Wechsel)
                     document.getElementById('jarvis-response').textContent = result.speech;
                     if (speakOutLoud) {
                         speakJarvis(result.speech);
