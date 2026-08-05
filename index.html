@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v14.0</title>
+    <title>JARVIS // ACTIVE OS v15.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -79,14 +79,8 @@
             letter-spacing: 1px;
         }
 
-        .wizard-step {
-            display: none;
-            min-height: 120px;
-        }
-
-        .wizard-step.active-step {
-            display: block;
-        }
+        .wizard-step { display: none; min-height: 120px; }
+        .wizard-step.active-step { display: block; }
 
         .step-desc {
             font-size: 0.8rem;
@@ -126,11 +120,7 @@
             outline: none;
         }
 
-        .wizard-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
+        .wizard-controls { display: flex; gap: 10px; margin-top: 15px; }
 
         .nav-btn {
             width: 35%;
@@ -171,17 +161,8 @@
             font-weight: 800;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .status {
-            color: var(--amber-bright);
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .status { color: var(--amber-bright); font-size: 0.7rem; font-weight: bold; }
 
         .logout-btn {
             background: rgba(255, 119, 0, 0.15);
@@ -194,23 +175,21 @@
             font-weight: bold;
         }
 
-        .logout-btn:active {
-            background: var(--amber-main);
-            color: #000;
-        }
-
-        /* LIVE VOICE INDICATOR */
+        /* LIVE VOICE & CHAT STATUS */
         .voice-status {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.7rem;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.75rem;
             color: var(--amber-bright);
-            padding: 8px 12px;
+            padding: 10px 14px;
             background: rgba(255, 119, 0, 0.1);
             border: 1px solid var(--amber-main);
             border-radius: 4px;
+            box-shadow: var(--hud-glow);
         }
+
+        .status-header { display: flex; align-items: center; gap: 8px; font-weight: bold; }
 
         .pulse-dot {
             width: 8px;
@@ -227,20 +206,38 @@
             100% { opacity: 0.3; }
         }
 
+        .response-text {
+            color: var(--text-bright);
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin-top: 4px;
+        }
+
         /* 3D GLOBUS CONTAINER */
         .globe-card {
             background: rgba(8, 4, 1, 0.95);
             border: 1px solid var(--amber-main);
             border-radius: 4px;
-            height: 280px;
+            height: 300px;
             width: 100%;
             position: relative;
             box-shadow: var(--hud-glow);
             overflow: hidden;
-            touch-action: none;
         }
 
         #globe-canvas { width: 100% !important; height: 100% !important; }
+
+        .globe-target-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 0.65rem;
+            color: var(--amber-bright);
+            background: rgba(0,0,0,0.7);
+            padding: 4px 8px;
+            border: 1px solid var(--amber-main);
+            border-radius: 3px;
+        }
 
         /* HORIZONTALES WISCH-SYSTEM */
         .swipe-section-title {
@@ -259,9 +256,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        .swipe-container::-webkit-scrollbar {
-            height: 4px;
-        }
+        .swipe-container::-webkit-scrollbar { height: 4px; }
         .swipe-container::-webkit-scrollbar-thumb {
             background: var(--amber-main);
             border-radius: 2px;
@@ -296,23 +291,6 @@
 
         .sub-text { font-size: 0.65rem; opacity: 0.7; }
 
-        .news-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-size: 0.7rem;
-            height: 72px;
-            overflow: hidden;
-        }
-
-        .news-item {
-            border-bottom: 1px dashed rgba(255, 119, 0, 0.15);
-            padding-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         @media (min-width: 768px) {
             .panel { flex: 0 0 45%; }
         }
@@ -320,13 +298,12 @@
 </head>
 <body>
 
-    <!-- USER LOGIN MODAL WITH STEP-BY-STEP WIZARD -->
+    <!-- USER LOGIN MODAL -->
     <div id="login-modal">
         <div class="login-box">
             <h2>JARVIS SYSTEM INITIALISIERUNG</h2>
             <div class="step-indicator" id="step-indicator">SCHRITT 1 VON 4</div>
 
-            <!-- SCHRITT 1 -->
             <div class="wizard-step active-step" id="step-1">
                 <p class="step-desc">Willkommen, Agent. Wie lautet Ihr Rufname für das System?</p>
                 <div class="input-group">
@@ -335,19 +312,16 @@
                 </div>
             </div>
 
-            <!-- SCHRITT 2 -->
             <div class="wizard-step" id="step-2">
-                <p class="step-desc"><b>Schritt 1: Gratis KI-Konto erstellen</b><br>Klicke unten, um dich bei OpenRouter kostenlos anzumelden (z.B. mit Google). Kein Guthaben nötig!</p>
+                <p class="step-desc"><b>Schritt 1: Gratis KI-Konto erstellen</b><br>Klicke unten, um dich bei OpenRouter kostenlos anzumelden. Kein Guthaben nötig!</p>
                 <a href="https://openrouter.ai" target="_blank" class="step-link">🔗 OpenRouter.ai öffnen</a>
             </div>
 
-            <!-- SCHRITT 3 -->
             <div class="wizard-step" id="step-3">
-                <p class="step-desc"><b>Schritt 2: Key generieren</b><br>Klicke auf "Create Key", gib einen beliebigen Namen ein und kopiere den fertigen Schlüssel.</p>
+                <p class="step-desc"><b>Schritt 2: Key generieren</b><br>Klicke auf "Create Key", gib einen Namen ein und kopiere den Schlüssel.</p>
                 <a href="https://openrouter.ai/keys" target="_blank" class="step-link">🔗 Direkt zu den API-Keys</a>
             </div>
 
-            <!-- SCHRITT 4 -->
             <div class="wizard-step" id="step-4">
                 <p class="step-desc"><b>Schritt 3: Key einfügen</b><br>Füge deinen kopierten Schlüssel (beginnt mit <code>sk-or-v1-...</code>) hier ein.</p>
                 <div class="input-group">
@@ -356,7 +330,6 @@
                 </div>
             </div>
 
-            <!-- NAVIGATION BUTTONS -->
             <div class="wizard-controls">
                 <button type="button" class="nav-btn" id="prev-btn" style="display: none;">ZURÜCK</button>
                 <button type="button" class="login-btn" id="next-btn">WEITER</button>
@@ -373,23 +346,26 @@
         </div>
     </header>
 
-    <!-- VOICE INDICATOR -->
+    <!-- VOICE & RESPONSE DISPLAY -->
     <div class="voice-status">
-        <div class="pulse-dot"></div>
-        <span id="speech-indicator">JARVIS hört zu... Sprich einfach mit mir!</span>
+        <div class="status-header">
+            <div class="pulse-dot"></div>
+            <span id="speech-indicator">JARVIS hört zu... Sprich mit mir!</span>
+        </div>
+        <div class="response-text" id="jarvis-response">System bereit.</div>
     </div>
 
     <!-- GLOBUS -->
     <div class="globe-card" id="globe-box">
         <canvas id="globe-canvas"></canvas>
+        <div class="globe-target-info" id="globe-info">TARGET: GLOBAL HUD</div>
     </div>
 
     <div class="swipe-section-title">WIDGETS (NACH LINKS/RECHTS WISCHEN) ◄ ►</div>
 
-    <!-- WISCHBARES DASHBOARD -->
+    <!-- DASHBOARD -->
     <div class="swipe-container" id="widget-carousel">
         
-        <!-- WIDGET 1: FINANZEN -->
         <div class="panel">
             <h2>FINANZEN // GUTHABEN</h2>
             <div class="sub-text">VERFÜGBAR</div>
@@ -397,28 +373,17 @@
             <div class="sub-text" style="color: #ffaa00; margin-top:5px;">STATUS: STABIL</div>
         </div>
 
-        <!-- WIDGET 2: SYSTEM STATUS -->
         <div class="panel">
             <h2>SYSTEM STATUS</h2>
             <div class="sub-text">CPU: <b style="color:#fff">12%</b></div>
             <div class="sub-text" style="margin-top: 4px;">RAM: <b style="color:#fff">3.1 / 16 GB</b></div>
-            <div class="sub-text" style="margin-top: 4px;">LATENZ: <b style="color:#ffaa00">9 ms</b></div>
-        </div>
-
-        <!-- WIDGET 3: INTEL NEWS -->
-        <div class="panel">
-            <h2>LIVE NEWS SCANNER</h2>
-            <div class="news-list" id="news-feed-list">
-                <div class="news-item"><b style="color:#ffaa00">[SYSTEM]</b> Bereitschaft hergestellt.</div>
-                <div class="news-item"><b style="color:#ffaa00">[RADAR]</b> Überwachung aktiv.</div>
-                <div class="news-item"><b style="color:#fff">[USER]</b> Authentifiziert.</div>
-            </div>
+            <div class="sub-text" style="margin-top: 4px;">GLOBUS MARKER: <b style="color:#ffaa00" id="marker-count">0</b></div>
         </div>
 
     </div>
 
     <script>
-        // --- 1. WIZARD & LOGIN LOGIK ---
+        // --- 1. WIZARD LOGIK ---
         let currentStep = 1;
         const totalSteps = 4;
 
@@ -442,27 +407,16 @@
         }
 
         nextBtn.addEventListener('click', () => {
-            if (currentStep === 1) {
-                const inputName = document.getElementById('username').value.trim();
-                if (!inputName) {
-                    alert("Bitte gib einen Benutzernamen ein.");
-                    return;
-                }
+            if (currentStep === 1 && !document.getElementById('username').value.trim()) {
+                alert("Bitte gib einen Namen ein."); return;
             }
-
             if (currentStep === totalSteps) {
                 const inputKey = document.getElementById('apikey').value.trim();
-                if (!inputKey) {
-                    alert("Bitte gib deinen OpenRouter Key ein.");
-                    return;
-                }
-
+                if (!inputKey) { alert("Bitte gib den Key ein."); return; }
                 userName = document.getElementById('username').value;
                 apiKey = inputKey;
-
                 localStorage.setItem('jarvis_user_name', userName);
                 localStorage.setItem('jarvis_openrouter_key', apiKey);
-                
                 initSystem();
             } else {
                 currentStep++;
@@ -470,22 +424,10 @@
             }
         });
 
-        prevBtn.addEventListener('click', () => {
-            if (currentStep > 1) {
-                currentStep--;
-                updateWizard();
-            }
-        });
+        prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
 
-        // LOGOUT
         logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('jarvis_user_name');
-            localStorage.removeItem('jarvis_openrouter_key');
-            userName = null;
-            apiKey = null;
-            currentStep = 1;
-            document.getElementById('username').value = '';
-            document.getElementById('apikey').value = '';
+            localStorage.clear();
             location.reload();
         });
 
@@ -494,70 +436,78 @@
                 userDisplay.textContent = `HALLO, ${userName.toUpperCase()}`;
                 loginModal.style.display = 'none';
                 
+                // Audio Context un-muten bei Interaktion
+                document.body.addEventListener('click', () => { speakJarvis(""); }, { once: true });
+                
                 setTimeout(() => {
-                    speakJarvis(`Hallo ${userName}. JARVIS ist jetzt einsatzbereit.`);
+                    speakJarvis(`Hallo ${userName}. JARVIS v15 ist voll einsatzbereit.`);
                     startListening();
-                }, 1000);
+                }, 800);
             } else {
                 loginModal.style.display = 'flex';
                 updateWizard();
             }
         }
 
-        // --- 2. JARVIS STIMME ---
+        // --- 2. VERBESSERTE SPRACHAUSGABE (TTS) ---
         function speakJarvis(text) {
+            if (!text) return;
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
+                window.speechSynthesis.cancel(); // Vorherige Sprache stoppen
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'de-DE';
-                utterance.pitch = 0.9;
+                utterance.pitch = 0.95;
                 utterance.rate = 1.0;
+
+                // Stimme auf Deutsch erzwingen
+                const voices = window.speechSynthesis.getVoices();
+                const deVoice = voices.find(v => v.lang.includes('de'));
+                if (deVoice) utterance.voice = deVoice;
+
                 window.speechSynthesis.speak(utterance);
             }
         }
+        window.speechSynthesis.onvoiceschanged = () => {};
 
         // --- 3. DAUERHAFTE SPRACHERKENNUNG ---
         const speechIndicator = document.getElementById('speech-indicator');
-        let recognition;
+        const jarvisResponse = document.getElementById('jarvis-response');
 
         function startListening() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                speechIndicator.textContent = "Spracherkennung im Browser nicht unterstützt.";
+                speechIndicator.textContent = "Spracherkennung wird vom Browser nicht unterstützt.";
                 return;
             }
 
-            recognition = new SpeechRecognition();
+            const recognition = new SpeechRecognition();
             recognition.lang = 'de-DE';
             recognition.continuous = true;
             recognition.interimResults = false;
 
             recognition.onresult = (event) => {
                 const transcript = event.results[event.results.length - 1][0].transcript.trim();
-                speechIndicator.textContent = `Verarbeitet: "${transcript}"`;
+                speechIndicator.textContent = `Erkannt: "${transcript}"`;
                 processVoiceCommandWithOpenRouter(transcript);
             };
 
-            recognition.onend = () => {
-                try { recognition.start(); } catch(e){}
-            };
-
+            recognition.onend = () => { try { recognition.start(); } catch(e){} };
             try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. KOSTENLOSE OPENROUTER AI ANBINDUNG ---
+        // --- 4. OPENROUTER ANBINDUNG MIT GLOBUS-STEUERUNG ---
         async function processVoiceCommandWithOpenRouter(userQuery) {
-            if (!apiKey) {
-                speechIndicator.textContent = "Kein API-Key vorhanden! Klicke oben auf Logout.";
-                return;
-            }
+            if (!apiKey) return;
 
             const systemPrompt = `
-            Du bist JARVIS, das hochentwickelte KI-System.
-            Der Benutzer heißt ${userName}. Antworte kurz und präzise auf Deutsch.
-            DU KANNST DIE WEBSEITE STEUERN:
+            Du bist JARVIS. Antworte kurz, klug und präzise auf Deutsch für ${userName}.
+            DU KANNST DAS DASHBOARD & DEN 3D GLOBUS STEUERN:
             - Guthaben ändern: [SET_BALANCE: Betrag] Deine Antwort.
             - Neues Widget: [ADD_WIDGET: Titel | Inhalt] Deine Antwort.
+            - Ort auf Globus markieren: [GLOBE_MARK: Breitengrad, Längengrad | Name] Deine Antwort.
+              (Beispiel Berlin: [GLOBE_MARK: 52.52, 13.40 | Berlin])
+              (Beispiel New York: [GLOBE_MARK: 40.71, -74.00 | New York])
+              (Beispiel Tokio: [GLOBE_MARK: 35.67, 139.65 | Tokio])
             `;
 
             try {
@@ -579,20 +529,14 @@
                 });
 
                 if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    console.error("OpenRouter Details:", errData);
-                    
-                    if (response.status === 401) {
-                        speechIndicator.textContent = "API Key ungültig! Bitte oben auf [LOGOUT] klicken und erneuern.";
-                    } else {
-                        speechIndicator.textContent = `API Fehler (${response.status}): Bitte Key erneut eingeben.`;
-                    }
+                    jarvisResponse.textContent = `Fehler (${response.status}): Bitte Key prüfen.`;
                     return;
                 }
 
                 const data = await response.json();
                 let reply = data.choices[0].message.content;
 
+                // Befehl: Guthaben
                 if (reply.includes('[SET_BALANCE:')) {
                     const match = reply.match(/\[SET_BALANCE:\s*(.*?)\]/);
                     if (match) {
@@ -601,6 +545,7 @@
                     }
                 }
 
+                // Befehl: Widget
                 if (reply.includes('[ADD_WIDGET:')) {
                     const match = reply.match(/\[ADD_WIDGET:\s*(.*?)\|(.*?)\]/);
                     if (match) {
@@ -609,12 +554,24 @@
                     }
                 }
 
-                speechIndicator.textContent = reply;
-                speakJarvis(reply);
+                // Befehl: Globus Marker
+                if (reply.includes('[GLOBE_MARK:')) {
+                    const match = reply.match(/\[GLOBE_MARK:\s*(.*?), (.*?)\|(.*?)\]/);
+                    if (match) {
+                        const lat = parseFloat(match[1]);
+                        const lon = parseFloat(match[2]);
+                        const name = match[3].trim();
+                        addGlobeMarker(lat, lon, name);
+                        reply = reply.replace(/\[GLOBE_MARK:.*?\]/, '');
+                    }
+                }
+
+                jarvisResponse.textContent = reply.trim();
+                speakJarvis(reply.trim());
 
             } catch (err) {
-                console.error("Fetch Exception:", err);
-                speechIndicator.textContent = "Verbindungsfehler zu OpenRouter!";
+                console.error(err);
+                jarvisResponse.textContent = "Verbindungsfehler!";
             }
         }
 
@@ -622,15 +579,12 @@
             const carousel = document.getElementById('widget-carousel');
             const newPanel = document.createElement('div');
             newPanel.className = 'panel';
-            newPanel.innerHTML = `
-                <h2>${title.toUpperCase()}</h2>
-                <div class="sub-text">${content}</div>
-            `;
+            newPanel.innerHTML = `<h2>${title.toUpperCase()}</h2><div class="sub-text">${content}</div>`;
             carousel.appendChild(newPanel);
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. 3D GLOBUS RENDERER ---
+        // --- 5. HELLER 3D GLOBUS & INTERAKTIVE MARKER ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -640,6 +594,7 @@
         function resize() {
             renderer.setSize(box.clientWidth, box.clientHeight, false);
             camera.aspect = box.clientWidth / box.clientHeight;
+            camera.updatePointer?;
             camera.updateProjectionMatrix();
         }
         resize();
@@ -648,21 +603,63 @@
         const globeGroup = new THREE.Group();
         scene.add(globeGroup);
 
-        const sphereGeo = new THREE.SphereGeometry(100, 22, 22);
+        // HELLER ORANGE-GLÜHENDER WIREFRAME GLOBUS
+        const sphereGeo = new THREE.SphereGeometry(80, 24, 24);
         const sphereMat = new THREE.MeshBasicMaterial({ 
-            color: 0x441800, 
+            color: 0xff7700, 
             wireframe: true,
             transparent: true,
-            opacity: 0.25
+            opacity: 0.55
         });
         const baseSphere = new THREE.Mesh(sphereGeo, sphereMat);
         globeGroup.add(baseSphere);
 
-        camera.position.z = 250;
+        // INNERER KERN FÜR TIEFE
+        const coreGeo = new THREE.SphereGeometry(78, 16, 16);
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0x110500 });
+        globeGroup.add(new THREE.Mesh(coreGeo, coreMat));
+
+        camera.position.z = 220;
+
+        let markerCount = 0;
+        function addGlobeMarker(lat, lon, name) {
+            // Umrechnung von Koordinaten (Lat/Lon) in 3D Vektor
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const radius = 80;
+
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const z = (radius * Math.sin(phi) * Math.sin(theta));
+            const y = (radius * Math.cos(phi));
+
+            // Marker-Punkt (Rot/Gelb leuchtend)
+            const markerGeo = new THREE.SphereGeometry(3, 12, 12);
+            const markerMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+            const marker = new THREE.Mesh(markerGeo, markerMat);
+            marker.position.set(x, y, z);
+            globeGroup.add(marker);
+
+            // Pulsierender Ring um den Marker
+            const ringGeo = new THREE.RingGeometry(4, 6, 16);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xff2200, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.set(x, y, z);
+            ring.lookAt(0,0,0);
+            globeGroup.add(ring);
+
+            // HUD Info aktualisieren
+            document.getElementById('globe-info').textContent = `TARGET ACQUIRED: ${name.toUpperCase()} (${lat}°, ${lon}°)`;
+            markerCount++;
+            document.getElementById('marker-count').textContent = markerCount;
+
+            // Drehe den Globus sanft zum Punkt
+            globeGroup.rotation.y = -theta;
+            globeGroup.rotation.x = phi - Math.PI / 2;
+        }
 
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.002;
+            globeGroup.rotation.y += 0.003; // Sanfte permanente Rotation
             renderer.render(scene, camera);
         }
         animate();
