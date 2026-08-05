@@ -214,7 +214,7 @@
     <div class="voice-status">
         <div class="status-header">
             <div class="pulse-dot"></div>
-            <span id="speech-indicator">JARVIS hört zu...</span>
+            <span id="speech-indicator">JARVIS hört zu... (Tippe auf den Orb, falls Audio stumm bleibt)</span>
         </div>
         <div class="response-text" id="jarvis-response">Systeme bereit.</div>
     </div>
@@ -229,7 +229,7 @@
         </div>
     </div>
 
-    <!-- JARVIS SPEECH CORE ORB -->
+    <!-- JARVIS SPEECH CORE ORB (Audio-Freischaltung für iOS) -->
     <div class="jarvis-orb-container" id="orb-trigger">
         <div class="orb-wrapper">
             <div class="orb-ring"></div>
@@ -237,7 +237,7 @@
         </div>
         <div>
             <div class="orb-label">JARVIS SPEECH CORE</div>
-            <div style="font-size: 0.6rem; opacity: 0.7;">TIPPEN ZUM AUDIO-TEST / AKTIVIEREN</div>
+            <div style="font-size: 0.6rem; opacity: 0.7;">TIPPEN ZUM FREISCHALTEN / AUDIO-TEST</div>
         </div>
     </div>
 
@@ -303,8 +303,9 @@
         prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
         logoutBtn.addEventListener('click', () => { localStorage.clear(); location.reload(); });
 
+        // Manuelles Freischalten von Audio für iOS Safari per Klick auf den Orb
         document.getElementById('orb-trigger').addEventListener('click', () => {
-            speakJarvis("Audio-System aktiv, Sir.");
+            speakJarvis("Audio-System aktiv, Sir. Bereit für Befehle.");
         });
 
         function initSystem() {
@@ -312,10 +313,8 @@
                 userDisplay.textContent = `HALLO, ${userName.toUpperCase()}`;
                 loginModal.style.display = 'none';
                 
-                document.body.addEventListener('click', () => { speakJarvis(" "); }, { once: true });
-                
                 setTimeout(() => {
-                    speakJarvis(`Guten Tag, ${userName}. Alles betriebsbereit.`);
+                    speakJarvis(`Guten Tag, ${userName}. Systeme online.`);
                     startListening();
                 }, 600);
             } else {
@@ -338,7 +337,7 @@
                 utterance.rate = 1.0;   
 
                 const orbCore = document.getElementById('orb-core-elem');
-                utterance.onstart = () => { if(orbCore) orbCore.style.transform = "scale(1.5)"; };
+                utterance.onstart = () => { if(orbCore) orbCore.style.transform = "scale(1.6)"; };
                 utterance.onend = () => { if(orbCore) orbCore.style.transform = "scale(1.0)"; };
 
                 const voices = window.speechSynthesis.getVoices();
@@ -396,11 +395,13 @@
             Du bist J.A.R.V.I.S. Antworte EXTREM KURZ, präzise und direkt auf den Punkt (maximal 1 bis 2 kurze Sätze) für ${userName}. Kein Geschwätz!
             Lass Steuerbefehle in deiner gesprochenen Antwort vollständig weg!
             
-            STEUERBEFEHLE (nur bei Bedarf verwenden):
+            STEUERBEFEHLE (nutze sie passend zur Anfrage):
             - Guthaben ändern: [SET_BALANCE: Betrag]
             - Neues Widget: [ADD_WIDGET: Titel | Inhalt]
-            - Einzelnen Ort anzeigen: [SHOW_LOCATION: Ort]
-            - Route berechnen: [CALC_ROUTE: Ort1 | Ort2]
+            - Einzelnen Ort anzeigen: [SHOW_LOCATION: Ort aus der Liste oder Welt]
+            - Route berechnen/zeichnen: [CALC_ROUTE: Ort1 | Ort2]
+            
+            Verfügbare Orte für Routen/Standorte: europa, asien, nordamerika, suedamerika, afrika, australien, tokio, berlin, new york, mecklenburg-vorpommern.
             `;
 
             try {
@@ -413,7 +414,6 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        // HIER IST DER FIX: Nutze das von OpenRouter vorgeschlagene Modell
                         model: "meta-llama/llama-3.3-70b-instruct",
                         messages: [
                             { role: "system", content: systemPrompt },
