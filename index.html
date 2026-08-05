@@ -3,33 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // COMMAND CENTER</title>
+    <title>JARVIS // COMMAND CENTER v2.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --bg-color: #060101;
-            --panel-bg: rgba(20, 4, 4, 0.85);
-            --border-red: #ff2200;
-            --glow-red: rgba(255, 34, 0, 0.5);
-            --text-main: #ff9988;
+            --bg-color: #030a12;
+            --panel-bg: rgba(6, 24, 40, 0.8);
+            --border-blue: #00ccff;
+            --glow-blue: rgba(0, 204, 255, 0.5);
+            --text-main: #99eeff;
             --text-bright: #ffffff;
+            /* Arc Reactor Farben */
+            --hud-glow: 0 0 15px rgba(0, 204, 255, 0.8), inset 0 0 10px rgba(0, 204, 255, 0.4);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+            font-family: 'Geist Mono', 'SF Mono', 'Courier New', monospace;
         }
 
         body {
             background-color: var(--bg-color);
+            background-image: radial-gradient(#0a1f33 1px, transparent 1px);
+            background-size: 30px 30px;
             color: var(--text-main);
             min-height: 100vh;
             padding: 12px;
             display: flex;
             flex-direction: column;
             gap: 12px;
+            overflow: hidden;
         }
 
         /* HEADER */
@@ -37,11 +42,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid var(--border-red);
+            border: 1px solid rgba(0, 204, 255, 0.3);
             background: var(--panel-bg);
             padding: 10px 15px;
-            border-radius: 6px;
-            box-shadow: 0 0 12px var(--glow-red);
+            border-radius: 4px;
+            box-shadow: var(--hud-glow);
         }
 
         h1 {
@@ -49,28 +54,42 @@
             font-size: 1rem;
             letter-spacing: 1.5px;
             font-weight: 800;
+            text-transform: uppercase;
         }
 
         .status {
-            color: #00ff66;
+            color: #00ffcc;
             font-size: 0.75rem;
             font-weight: bold;
             letter-spacing: 1px;
+            position: relative;
         }
 
-        /* GLOBUS SECTION (CENTERPIECE) */
+        .status::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ffcc;
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 10px #00ffcc;
+        }
+
+        /* GLOBUS SECTION */
         .globe-card {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-red);
-            border-radius: 6px;
-            height: 260px;
+            background: rgba(4, 15, 25, 0.9);
+            border: 1px solid var(--border-blue);
+            border-radius: 4px;
+            height: 300px;
             width: 100%;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.15), 0 0 15px var(--glow-red);
+            box-shadow: inset 0 0 25px rgba(0, 204, 255, 0.1), var(--hud-glow);
             overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
         }
 
         #globe-canvas {
@@ -79,7 +98,94 @@
             touch-action: none;
         }
 
-        /* GRID FÜR WIDGETS */
+        /* --- SMART IRON MAN INFO BOX (HOLOGRAPHIC) --- */
+        #country-info-hud {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            background: rgba(0, 20, 40, 0.85);
+            border: 1px solid var(--border-blue);
+            border-radius: 2px;
+            padding: 12px;
+            box-shadow: var(--hud-glow);
+            display: none; /* Am Anfang versteckt */
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 100;
+            pointer-events: none; /* Damit man durchklicken kann zum Globus */
+            
+            /* Stark-Style Abschrägung */
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+
+        #country-info-hud.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Arc-Reactor Kern-Icon */
+        .hud-core-icon {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--border-blue);
+            border-radius: 50%;
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: #001a33;
+            box-shadow: var(--hud-glow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hud-core-icon::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: var(--text-bright);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--text-bright);
+            animation: pulse-core 2s infinite;
+        }
+
+        .hud-title {
+            color: var(--text-bright);
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(0, 204, 255, 0.5);
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+        }
+
+        .hud-data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .hud-label {
+            color: rgba(153, 238, 255, 0.7);
+            font-weight: bold;
+        }
+
+        .hud-value {
+            color: var(--text-bright);
+            text-align: right;
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--border-blue);
+        }
+
+        /* WIDGET GRID */
         .widgets-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -88,10 +194,11 @@
 
         .panel {
             background: var(--panel-bg);
-            border: 1px solid var(--border-red);
-            border-radius: 6px;
+            border: 1px solid rgba(0, 204, 255, 0.4);
+            border-radius: 4px;
             padding: 12px;
-            box-shadow: 0 0 8px var(--glow-red);
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.2);
+            position: relative;
         }
 
         .panel-full {
@@ -101,7 +208,7 @@
         .panel h2 {
             font-size: 0.7rem;
             color: var(--text-bright);
-            border-bottom: 1px solid rgba(255, 34, 0, 0.4);
+            border-bottom: 1px solid rgba(0, 204, 255, 0.3);
             padding-bottom: 4px;
             margin-bottom: 8px;
             text-transform: uppercase;
@@ -112,7 +219,7 @@
             font-size: 1.8rem;
             color: var(--text-bright);
             font-weight: 900;
-            text-shadow: 0 0 8px var(--border-red);
+            text-shadow: 0 0 10px var(--border-blue);
             margin: 4px 0;
         }
 
@@ -129,8 +236,9 @@
         }
 
         .news-item {
-            border-bottom: 1px dashed rgba(255, 34, 0, 0.2);
+            border-bottom: 1px dashed rgba(0, 204, 255, 0.15);
             padding-bottom: 4px;
+            color: var(--text-main);
         }
 
         /* BUTTON */
@@ -141,37 +249,40 @@
 
         .start-btn {
             width: 100%;
-            background: rgba(255, 34, 0, 0.25);
-            border: 2px solid var(--border-red);
+            background: rgba(0, 204, 255, 0.15);
+            border: 1px solid var(--border-blue);
             color: var(--text-bright);
             padding: 14px;
             font-size: 1.1rem;
             font-weight: 900;
             letter-spacing: 2px;
-            border-radius: 6px;
-            box-shadow: 0 0 20px var(--glow-red);
+            text-transform: uppercase;
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
             cursor: pointer;
-            text-align: center;
+            transition: all 0.2s ease;
         }
 
         .start-btn:active {
-            background: var(--border-red);
+            background: var(--border-blue);
             color: #000;
+            box-shadow: 0 0 25px var(--border-blue);
+            transform: scale(0.98);
+        }
+
+        /* ANIMATIONEN */
+        @keyframes pulse-core {
+            0% { box-shadow: 0 0 5px var(--text-bright); opacity: 1; }
+            50% { box-shadow: 0 0 20px var(--border-blue); opacity: 0.8; }
+            100% { box-shadow: 0 0 5px var(--text-bright); opacity: 1; }
         }
 
         /* DESKTOP OPTIMIERUNG */
         @media (min-width: 768px) {
-            body {
-                max-width: 1000px;
-                margin: 0 auto;
-                padding: 20px;
-            }
-            .widgets-grid {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
-            .globe-card {
-                height: 380px;
-            }
+            body { max-width: 1100px; margin: 0 auto; padding: 20px; }
+            .widgets-grid { grid-template-columns: 1fr 1fr 1fr; }
+            .globe-card { height: 420px; }
+            #country-info-hud { width: 250px; padding: 15px; }
         }
     </style>
 </head>
@@ -179,47 +290,74 @@
 
     <header>
         <h1>JARVIS // COMMAND CENTER</h1>
-        <div class="status">● ONLINE</div>
+        <div class="status">MK-LXXXV // ONLINE</div>
     </header>
 
-    <!-- RUNDER GLOBUS IN DER MITTE -->
+    <!-- GLOBUS SECTION MIT HOLOGRAPHISCHEM INFO-HUD -->
     <div class="globe-card" id="globe-box">
         <canvas id="globe-canvas"></canvas>
+        
+        <!-- SMART IRON MAN STYLE INFO BOX -->
+        <div id="country-info-hud">
+            <!-- Arc Reactor Icon -->
+            <div class="hud-core-icon"></div>
+            
+            <div class="hud-title">Zielerfassung</div>
+            
+            <div class="hud-data-row">
+                <span class="hud-label">NAME:</span>
+                <span class="hud-value" id="hud-country-name">---</span>
+            </div>
+            <div class="hud-data-row">
+                <span class="hud-label">POPULATION:</span>
+                <span class="hud-value" id="hud-country-pop">---</span>
+            </div>
+            <div class="hud-data-row">
+                <span class="hud-label">AREA (KM²):</span>
+                <span class="hud-value" id="hud-country-size">---</span>
+            </div>
+        </div>
     </div>
 
     <!-- METRIKEN & KONTOSTAND -->
     <div class="widgets-grid">
         <div class="panel">
-            <h2>FINANZEN</h2>
-            <div class="sub-text">KONTOSTAND</div>
+            <h2>FINANZEN // STARK IND.</h2>
+            <div class="sub-text">VERFÜGBARES GUTHABEN</div>
             <div class="balance-val">0,00 €</div>
-            <div class="sub-text" style="color: #00ff66;">PIPELINE: +0,00 €</div>
+            <div class="sub-text" style="color: #00ffcc;">PIPELINE: +0,00 €</div>
         </div>
 
         <div class="panel">
-            <h2>SYSTEM</h2>
+            <h2>SYSTEM STATUS</h2>
             <div class="sub-text">CPU LOAD: <b style="color:#fff">12%</b></div>
-            <div class="sub-text" style="margin-top: 4px;">RAM: <b style="color:#fff">2.4 / 16 GB</b></div>
-            <div class="sub-text" style="margin-top: 4px;">LATENZ: <b style="color:#00ff66">14 ms</b></div>
+            <div class="sub-text" style="margin-top: 4px;">RAM USAGE: <b style="color:#fff">2.4 / 16 GB</b></div>
+            <div class="sub-text" style="margin-top: 4px;">LATENZ: <b style="color:#00ffcc">14 ms</b></div>
         </div>
 
         <div class="panel panel-full">
-            <h2>LIVE FEEDS // NEWS</h2>
+            <h2>LIVE FEEDS // PROTOKOLLE</h2>
             <div class="news-list">
-                <div class="news-item"><b style="color:#fff">[12:00]</b> KI-System V1.0 online.</div>
-                <div class="news-item"><b style="color:#fff">[11:45]</b> Sprachsteuerung bereit.</div>
+                <div class="news-item"><b style="color:#fff">[12:00]</b> MK-LXXXV Systeme initialisiert.</div>
+                <div class="news-item"><b style="color:#fff">[11:45]</b> Bio-Signatur bestätigt. Willkommen, Master.</div>
             </div>
         </div>
     </div>
 
     <div class="btn-container">
-        <button class="start-btn" onclick="triggerAI()">KI STARTEN</button>
+        <button class="start-btn" onclick="triggerAI()">JARVIS STARTEN</button>
     </div>
 
     <script>
-        // GLOBUS SETUP (Echter runder 3D Globus)
+        // GLOBUS SETUP (Three.js)
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
+        const hud = document.getElementById('country-info-hud');
+
+        // HUD Elemente
+        const hudName = document.getElementById('hud-country-name');
+        const hudPop = document.getElementById('hud-country-pop');
+        const hudSize = document.getElementById('hud-country-size');
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, box.clientWidth / box.clientHeight, 0.1, 1000);
@@ -235,58 +373,134 @@
         resize();
         window.addEventListener('resize', resize);
 
-        // Kugel (Gitter)
-        const geometry = new THREE.SphereGeometry(1.8, 20, 20);
+        // Kugel (Gitter-Globus)
+        const geometry = new THREE.SphereGeometry(2, 25, 25);
         const material = new THREE.MeshBasicMaterial({
-            color: 0xff2200,
+            color: 0x00ccff,
             wireframe: true,
             transparent: true,
-            opacity: 0.75
+            opacity: 0.6
         });
         const globe = new THREE.Mesh(geometry, material);
         scene.add(globe);
 
-        camera.position.z = 5;
+        camera.position.z = 6;
 
-        // Touch & Maus Steuerung
+        // --- INTERAKTIONS-LOGIK FÜR DIE LÄNDER ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // Vereinfachte Länderdaten (für Demo)
+        const countryData = [
+            { name: "Deutschland", pop: "~84 Mio.", size: "357.600", vec: new THREE.Vector3(1, 1.5, 1).normalize() },
+            { name: "USA", pop: "~335 Mio.", size: "9.834.000", vec: new THREE.Vector3(-1.5, 1, 1.5).normalize() },
+            { name: "China", pop: "~1.41 Mrd.", size: "9.597.000", vec: new THREE.Vector3(2, 1, -1).normalize() },
+            { name: "Brasilien", pop: "~216 Mio.", size: "8.516.000", vec: new THREE.Vector3(-0.5, -1.5, 2).normalize() }
+        ];
+
+        // Ländertreffer prüfen
+        function checkCountryClick() {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(globe);
+
+            if (intersects.length > 0) {
+                const clickPoint = intersects[0].point.normalize();
+                let closest = null;
+                let minDist = 0.5; // Klick-Radius
+
+                countryData.forEach(country => {
+                    const dist = clickPoint.distanceTo(country.vec);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closest = country;
+                    }
+                });
+
+                if (closest) {
+                    showHudInfo(closest);
+                } else {
+                    hideHudInfo();
+                }
+            }
+        }
+
+        // HUD Info anzeigen (Iron Man Style)
+        function showHudInfo(data) {
+            hudName.textContent = data.name;
+            hudPop.textContent = data.pop;
+            hudSize.textContent = data.size;
+            hud.classList.add('visible'); // Hologramm-Animation triggern
+            
+            // Auto-Hide nach 5 Sekunden
+            clearTimeout(window.hudTimer);
+            window.hudTimer = setTimeout(hideHudInfo, 5000);
+        }
+
+        function hideHudInfo() {
+            hud.classList.remove('visible');
+        }
+
+        // --- STEUERUNG (Touch & Maus) ---
         let isDragging = false;
         let prevX = 0, prevY = 0;
+        let rotationSpeed = 0.006;
 
         function startDrag(x, y) {
             isDragging = true;
             prevX = x;
             prevY = y;
+            hideHudInfo(); // Info verstecken beim Drehen
         }
 
         function moveDrag(x, y) {
             if (!isDragging) return;
             const deltaX = x - prevX;
             const deltaY = y - prevY;
-            globe.rotation.y += deltaX * 0.008;
-            globe.rotation.x += deltaY * 0.008;
+            globe.rotation.y += deltaX * rotationSpeed;
+            globe.rotation.x += deltaY * rotationSpeed;
             prevX = x;
             prevY = y;
         }
 
         function stopDrag() { isDragging = false; }
 
-        box.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
+        // Maus Events
+        box.addEventListener('mousedown', e => {
+            startDrag(e.clientX, e.clientY);
+            // Mausposition für Raycaster berechnen
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            checkCountryClick(); // Klick auf Land prüfen
+        });
         window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
         window.addEventListener('mouseup', stopDrag);
 
-        box.addEventListener('touchstart', e => startDrag(e.touches[0].clientX, e.touches[0].clientY));
+        // Touch Events
+        box.addEventListener('touchstart', e => {
+            const touch = e.touches[0];
+            startDrag(touch.clientX, touch.clientY);
+            // Touchposition berechnen
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+            checkCountryClick();
+        });
         window.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX, e.touches[0].clientY));
         window.addEventListener('touchend', stopDrag);
 
+        // ANIMATION LOOP
         function animate() {
             requestAnimationFrame(animate);
-            if (!isDragging) globe.rotation.y += 0.004;
+            if (!isDragging) {
+                globe.rotation.y += 0.002; // Langsame Auto-Rotation
+            }
             renderer.render(scene, camera);
         }
         animate();
 
         function triggerAI() {
-            alert("JARVIS online. System bereit, Master!");
+            alert("JARVIS: Systeme sind bereit. Warten auf Autorisierungscode, Master.");
         }
     </script>
 </body>
