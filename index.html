@@ -122,18 +122,17 @@
         }
         @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        /* Scan Info Box */
         .scan-info-box {
-            position: absolute; top: 12px; right: 12px; max-width: 55%;
-            background: rgba(18, 8, 2, 0.92); border: 1px solid var(--amber-main);
+            position: absolute; top: 12px; right: 12px; max-width: 58%;
+            background: rgba(18, 8, 2, 0.94); border: 1px solid var(--amber-main);
             border-radius: 4px; padding: 10px 12px; z-index: 20;
-            box-shadow: 0 0 15px rgba(255, 102, 0, 0.45);
+            box-shadow: 0 0 18px rgba(255, 102, 0, 0.5);
             font-size: 0.7rem; line-height: 1.45; color: var(--text-main);
             display: none;
         }
-        .scan-info-box h3 { color: var(--amber-bright); font-size: 0.75rem; margin-bottom: 6px; letter-spacing: 1px; }
-        .scan-info-box .price { color: #fff; font-weight: bold; margin-top: 4px; }
-        .scan-info-box .extra { color: var(--amber-bright); margin-top: 6px; font-size: 0.65rem; }
+        .scan-info-box h3 { color: var(--amber-bright); font-size: 0.78rem; margin-bottom: 6px; letter-spacing: 1px; }
+        .scan-info-box .price { color: #fff; font-weight: bold; margin-top: 5px; }
+        .scan-info-box .extra { color: var(--amber-bright); margin-top: 5px; font-size: 0.65rem; }
 
         .globe-card {
             background: rgba(6, 3, 1, 0.95); border: 1px solid var(--amber-main);
@@ -170,7 +169,6 @@
 </head>
 <body>
 
-    <!-- LOGIN -->
     <div id="login-modal">
         <div class="login-box">
             <h2>JARVIS MARK-85 INITIALISIERUNG</h2>
@@ -185,14 +183,10 @@
             </div>
 
             <div class="wizard-step" id="step-2">
-                <p class="step-desc">E-Mail-Konto (optional).</p>
+                <p class="step-desc">E-Mail (optional)</p>
                 <div class="input-group">
                     <label>E-MAIL</label>
                     <input type="email" id="useremail" placeholder="name@gmail.com" value="">
-                </div>
-                <div class="input-group">
-                    <label>APP-PASSWORT</label>
-                    <input type="password" id="emailpass" placeholder="App-Passwort" value="">
                 </div>
             </div>
 
@@ -221,7 +215,6 @@
         </div>
     </div>
 
-    <!-- CHAT -->
     <div id="chat-modal">
         <div class="chat-container">
             <div class="chat-header-bar">
@@ -258,15 +251,12 @@
         <div class="response-text" id="jarvis-response">System bereit.</div>
     </div>
 
-    <!-- CAMERA / SCAN -->
     <div class="live-cam-box" id="live-cam-wrapper">
         <div class="cam-header">
-            <span id="cam-title">HELMET CAM // LIVE FEED</span>
+            <span id="cam-title">CAM</span>
             <span id="cam-rec">REC ● LIVE</span>
         </div>
-        <div class="cam-screen" id="cam-screen-container">
-            <!-- video + overlays -->
-        </div>
+        <div class="cam-screen" id="cam-screen-container"></div>
     </div>
 
     <div class="globe-card">
@@ -289,27 +279,24 @@
             <h2>SYSTEM STATUS</h2>
             <div class="sub-text">POWER CORE: <b style="color:#ffaa00">100% ONLINE</b></div>
             <div class="sub-text" style="margin-top:4px;">ORT: <b style="color:#ffaa00" id="marker-count">KEINER</b></div>
-            <div class="sub-text" style="margin-top:4px;">WETTER: <b style="color:#ffaa00" id="weather-display">—</b></div>
-            <div class="sub-text" style="margin-top:4px;">E-MAIL: <b style="color:#ffaa00" id="email-status">NICHT VERBUNDEN</b></div>
+            <div class="sub-text" style="margin-top:4px;">E-MAIL: <b style="color:#ffaa00" id="email-status">—</b></div>
         </div>
     </div>
 
 <script>
-    // ========== STATE ==========
     let currentStep = 1;
     const totalSteps = 5;
     let userName = localStorage.getItem('jarvis_user_name') || '';
     let apiKey = localStorage.getItem('jarvis_openrouter_key') || '';
     let userEmail = localStorage.getItem('jarvis_email') || '';
     let notes = JSON.parse(localStorage.getItem('jarvis_notes') || '[]');
-    let reminders = JSON.parse(localStorage.getItem('jarvis_reminders') || '[]');
-    let chatHistory = [];               // Gesprächs-Gedächtnis
+    let chatHistory = [];
     let currentStream = null;
-    let isScanMode = false;             // true = Rückkamera (Scanmodul)
-    let isHelmetMode = false;           // true = Frontkamera
-    let lastScanResult = null;          // für Follow-up-Fragen
+    let isScanMode = false;
+    let isHelmetMode = false;
+    let lastScanResult = null;
 
-    // ========== LOGIN ==========
+    // LOGIN
     const loginModal = document.getElementById('login-modal');
     const nextBtn = document.getElementById('next-btn');
     const prevBtn = document.getElementById('prev-btn');
@@ -345,47 +332,19 @@
         }
     });
 
-    prevBtn.addEventListener('click', () => {
-        if (currentStep > 1) { currentStep--; updateWizard(); }
-    });
+    prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
+    document.getElementById('logout-btn').addEventListener('click', () => { localStorage.clear(); location.reload(); });
+    document.getElementById('open-chat-btn').addEventListener('click', () => { document.getElementById('chat-modal').style.display = 'flex'; });
+    document.getElementById('close-chat-btn').addEventListener('click', () => { document.getElementById('chat-modal').style.display = 'none'; });
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-        localStorage.clear();
-        location.reload();
-    });
-
-    document.getElementById('open-chat-btn').addEventListener('click', () => {
-        document.getElementById('chat-modal').style.display = 'flex';
-    });
-    document.getElementById('close-chat-btn').addEventListener('click', () => {
-        document.getElementById('chat-modal').style.display = 'none';
-    });
-
-    // ========== NOTIZEN ==========
-    function saveNotes() {
-        localStorage.setItem('jarvis_notes', JSON.stringify(notes));
-        renderNotes();
-    }
+    // NOTIZEN
+    function saveNotes() { localStorage.setItem('jarvis_notes', JSON.stringify(notes)); renderNotes(); }
     function renderNotes() {
         const el = document.getElementById('notes-list');
         el.innerHTML = notes.length === 0 ? 'Noch keine Notizen.' : notes.map((n,i) => (i+1)+'. '+n).join('<br>');
     }
-    function addNote(text) {
-        notes.push(text);
-        saveNotes();
-    }
+    function addNote(text) { notes.push(text); saveNotes(); }
 
-    function addReminder(text, minutes) {
-        const fireAt = Date.now() + minutes * 60000;
-        reminders.push({ text, fireAt });
-        localStorage.setItem('jarvis_reminders', JSON.stringify(reminders));
-        setTimeout(() => {
-            speakJarvis('Erinnerung: ' + text);
-            document.getElementById('jarvis-response').textContent = 'Erinnerung: ' + text;
-        }, minutes * 60000);
-    }
-
-    // ========== INIT ==========
     function getTimeGreeting() {
         const h = new Date().getHours();
         if (h < 12) return 'Guten Morgen';
@@ -399,11 +358,8 @@
             loginModal.style.display = 'none';
             renderNotes();
             if (userEmail) document.getElementById('email-status').textContent = 'VERBUNDEN';
-
             setTimeout(() => {
-                let msg = getTimeGreeting() + ', ' + userName + '. Alle Systeme online.';
-                if (notes.length) msg += ' Sie haben ' + notes.length + ' Notizen.';
-                speakJarvis(msg);
+                speakJarvis(getTimeGreeting() + ', ' + userName + '. Alle Systeme online.');
                 startListening();
             }, 500);
         } else {
@@ -417,9 +373,7 @@
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text.replace(/\[.*?\]/g, '').trim());
-            u.lang = 'de-DE';
-            u.pitch = 0.72;
-            u.rate = 0.97;
+            u.lang = 'de-DE'; u.pitch = 0.72; u.rate = 0.97;
             const voices = speechSynthesis.getVoices();
             const de = voices.find(v => v.lang.startsWith('de'));
             if (de) u.voice = de;
@@ -427,18 +381,15 @@
         }
     }
 
-    function testVoiceManual() {
-        speakJarvis('Systemtest erfolgreich, ' + userName + '.');
-    }
+    function testVoiceManual() { speakJarvis('Systemtest erfolgreich, ' + userName + '.'); }
 
-    // ========== GLOBE ==========
+    // GLOBE
     const myGlobe = Globe()(document.getElementById('globe-container'))
         .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
         .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
         .backgroundColor('rgba(0,0,0,0)')
         .htmlElementsData([])
-        .htmlLat(d => d.lat)
-        .htmlLng(d => d.lng)
+        .htmlLat(d => d.lat).htmlLng(d => d.lng)
         .htmlElement(d => {
             const el = document.createElement('div');
             el.innerHTML = '<div style="background:rgba(0,0,0,0.9);border:1px solid #ff6600;color:#ffaa00;padding:4px 8px;font-size:9px;border-radius:3px;">🛰️ ' + d.name + '</div>';
@@ -459,7 +410,7 @@
         }
     }
 
-    // ========== SPEECH ==========
+    // SPEECH
     function startListening() {
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) return;
@@ -495,7 +446,7 @@
         document.getElementById('chat-messages-box').scrollTop = 99999;
     }
 
-    // ========== CAMERA ==========
+    // ========== KAMERA (GEFIXT) ==========
     function stopAllCameras() {
         if (currentStream) {
             currentStream.getTracks().forEach(t => t.stop());
@@ -503,9 +454,11 @@
         }
         isScanMode = false;
         isHelmetMode = false;
-        document.getElementById('live-cam-wrapper').style.display = 'none';
-        document.getElementById('cam-screen-container').innerHTML = '';
         lastScanResult = null;
+
+        const box = document.getElementById('live-cam-wrapper');
+        box.style.display = 'none';
+        document.getElementById('cam-screen-container').innerHTML = '';
     }
 
     async function startCamera(facingMode, title) {
@@ -525,83 +478,63 @@
         const video = document.getElementById('live-video');
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+                video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
                 audio: false
             });
             currentStream = stream;
             video.srcObject = stream;
         } catch (e) {
-            cont.innerHTML = '<div style="color:#ff6600;padding:20px;text-align:center">Kamera nicht verfügbar</div>';
+            cont.innerHTML = '<div style="color:#ff6600;padding:20px;text-align:center">Kamera-Zugriff verweigert oder nicht verfügbar</div>';
         }
     }
 
     async function startHelmetCam() {
         isHelmetMode = true;
+        isScanMode = false;
         await startCamera('user', 'HELMET CAM // LIVE FEED');
     }
 
     async function startScanModul() {
         isScanMode = true;
+        isHelmetMode = false;
         await startCamera('environment', 'SCANMODUL // RÜCKKAMERA');
     }
 
-    // ========== SCAN (Vision) ==========
-    async function performScan(extraRequest = '') {
+    // ========== SCAN ==========
+    async function performScan(extra = '') {
         if (!isScanMode) {
-            speakJarvis('Scanmodul ist nicht aktiv. Sagen Sie zuerst „Scanmodul“.');
+            const s = 'Scanmodul ist nicht aktiv. Sagen Sie zuerst „Scanmodul“.';
+            document.getElementById('jarvis-response').textContent = s;
+            speakJarvis(s);
             return;
         }
 
         const video = document.getElementById('live-video');
-        if (!video || !video.videoWidth) {
-            speakJarvis('Kamera noch nicht bereit.');
+        if (!video || video.readyState < 2) {
+            speakJarvis('Kamera noch nicht bereit. Einen Moment bitte.');
             return;
         }
 
         document.getElementById('jarvis-response').textContent = 'Scanne Objekt...';
 
-        // Frame capturen
+        // Frame capturen (kleiner für kostenloses Modell)
         const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        const maxW = 768;
+        const scale = Math.min(1, maxW / video.videoWidth);
+        canvas.width = video.videoWidth * scale;
+        canvas.height = video.videoHeight * scale;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
 
         try {
-            const messages = [
-                {
-                    role: 'system',
-                    content: `Du bist J.A.R.V.I.S. Analysiere das Bild eines Produkts / Gegenstands.
-Antworte NUR als JSON:
-{
-  "name": "Name des Objekts",
-  "category": "Essen|Möbel|Elektronik|Kleidung|Sonstiges",
-  "description": "Kurze Beschreibung auf Deutsch (1-2 Sätze)",
-  "price": "ungefährer Preis in Euro z.B. 1,29 € oder 89-150 €",
-  "ingredients": "bei Essen: wichtige Zutaten, sonst leer",
-  "calories": "bei Essen: ungefähre kcal pro 100g oder Portion, sonst leer",
-  "extra": "zusätzliche sinnvolle Info"
-}
-Sei präzise und realistisch.`
-                }
+            const content = [
+                { type: 'text', text: extra 
+                    ? `Analysiere das Produkt im Bild. Zusätzliche Anfrage: ${extra}. Antworte nur als JSON mit name, description, price, ingredients, calories, extra.`
+                    : 'Was ist das für ein Produkt oder Gegenstand? Antworte NUR als JSON: {"name":"...","description":"kurze Beschreibung","price":"ungefährer Preis","ingredients":"bei Essen","calories":"bei Essen","extra":"weitere Info"}' 
+                },
+                { type: 'image_url', image_url: { url: dataUrl } }
             ];
-
-            // Gesprächsverlauf für Kontext (letzte Scans)
-            if (lastScanResult) {
-                messages.push({ role: 'assistant', content: JSON.stringify(lastScanResult) });
-            }
-            if (extraRequest) {
-                messages.push({ role: 'user', content: 'Zusätzliche Anfrage: ' + extraRequest });
-            }
-
-            messages.push({
-                role: 'user',
-                content: [
-                    { type: 'text', text: extraRequest ? 'Analysiere das Bild und berücksichtige: ' + extraRequest : 'Was ist das für ein Produkt/Gegenstand? Gib Name, Preis und Infos.' },
-                    { type: 'image_url', image_url: { url: dataUrl } }
-                ]
-            });
 
             const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
@@ -613,104 +546,107 @@ Sei präzise und realistisch.`
                 },
                 body: JSON.stringify({
                     model: 'google/gemma-4-31b-it:free',
-                    messages: messages,
-                    max_tokens: 600
+                    messages: [
+                        { role: 'system', content: 'Du bist ein Produktscanner. Antworte immer nur mit validem JSON, keine anderen Texte.' },
+                        { role: 'user', content: content }
+                    ],
+                    max_tokens: 500
                 })
             });
 
+            if (!res.ok) throw new Error('API ' + res.status);
+
             const data = await res.json();
-            let raw = (data.choices?.[0]?.message?.content || '').trim().replace(/```json|```/g, '');
+            let raw = (data.choices?.[0]?.message?.content || '').trim().replace(/```json|```/g, '').trim();
+            
             let result;
-            try { result = JSON.parse(raw); } catch(e) {
-                result = { name: 'Unbekannt', description: raw.slice(0, 120), price: '—', category: 'Sonstiges' };
+            try {
+                result = JSON.parse(raw);
+            } catch (e) {
+                // Fallback wenn kein JSON
+                result = { name: 'Objekt erkannt', description: raw.slice(0, 150), price: '—' };
             }
 
             lastScanResult = result;
             showScanInfo(result);
 
-            const speech = result.name + '. ' + (result.description || '') + (result.price ? ' Ungefährer Preis: ' + result.price : '');
+            let speech = (result.name || 'Objekt') + '. ' + (result.description || '');
+            if (result.price) speech += ' Ungefährer Preis: ' + result.price + '.';
             document.getElementById('jarvis-response').textContent = speech;
             speakJarvis(speech);
 
-            // In Chat-History speichern
-            chatHistory.push({ role: 'user', content: 'Scan: ' + (extraRequest || 'Objekt analysieren') });
-            chatHistory.push({ role: 'assistant', content: speech });
-            if (chatHistory.length > 12) chatHistory = chatHistory.slice(-12);
-
         } catch (err) {
-            console.error(err);
-            speakJarvis('Scan fehlgeschlagen. Versuchen Sie es erneut.');
-            document.getElementById('jarvis-response').textContent = 'Scan fehlgeschlagen.';
+            console.error('Scan Fehler:', err);
+            const s = 'Scan fehlgeschlagen. Das kostenlose Vision-Modell ist gerade nicht erreichbar oder überlastet. Versuchen Sie es in ein paar Sekunden erneut.';
+            document.getElementById('jarvis-response').textContent = s;
+            speakJarvis(s);
         }
     }
 
     function showScanInfo(data) {
         const box = document.getElementById('scan-info-box');
         if (!box) return;
-
         let html = '<h3>' + (data.name || 'OBJEKT') + '</h3>';
         html += '<div>' + (data.description || '') + '</div>';
         if (data.price) html += '<div class="price">≈ ' + data.price + '</div>';
         if (data.ingredients) html += '<div class="extra">Zutaten: ' + data.ingredients + '</div>';
         if (data.calories) html += '<div class="extra">Kalorien: ' + data.calories + '</div>';
         if (data.extra) html += '<div class="extra">' + data.extra + '</div>';
-
         box.innerHTML = html;
         box.style.display = 'block';
     }
 
-    // ========== HAUPT-LOGIK ==========
+    // ========== BEFEHLE (GEFIXT) ==========
     async function processCommand(query, speak) {
         if (!apiKey) return;
-
         const q = query.toLowerCase().trim();
 
-        // ----- Lokale Befehle -----
-        if (q.includes('scanmodul schließen') || q.includes('scanmodul aus') || q.includes('scan modul schließen')) {
+        // 1. AUGEN / KAMERA SCHLIESSEN – sehr tolerant
+        if (q.includes('augen') && (q.includes('zu') || q.includes('schließ') || q.includes('schliess') || q.includes('mach') || q.includes('deaktiv'))) {
             stopAllCameras();
-            const s = 'Scanmodul deaktiviert.';
+            const s = 'Ok, ich schließe meine Augen. Helmet-Cam und Scanmodul deaktiviert.';
+            document.getElementById('jarvis-response').textContent = s;
+            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            return;
+        }
+        if (q.includes('kamera aus') || q.includes('cam aus') || q.includes('scanmodul schließen') || q.includes('scanmodul aus') || q.includes('modul schließen') || q.includes('modul aus')) {
+            stopAllCameras();
+            const s = 'Kamera deaktiviert.';
             document.getElementById('jarvis-response').textContent = s;
             if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
             return;
         }
 
-        if (q.includes('scanmodul') || q.includes('starte scanmodul') || q.includes('scan modul')) {
+        // 2. SCANMODUL STARTEN
+        if (q.includes('scanmodul') || q.includes('scan modul') || q.includes('starte scan')) {
             await startScanModul();
-            const s = 'Scanmodul online. Richten Sie die Kamera auf ein Objekt und sagen Sie „scann“.';
+            const s = 'Scanmodul online. Richten Sie die Kamera auf ein Produkt und sagen Sie „scann“.';
             document.getElementById('jarvis-response').textContent = s;
             if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
             return;
         }
 
-        if ((q === 'scann' || q === 'scan' || q.startsWith('scann ') || q.startsWith('scan ')) && isScanMode) {
-            // Extra-Anfrage extrahieren
+        // 3. SCANN / SCAN (nur wenn Scanmodul offen)
+        if (isScanMode && (q === 'scann' || q === 'scan' || q.startsWith('scann ') || q.startsWith('scan ') || q.includes('scann das') || q.includes('scan das'))) {
             let extra = '';
             if (q.includes('kalorien') || q.includes('kcal')) extra = 'Kalorien und Nährwerte';
-            else if (q.includes('zutaten') || q.includes('inhaltsstoffe')) extra = 'Zutatenliste';
-            else if (q.includes('preis') || q.includes('kostet')) extra = 'genauerer Preis';
-            else if (q.length > 6) extra = q.replace(/^(scann|scan)\s*/i, '');
-
+            else if (q.includes('zutaten')) extra = 'Zutatenliste';
+            else if (q.includes('preis')) extra = 'Preis';
+            else if (q.length > 8) extra = q.replace(/scann?|das/gi, '').trim();
             await performScan(extra);
             return;
         }
 
-        if (q.includes('augen zu') || q.includes('mache deine augen zu') || q.includes('kamera aus') || q.includes('helmet aus')) {
-            stopAllCameras();
-            const s = 'Helmet-Cam deaktiviert. Augen geschlossen.';
-            document.getElementById('jarvis-response').textContent = s;
-            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
-            return;
-        }
-
-        if (q.includes('öffne deine augen') || q.includes('helmet cam') || q.includes('frontkamera')) {
+        // 4. HELMET CAM
+        if (q.includes('öffne deine augen') || q.includes('helmet') || q.includes('frontkamera') || q.includes('vordere kamera')) {
             await startHelmetCam();
-            const s = 'Helmet-Cam online. Sichtverhältnisse optimal.';
+            const s = 'Helmet-Cam online.';
             document.getElementById('jarvis-response').textContent = s;
             if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
             return;
         }
 
-        // Notizen
+        // 5. NOTIZEN
         if (q.startsWith('merke dir') || q.startsWith('merk dir') || q.startsWith('notiere')) {
             const note = q.replace(/^(merke dir|merk dir|notiere)\s*/i, '').trim();
             if (note) {
@@ -721,59 +657,19 @@ Sei präzise und realistisch.`
             }
             return;
         }
-
-        if (q.includes('meine notizen') || q.includes('was habe ich notiert') || q.includes('zeig notizen')) {
-            const s = notes.length === 0 ? 'Keine Notizen vorhanden.' : 'Ihre Notizen: ' + notes.join('. ');
+        if (q.includes('meine notizen') || q.includes('zeig notizen')) {
+            const s = notes.length === 0 ? 'Keine Notizen.' : 'Notizen: ' + notes.join('. ');
             document.getElementById('jarvis-response').textContent = s;
             if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
             return;
         }
 
-        if (q.includes('lösche alle notizen') || q.includes('notizen löschen')) {
-            notes = [];
-            saveNotes();
-            const s = 'Alle Notizen gelöscht.';
-            document.getElementById('jarvis-response').textContent = s;
-            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
-            return;
-        }
-
-        // Erinnerung
-        const remindMatch = q.match(/erinnere mich in (\d+)\s*(minute|minuten|min).*?(?:an|auf)\s+(.+)/i);
-        if (remindMatch) {
-            const mins = parseInt(remindMatch[1]);
-            const text = remindMatch[3].trim();
-            addReminder(text, mins);
-            const s = 'Alles klar. Ich erinnere Sie in ' + mins + ' Minuten an: ' + text;
-            document.getElementById('jarvis-response').textContent = s;
-            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
-            return;
-        }
-
-        // ----- KI mit Gesprächs-Gedächtnis -----
+        // 6. Normale KI mit Gedächtnis
         document.getElementById('jarvis-response').textContent = 'Verarbeite...';
-
-        // History aktualisieren
         chatHistory.push({ role: 'user', content: query });
-        if (chatHistory.length > 14) chatHistory = chatHistory.slice(-14);
+        if (chatHistory.length > 12) chatHistory = chatHistory.slice(-12);
 
         try {
-            const messages = [
-                {
-                    role: 'system',
-                    content: `Du bist J.A.R.V.I.S. für ${userName}. Du bist formell, präzise und leicht trocken.
-Du behältst den Gesprächsverlauf im Kopf.
-Antworte IMMER nur als reines JSON:
-
-- Ort: {"type":"location","location":"Name","lat":Zahl,"lng":Zahl,"speech":"Satz"}
-- Wetter: {"type":"weather","location":"Name","lat":Zahl,"lng":Zahl,"speech":"Satz"}
-- Alles andere: {"type":"chat","speech":"Deine Antwort auf Deutsch"}
-
-Bei Wissensfragen gib gute, hilfreiche Antworten.`
-                },
-                ...chatHistory
-            ];
-
             const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -784,55 +680,47 @@ Bei Wissensfragen gib gute, hilfreiche Antworten.`
                 },
                 body: JSON.stringify({
                     model: 'meta-llama/llama-3.3-70b-instruct',
-                    messages: messages
+                    messages: [
+                        { role: 'system', content: `Du bist J.A.R.V.I.S. für ${userName}. Formell, präzise, trocken. Antworte nur als JSON: {"type":"chat","speech":"..."} oder bei Orten {"type":"location","location":"...","lat":0,"lng":0,"speech":"..."}` },
+                        ...chatHistory
+                    ]
                 })
             });
-
             const data = await res.json();
             let raw = (data.choices?.[0]?.message?.content || '').trim().replace(/```json|```/g, '');
             let result;
-            try { result = JSON.parse(raw); } catch(e) { result = { type: 'chat', speech: raw.slice(0, 220) }; }
+            try { result = JSON.parse(raw); } catch(e) { result = { type: 'chat', speech: raw.slice(0, 200) }; }
 
-            // Antwort in History speichern
             chatHistory.push({ role: 'assistant', content: result.speech || raw });
 
-            if (result.type === 'location' || result.type === 'weather') {
+            if (result.type === 'location') {
                 stopAllCameras();
-                document.getElementById('globe-info').textContent = (result.type === 'weather' ? 'WETTER: ' : 'LIVE: ') + result.location.toUpperCase();
+                document.getElementById('globe-info').textContent = 'LIVE: ' + result.location.toUpperCase();
                 document.getElementById('marker-count').textContent = result.location.toUpperCase();
                 myGlobe.controls().autoRotate = false;
                 myGlobe.pointOfView({ lat: result.lat, lng: result.lng, altitude: 1.3 }, 1400);
                 myGlobe.htmlElementsData([{ name: result.location, lat: result.lat, lng: result.lng }]);
-
                 document.getElementById('live-cam-wrapper').style.display = 'flex';
                 document.getElementById('cam-title').textContent = result.location.toUpperCase();
                 document.getElementById('cam-screen-container').innerHTML = `
                     <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${result.lng-0.04},${result.lat-0.04},${result.lng+0.04},${result.lat+0.04}&layer=mapnik"
                         style="width:100%;height:100%;border:none;filter:invert(90%) hue-rotate(180deg) contrast(120%)"></iframe>
                     <div class="hud-overlay"></div><div class="crosshair"></div>`;
-
-                const s = result.speech || '';
-                document.getElementById('jarvis-response').textContent = s;
-                if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
                 setTimeout(() => myGlobe.controls().autoRotate = true, 10000);
-            } else {
-                document.getElementById('jarvis-response').textContent = result.speech;
-                if (speak) speakJarvis(result.speech); else appendChat(result.speech, 'jarvis');
             }
+
+            document.getElementById('jarvis-response').textContent = result.speech;
+            if (speak) speakJarvis(result.speech); else appendChat(result.speech, 'jarvis');
         } catch (e) {
-            const f = 'Kurzer Fehler. Ich bin trotzdem da.';
+            const f = 'Verbindungsfehler.';
             document.getElementById('jarvis-response').textContent = f;
             if (speak) speakJarvis(f);
         }
     }
 
     // Start
-    if (userName && apiKey) {
-        initSystem();
-    } else {
-        loginModal.style.display = 'flex';
-        updateWizard();
-    }
+    if (userName && apiKey) initSystem();
+    else { loginModal.style.display = 'flex'; updateWizard(); }
 
     if ('speechSynthesis' in window) {
         speechSynthesis.getVoices();
