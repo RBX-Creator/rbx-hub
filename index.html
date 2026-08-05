@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JARVIS // MARK-85 HUD OS</title>
     <script src="//unpkg.com/globe.gl"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <style>
         :root {
             --bg-color: #040201;
@@ -26,12 +22,8 @@
             background-image: radial-gradient(#1f0a02 1px, transparent 1px);
             background-size: 25px 25px;
             color: var(--text-main);
-            min-height: 100vh;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-x: hidden;
+            min-height: 100vh; padding: 12px;
+            display: flex; flex-direction: column; gap: 12px; overflow-x: hidden;
         }
         #login-modal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -42,11 +34,11 @@
         .login-box {
             background: var(--panel-bg); border: 1px solid var(--amber-main);
             padding: 25px; border-radius: 4px; width: 100%; max-width: 420px;
-            box-shadow: var(--hud-glow);
+            box-shadow: var(--hud-glow); max-height: 90vh; overflow-y: auto;
         }
         .login-box h2 { color: var(--text-bright); font-size: 1.0rem; margin-bottom: 4px; letter-spacing: 2px; }
         .step-indicator { font-size: 0.65rem; color: var(--amber-bright); margin-bottom: 15px; letter-spacing: 1px; }
-        .wizard-step { display: none; min-height: 120px; }
+        .wizard-step { display: none; min-height: 110px; }
         .wizard-step.active-step { display: block; }
         .step-desc { font-size: 0.8rem; line-height: 1.4; color: var(--text-main); margin-bottom: 15px; }
         .step-link {
@@ -54,10 +46,10 @@
             border: 1px solid var(--amber-main); color: var(--text-bright); text-decoration: none;
             font-size: 0.75rem; border-radius: 4px; margin-bottom: 10px; font-weight: bold;
         }
-        .input-group { margin-bottom: 15px; }
+        .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.7rem; margin-bottom: 5px; color: var(--amber-main); }
         .input-group input {
-            width: 100%; padding: 12px; background: rgba(255, 102, 0, 0.05);
+            width: 100%; padding: 11px; background: rgba(255, 102, 0, 0.05);
             border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.9rem; outline: none;
         }
         .wizard-controls { display: flex; gap: 10px; margin-top: 15px; }
@@ -74,7 +66,6 @@
         .status { color: var(--amber-bright); font-size: 0.7rem; font-weight: bold; display: none; }
         @media(min-width: 480px) { .status { display: block; } }
         .header-btn { background: rgba(255, 102, 0, 0.15); border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.65rem; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-weight: bold; }
-        .header-btn:hover { background: var(--amber-main); color: #000; }
 
         .voice-status {
             display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem;
@@ -117,9 +108,8 @@
             border-radius: 4px; padding: 8px; box-shadow: var(--hud-glow); flex-direction: column; gap: 6px;
         }
         .cam-header { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--amber-bright); }
-        .cam-screen { width: 100%; height: 240px; background: #000; border: 1px solid rgba(255,102,0,0.3); position: relative; overflow: hidden; }
-        .cam-screen video, .cam-screen canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .cam-screen canvas { z-index: 5; pointer-events: none; }
+        .cam-screen { width: 100%; height: 260px; background: #000; border: 1px solid rgba(255,102,0,0.3); position: relative; overflow: hidden; }
+        .cam-screen video { width: 100%; height: 100%; object-fit: cover; }
         .hud-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4;
             background: linear-gradient(rgba(18, 16, 14, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
@@ -131,15 +121,23 @@
             animation: spin 10s linear infinite; pointer-events: none; z-index: 6;
         }
         @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-        .gesture-label {
-            position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85);
-            border: 1px solid var(--amber-main); color: var(--amber-bright);
-            font-size: 0.65rem; padding: 4px 8px; border-radius: 3px; z-index: 10;
+
+        /* Scan Info Box */
+        .scan-info-box {
+            position: absolute; top: 12px; right: 12px; max-width: 55%;
+            background: rgba(18, 8, 2, 0.92); border: 1px solid var(--amber-main);
+            border-radius: 4px; padding: 10px 12px; z-index: 20;
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.45);
+            font-size: 0.7rem; line-height: 1.45; color: var(--text-main);
+            display: none;
         }
+        .scan-info-box h3 { color: var(--amber-bright); font-size: 0.75rem; margin-bottom: 6px; letter-spacing: 1px; }
+        .scan-info-box .price { color: #fff; font-weight: bold; margin-top: 4px; }
+        .scan-info-box .extra { color: var(--amber-bright); margin-top: 6px; font-size: 0.65rem; }
 
         .globe-card {
             background: rgba(6, 3, 1, 0.95); border: 1px solid var(--amber-main);
-            border-radius: 4px; height: 320px; width: 100%; position: relative;
+            border-radius: 4px; height: 300px; width: 100%; position: relative;
             box-shadow: var(--hud-glow); overflow: hidden;
         }
         #globe-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
@@ -149,26 +147,24 @@
             padding: 6px 10px; border: 1px solid var(--amber-main); border-radius: 3px;
             letter-spacing: 1px; z-index: 10; pointer-events: none;
         }
-        .mode-selector { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 6px; z-index: 10; flex-wrap: wrap; }
+        .mode-selector { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 6px; z-index: 10; }
         .mode-btn {
             background: rgba(18, 8, 2, 0.9); border: 1px solid var(--amber-main);
             color: var(--amber-bright); font-size: 0.55rem; padding: 6px 8px;
-            border-radius: 3px; cursor: pointer; font-weight: bold; transition: all 0.2s;
+            border-radius: 3px; cursor: pointer; font-weight: bold;
         }
-        .mode-btn:hover, .mode-btn.active { background: var(--amber-main); color: #000; box-shadow: 0 0 10px var(--amber-glow); }
+        .mode-btn.active { background: var(--amber-main); color: #000; }
 
         .swipe-section-title { font-size: 0.65rem; color: var(--amber-bright); letter-spacing: 1px; margin-top: 5px; }
         .swipe-container { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
-        .swipe-container::-webkit-scrollbar { height: 4px; }
-        .swipe-container::-webkit-scrollbar-thumb { background: var(--amber-main); border-radius: 2px; }
         .panel {
             flex: 0 0 85%; scroll-snap-align: start; background: var(--panel-bg);
             border: 1px solid rgba(255, 102, 0, 0.4); border-radius: 4px; padding: 15px;
-            box-shadow: 0 0 10px rgba(255, 102, 0, 0.15); min-height: 120px;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.15); min-height: 110px;
         }
         .panel h2 { font-size: 0.75rem; color: var(--text-bright); border-bottom: 1px solid rgba(255, 102, 0, 0.3); padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
-        .balance-val { font-size: 1.8rem; color: var(--text-bright); font-weight: 900; text-shadow: 0 0 10px var(--amber-main); }
         .sub-text { font-size: 0.65rem; opacity: 0.7; }
+        #notes-list { font-size: 0.7rem; color: var(--text-main); margin-top: 6px; max-height: 70px; overflow-y: auto; }
         @media (min-width: 768px) { .panel { flex: 0 0 45%; } }
     </style>
 </head>
@@ -178,46 +174,58 @@
     <div id="login-modal">
         <div class="login-box">
             <h2>JARVIS MARK-85 INITIALISIERUNG</h2>
-            <div class="step-indicator" id="step-indicator">SCHRITT 1 VON 4</div>
+            <div class="step-indicator" id="step-indicator">SCHRITT 1 VON 5</div>
 
             <div class="wizard-step active-step" id="step-1">
                 <p class="step-desc">Willkommen. Wie darf JARVIS Sie ansprechen?</p>
                 <div class="input-group">
                     <label>BENUTZERNAME</label>
-                    <input type="text" id="username" placeholder="z.B. Master" value="" required>
+                    <input type="text" id="username" placeholder="z.B. Master" value="">
                 </div>
             </div>
 
             <div class="wizard-step" id="step-2">
-                <p class="step-desc"><b>Schritt 1: OpenRouter-Konto</b><br>Klicke unten, um dich bei OpenRouter anzumelden.</p>
-                <a href="https://openrouter.ai" target="_blank" class="step-link">🔗 OpenRouter.ai öffnen</a>
+                <p class="step-desc">E-Mail-Konto (optional).</p>
+                <div class="input-group">
+                    <label>E-MAIL</label>
+                    <input type="email" id="useremail" placeholder="name@gmail.com" value="">
+                </div>
+                <div class="input-group">
+                    <label>APP-PASSWORT</label>
+                    <input type="password" id="emailpass" placeholder="App-Passwort" value="">
+                </div>
             </div>
 
             <div class="wizard-step" id="step-3">
-                <p class="step-desc"><b>Schritt 2: Key generieren</b><br>Klicke auf "Create Key", gib einen Namen ein und kopiere den Schlüssel.</p>
-                <a href="https://openrouter.ai/keys" target="_blank" class="step-link">🔗 Direkt zu den API-Keys</a>
+                <p class="step-desc"><b>OpenRouter-Konto</b></p>
+                <a href="https://openrouter.ai" target="_blank" class="step-link">🔗 OpenRouter.ai öffnen</a>
             </div>
 
             <div class="wizard-step" id="step-4">
-                <p class="step-desc"><b>Schritt 3: Key einfügen</b><br>Füge deinen kopierten Schlüssel hier ein.</p>
+                <p class="step-desc"><b>API-Key erstellen</b></p>
+                <a href="https://openrouter.ai/keys" target="_blank" class="step-link">🔗 Direkt zu den Keys</a>
+            </div>
+
+            <div class="wizard-step" id="step-5">
+                <p class="step-desc"><b>Key einfügen</b></p>
                 <div class="input-group">
                     <label>OPENROUTER API KEY</label>
-                    <input type="password" id="apikey" placeholder="sk-or-v1-..." required>
+                    <input type="password" id="apikey" placeholder="sk-or-v1-..." value="">
                 </div>
             </div>
 
             <div class="wizard-controls">
-                <button type="button" class="nav-btn" id="prev-btn" style="display: none;">ZURÜCK</button>
+                <button type="button" class="nav-btn" id="prev-btn" style="display:none;">ZURÜCK</button>
                 <button type="button" class="login-btn" id="next-btn">WEITER</button>
             </div>
         </div>
     </div>
 
-    <!-- CHAT MODAL -->
+    <!-- CHAT -->
     <div id="chat-modal">
         <div class="chat-container">
             <div class="chat-header-bar">
-                <span>💬 SILENTER CHAT-MODUS</span>
+                <span>💬 SILENTER CHAT</span>
                 <button class="close-chat-btn" id="close-chat-btn">SCHLIESSEN</button>
             </div>
             <div class="chat-messages" id="chat-messages-box">
@@ -230,7 +238,6 @@
         </div>
     </div>
 
-    <!-- HEADER -->
     <header>
         <div class="user-greeting" id="user-display">HALLO</div>
         <div class="header-right">
@@ -240,7 +247,6 @@
         </div>
     </header>
 
-    <!-- VOICE STATUS -->
     <div class="voice-status">
         <div class="status-header">
             <div class="status-left">
@@ -252,16 +258,17 @@
         <div class="response-text" id="jarvis-response">System bereit.</div>
     </div>
 
-    <!-- LIVE CAM -->
+    <!-- CAMERA / SCAN -->
     <div class="live-cam-box" id="live-cam-wrapper">
         <div class="cam-header">
             <span id="cam-title">HELMET CAM // LIVE FEED</span>
             <span id="cam-rec">REC ● LIVE</span>
         </div>
-        <div class="cam-screen" id="cam-screen-container"></div>
+        <div class="cam-screen" id="cam-screen-container">
+            <!-- video + overlays -->
+        </div>
     </div>
 
-    <!-- GLOBE -->
     <div class="globe-card">
         <div class="globe-target-info" id="globe-info">STATUS: RADAR AKTIV</div>
         <div id="globe-container"></div>
@@ -274,58 +281,60 @@
     <div class="swipe-section-title">SYSTEM PANELS (WISCHEN) ◄ ►</div>
     <div class="swipe-container">
         <div class="panel">
-            <h2>FINANZEN // GUTHABEN</h2>
-            <div class="sub-text">VERFÜGBAR</div>
-            <div class="balance-val">10,00 €</div>
-            <div class="sub-text" style="color:#ffaa00;margin-top:5px;">ATOMISCH GESICHERT</div>
+            <h2>NOTIZEN & AUFGABEN</h2>
+            <div class="sub-text">GESPEICHERT</div>
+            <div id="notes-list">Noch keine Notizen.</div>
         </div>
         <div class="panel">
-            <h2>SYSTEM STATUS // HUD</h2>
+            <h2>SYSTEM STATUS</h2>
             <div class="sub-text">POWER CORE: <b style="color:#ffaa00">100% ONLINE</b></div>
-            <div class="sub-text" style="margin-top:4px;">INTEGRITÄT: <b style="color:#fff">99.8%</b></div>
-            <div class="sub-text" style="margin-top:4px;">AKTIVER ORT: <b style="color:#ffaa00" id="marker-count">KEINER</b></div>
+            <div class="sub-text" style="margin-top:4px;">ORT: <b style="color:#ffaa00" id="marker-count">KEINER</b></div>
             <div class="sub-text" style="margin-top:4px;">WETTER: <b style="color:#ffaa00" id="weather-display">—</b></div>
-            <div class="sub-text" style="margin-top:4px;">GESTE: <b style="color:#ffaa00" id="gesture-status">—</b></div>
+            <div class="sub-text" style="margin-top:4px;">E-MAIL: <b style="color:#ffaa00" id="email-status">NICHT VERBUNDEN</b></div>
         </div>
     </div>
 
 <script>
-    // ========== LOGIN WIZARD (GEFIXT) ==========
+    // ========== STATE ==========
     let currentStep = 1;
-    const totalSteps = 4;
+    const totalSteps = 5;
     let userName = localStorage.getItem('jarvis_user_name') || '';
     let apiKey = localStorage.getItem('jarvis_openrouter_key') || '';
+    let userEmail = localStorage.getItem('jarvis_email') || '';
+    let notes = JSON.parse(localStorage.getItem('jarvis_notes') || '[]');
+    let reminders = JSON.parse(localStorage.getItem('jarvis_reminders') || '[]');
+    let chatHistory = [];               // Gesprächs-Gedächtnis
+    let currentStream = null;
+    let isScanMode = false;             // true = Rückkamera (Scanmodul)
+    let isHelmetMode = false;           // true = Frontkamera
+    let lastScanResult = null;          // für Follow-up-Fragen
 
+    // ========== LOGIN ==========
     const loginModal = document.getElementById('login-modal');
-    const userDisplay = document.getElementById('user-display');
     const nextBtn = document.getElementById('next-btn');
     const prevBtn = document.getElementById('prev-btn');
-    const stepIndicator = document.getElementById('step-indicator');
 
     function updateWizard() {
         document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active-step'));
         document.getElementById('step-' + currentStep).classList.add('active-step');
-        stepIndicator.textContent = 'SCHRITT ' + currentStep + ' VON ' + totalSteps;
+        document.getElementById('step-indicator').textContent = 'SCHRITT ' + currentStep + ' VON ' + totalSteps;
         prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
         nextBtn.textContent = currentStep === totalSteps ? 'SYSTEM STARTEN' : 'WEITER';
     }
 
-    nextBtn.addEventListener('click', function() {
+    nextBtn.addEventListener('click', () => {
         if (currentStep === 1) {
             const name = document.getElementById('username').value.trim();
-            if (!name) {
-                alert('Bitte einen Namen eingeben.');
-                return;
-            }
+            if (!name) { alert('Bitte Namen eingeben.'); return; }
             userName = name;
         }
-
+        if (currentStep === 2) {
+            userEmail = document.getElementById('useremail').value.trim();
+            localStorage.setItem('jarvis_email', userEmail);
+        }
         if (currentStep === totalSteps) {
             const key = document.getElementById('apikey').value.trim();
-            if (!key) {
-                alert('API-Schlüssel ist erforderlich.');
-                return;
-            }
+            if (!key) { alert('API-Key erforderlich.'); return; }
             apiKey = key;
             localStorage.setItem('jarvis_user_name', userName);
             localStorage.setItem('jarvis_openrouter_key', apiKey);
@@ -336,19 +345,15 @@
         }
     });
 
-    prevBtn.addEventListener('click', function() {
-        if (currentStep > 1) {
-            currentStep--;
-            updateWizard();
-        }
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 1) { currentStep--; updateWizard(); }
     });
 
-    document.getElementById('logout-btn').addEventListener('click', function() {
+    document.getElementById('logout-btn').addEventListener('click', () => {
         localStorage.clear();
         location.reload();
     });
 
-    // Chat
     document.getElementById('open-chat-btn').addEventListener('click', () => {
         document.getElementById('chat-modal').style.display = 'flex';
     });
@@ -356,13 +361,31 @@
         document.getElementById('chat-modal').style.display = 'none';
     });
 
-    // ========== RESTLICHE FUNKTIONEN ==========
-    let currentStream = null;
-    let hands = null;
-    let camera = null;
-    let lastGesture = null;
-    let gestureCooldown = 0;
+    // ========== NOTIZEN ==========
+    function saveNotes() {
+        localStorage.setItem('jarvis_notes', JSON.stringify(notes));
+        renderNotes();
+    }
+    function renderNotes() {
+        const el = document.getElementById('notes-list');
+        el.innerHTML = notes.length === 0 ? 'Noch keine Notizen.' : notes.map((n,i) => (i+1)+'. '+n).join('<br>');
+    }
+    function addNote(text) {
+        notes.push(text);
+        saveNotes();
+    }
 
+    function addReminder(text, minutes) {
+        const fireAt = Date.now() + minutes * 60000;
+        reminders.push({ text, fireAt });
+        localStorage.setItem('jarvis_reminders', JSON.stringify(reminders));
+        setTimeout(() => {
+            speakJarvis('Erinnerung: ' + text);
+            document.getElementById('jarvis-response').textContent = 'Erinnerung: ' + text;
+        }, minutes * 60000);
+    }
+
+    // ========== INIT ==========
     function getTimeGreeting() {
         const h = new Date().getHours();
         if (h < 12) return 'Guten Morgen';
@@ -372,10 +395,15 @@
 
     function initSystem() {
         if (userName && apiKey) {
-            userDisplay.textContent = 'HALLO, ' + userName.toUpperCase();
+            document.getElementById('user-display').textContent = 'HALLO, ' + userName.toUpperCase();
             loginModal.style.display = 'none';
+            renderNotes();
+            if (userEmail) document.getElementById('email-status').textContent = 'VERBUNDEN';
+
             setTimeout(() => {
-                speakJarvis(getTimeGreeting() + ', ' + userName + '. Alle Systeme sind online. Ich höre zu.');
+                let msg = getTimeGreeting() + ', ' + userName + '. Alle Systeme online.';
+                if (notes.length) msg += ' Sie haben ' + notes.length + ' Notizen.';
+                speakJarvis(msg);
                 startListening();
             }, 500);
         } else {
@@ -391,11 +419,11 @@
             const u = new SpeechSynthesisUtterance(text.replace(/\[.*?\]/g, '').trim());
             u.lang = 'de-DE';
             u.pitch = 0.72;
-            u.rate = 0.98;
-            const voices = window.speechSynthesis.getVoices();
+            u.rate = 0.97;
+            const voices = speechSynthesis.getVoices();
             const de = voices.find(v => v.lang.startsWith('de'));
             if (de) u.voice = de;
-            window.speechSynthesis.speak(u);
+            speechSynthesis.speak(u);
         }
     }
 
@@ -403,7 +431,7 @@
         speakJarvis('Systemtest erfolgreich, ' + userName + '.');
     }
 
-    // Globe
+    // ========== GLOBE ==========
     const myGlobe = Globe()(document.getElementById('globe-container'))
         .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
         .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
@@ -417,7 +445,7 @@
             return el;
         });
     myGlobe.controls().autoRotate = true;
-    myGlobe.controls().autoRotateSpeed = 0.4;
+    myGlobe.controls().autoRotateSpeed = 0.35;
 
     function setGlobeMode(mode) {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -431,7 +459,7 @@
         }
     }
 
-    // Speech
+    // ========== SPEECH ==========
     function startListening() {
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) return;
@@ -464,129 +492,288 @@
         d.className = 'chat-msg ' + who;
         d.textContent = (who === 'user' ? userName + ': ' : 'JARVIS: ') + text;
         document.getElementById('chat-messages-box').appendChild(d);
-        document.getElementById('chat-messages-box').scrollTop = 9999;
+        document.getElementById('chat-messages-box').scrollTop = 99999;
     }
 
-    function stopCamera() {
-        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
-        currentStream = null;
-        if (camera) { try { camera.stop(); } catch(e){} camera = null; }
-        hands = null;
-    }
-
-    // Hand Tracking
-    function onHandResults(results) {
-        const canvas = document.getElementById('hand-canvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        ctx.save();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            for (const lm of results.multiHandLandmarks) {
-                drawConnectors(ctx, lm, HAND_CONNECTIONS, { color: '#ff6600', lineWidth: 2 });
-                drawLandmarks(ctx, lm, { color: '#ffaa00', lineWidth: 1, radius: 3 });
-                const g = detectGesture(lm);
-                if (g && g !== lastGesture && Date.now() > gestureCooldown) {
-                    lastGesture = g;
-                    gestureCooldown = Date.now() + 1800;
-                    handleGesture(g);
-                }
-            }
-        } else {
-            lastGesture = null;
-            document.getElementById('gesture-status').textContent = '—';
+    // ========== CAMERA ==========
+    function stopAllCameras() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(t => t.stop());
+            currentStream = null;
         }
-        ctx.restore();
+        isScanMode = false;
+        isHelmetMode = false;
+        document.getElementById('live-cam-wrapper').style.display = 'none';
+        document.getElementById('cam-screen-container').innerHTML = '';
+        lastScanResult = null;
     }
 
-    function detectGesture(lm) {
-        const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-        const wrist = lm[0];
-        const closed = dist(lm[8], lm[5]) < 0.08 && dist(lm[12], lm[9]) < 0.08 && dist(lm[16], lm[13]) < 0.08;
-        if (closed) return 'fist';
-        const open = dist(lm[8], wrist) > 0.25 && dist(lm[12], wrist) > 0.25 && dist(lm[16], wrist) > 0.22;
-        if (open) return 'open';
-        const peace = dist(lm[8], wrist) > 0.22 && dist(lm[12], wrist) > 0.22 && dist(lm[16], lm[13]) < 0.1;
-        if (peace) return 'peace';
-        const thumb = lm[4].y < lm[3].y && dist(lm[8], lm[5]) < 0.1;
-        if (thumb) return 'thumbsup';
-        return null;
-    }
-
-    function handleGesture(g) {
-        const el = document.getElementById('gesture-status');
-        let s = '';
-        if (g === 'open') { el.textContent = 'OFFENE HAND'; s = 'Repulsoren bereit, Sir.'; }
-        if (g === 'fist') { el.textContent = 'FAUST'; s = 'Energie geladen. Power Core 100 Prozent.'; }
-        if (g === 'peace') {
-            el.textContent = 'PEACE';
-            s = 'Wechsle Anzeige-Modus.';
-            const isTech = document.querySelector('.mode-btn.active')?.textContent.includes('TECH');
-            setGlobeMode(isTech ? 'dark' : 'tech');
-        }
-        if (g === 'thumbsup') { el.textContent = 'DAUMEN HOCH'; s = 'Systemstatus optimal, ' + userName + '.'; }
-        if (s) {
-            document.getElementById('jarvis-response').textContent = s;
-            speakJarvis(s);
-        }
-    }
-
-    async function startHelmetCam(speech) {
-        stopCamera();
+    async function startCamera(facingMode, title) {
+        stopAllCameras();
         const box = document.getElementById('live-cam-wrapper');
         const cont = document.getElementById('cam-screen-container');
         box.style.display = 'flex';
-        document.getElementById('cam-title').textContent = 'HELMET CAM // LIVE FEED';
+        document.getElementById('cam-title').textContent = title;
 
         cont.innerHTML = `
-            <video id="helmet-video" autoplay playsinline muted style="transform:scaleX(-1)"></video>
-            <canvas id="hand-canvas" style="transform:scaleX(-1)"></canvas>
+            <video id="live-video" autoplay playsinline muted></video>
             <div class="hud-overlay"></div>
             <div class="crosshair"></div>
-            <div class="gesture-label">Hand-Tracking aktiv</div>
+            <div class="scan-info-box" id="scan-info-box"></div>
         `;
 
-        const video = document.getElementById('helmet-video');
-        const canvas = document.getElementById('hand-canvas');
-
+        const video = document.getElementById('live-video');
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false });
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+                audio: false
+            });
             currentStream = stream;
             video.srcObject = stream;
-            video.onloadedmetadata = () => { canvas.width = video.videoWidth; canvas.height = video.videoHeight; };
-
-            hands = new Hands({ locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/' + f });
-            hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.6 });
-            hands.onResults(onHandResults);
-
-            camera = new Camera(video, {
-                onFrame: async () => { if (hands) await hands.send({ image: video }); },
-                width: 640, height: 480
-            });
-            camera.start();
-
-            if (speech) document.getElementById('jarvis-response').textContent = speech;
         } catch (e) {
             cont.innerHTML = '<div style="color:#ff6600;padding:20px;text-align:center">Kamera nicht verfügbar</div>';
         }
     }
 
-    async function fetchWeather(lat, lng) {
-        try {
-            const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code&timezone=auto`);
-            const d = await r.json();
-            const map = {0:'Klar',1:'Klar',2:'Bewölkt',3:'Bewölkt',61:'Regen',63:'Regen',80:'Schauer',95:'Gewitter'};
-            return { temp: Math.round(d.current.temperature_2m), condition: map[d.current.weather_code] || '—' };
-        } catch(e) { return null; }
+    async function startHelmetCam() {
+        isHelmetMode = true;
+        await startCamera('user', 'HELMET CAM // LIVE FEED');
     }
 
-    async function processCommand(query, speak) {
-        if (!apiKey) return;
-        document.getElementById('jarvis-response').textContent = 'Verarbeite...';
+    async function startScanModul() {
+        isScanMode = true;
+        await startCamera('environment', 'SCANMODUL // RÜCKKAMERA');
+    }
+
+    // ========== SCAN (Vision) ==========
+    async function performScan(extraRequest = '') {
+        if (!isScanMode) {
+            speakJarvis('Scanmodul ist nicht aktiv. Sagen Sie zuerst „Scanmodul“.');
+            return;
+        }
+
+        const video = document.getElementById('live-video');
+        if (!video || !video.videoWidth) {
+            speakJarvis('Kamera noch nicht bereit.');
+            return;
+        }
+
+        document.getElementById('jarvis-response').textContent = 'Scanne Objekt...';
+
+        // Frame capturen
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
 
         try {
+            const messages = [
+                {
+                    role: 'system',
+                    content: `Du bist J.A.R.V.I.S. Analysiere das Bild eines Produkts / Gegenstands.
+Antworte NUR als JSON:
+{
+  "name": "Name des Objekts",
+  "category": "Essen|Möbel|Elektronik|Kleidung|Sonstiges",
+  "description": "Kurze Beschreibung auf Deutsch (1-2 Sätze)",
+  "price": "ungefährer Preis in Euro z.B. 1,29 € oder 89-150 €",
+  "ingredients": "bei Essen: wichtige Zutaten, sonst leer",
+  "calories": "bei Essen: ungefähre kcal pro 100g oder Portion, sonst leer",
+  "extra": "zusätzliche sinnvolle Info"
+}
+Sei präzise und realistisch.`
+                }
+            ];
+
+            // Gesprächsverlauf für Kontext (letzte Scans)
+            if (lastScanResult) {
+                messages.push({ role: 'assistant', content: JSON.stringify(lastScanResult) });
+            }
+            if (extraRequest) {
+                messages.push({ role: 'user', content: 'Zusätzliche Anfrage: ' + extraRequest });
+            }
+
+            messages.push({
+                role: 'user',
+                content: [
+                    { type: 'text', text: extraRequest ? 'Analysiere das Bild und berücksichtige: ' + extraRequest : 'Was ist das für ein Produkt/Gegenstand? Gib Name, Preis und Infos.' },
+                    { type: 'image_url', image_url: { url: dataUrl } }
+                ]
+            });
+
+            const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + apiKey.trim(),
+                    'HTTP-Referer': location.href,
+                    'X-Title': 'JARVIS Scan',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'google/gemma-4-31b-it:free',
+                    messages: messages,
+                    max_tokens: 600
+                })
+            });
+
+            const data = await res.json();
+            let raw = (data.choices?.[0]?.message?.content || '').trim().replace(/```json|```/g, '');
+            let result;
+            try { result = JSON.parse(raw); } catch(e) {
+                result = { name: 'Unbekannt', description: raw.slice(0, 120), price: '—', category: 'Sonstiges' };
+            }
+
+            lastScanResult = result;
+            showScanInfo(result);
+
+            const speech = result.name + '. ' + (result.description || '') + (result.price ? ' Ungefährer Preis: ' + result.price : '');
+            document.getElementById('jarvis-response').textContent = speech;
+            speakJarvis(speech);
+
+            // In Chat-History speichern
+            chatHistory.push({ role: 'user', content: 'Scan: ' + (extraRequest || 'Objekt analysieren') });
+            chatHistory.push({ role: 'assistant', content: speech });
+            if (chatHistory.length > 12) chatHistory = chatHistory.slice(-12);
+
+        } catch (err) {
+            console.error(err);
+            speakJarvis('Scan fehlgeschlagen. Versuchen Sie es erneut.');
+            document.getElementById('jarvis-response').textContent = 'Scan fehlgeschlagen.';
+        }
+    }
+
+    function showScanInfo(data) {
+        const box = document.getElementById('scan-info-box');
+        if (!box) return;
+
+        let html = '<h3>' + (data.name || 'OBJEKT') + '</h3>';
+        html += '<div>' + (data.description || '') + '</div>';
+        if (data.price) html += '<div class="price">≈ ' + data.price + '</div>';
+        if (data.ingredients) html += '<div class="extra">Zutaten: ' + data.ingredients + '</div>';
+        if (data.calories) html += '<div class="extra">Kalorien: ' + data.calories + '</div>';
+        if (data.extra) html += '<div class="extra">' + data.extra + '</div>';
+
+        box.innerHTML = html;
+        box.style.display = 'block';
+    }
+
+    // ========== HAUPT-LOGIK ==========
+    async function processCommand(query, speak) {
+        if (!apiKey) return;
+
+        const q = query.toLowerCase().trim();
+
+        // ----- Lokale Befehle -----
+        if (q.includes('scanmodul schließen') || q.includes('scanmodul aus') || q.includes('scan modul schließen')) {
+            stopAllCameras();
+            const s = 'Scanmodul deaktiviert.';
+            document.getElementById('jarvis-response').textContent = s;
+            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            return;
+        }
+
+        if (q.includes('scanmodul') || q.includes('starte scanmodul') || q.includes('scan modul')) {
+            await startScanModul();
+            const s = 'Scanmodul online. Richten Sie die Kamera auf ein Objekt und sagen Sie „scann“.';
+            document.getElementById('jarvis-response').textContent = s;
+            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            return;
+        }
+
+        if ((q === 'scann' || q === 'scan' || q.startsWith('scann ') || q.startsWith('scan ')) && isScanMode) {
+            // Extra-Anfrage extrahieren
+            let extra = '';
+            if (q.includes('kalorien') || q.includes('kcal')) extra = 'Kalorien und Nährwerte';
+            else if (q.includes('zutaten') || q.includes('inhaltsstoffe')) extra = 'Zutatenliste';
+            else if (q.includes('preis') || q.includes('kostet')) extra = 'genauerer Preis';
+            else if (q.length > 6) extra = q.replace(/^(scann|scan)\s*/i, '');
+
+            await performScan(extra);
+            return;
+        }
+
+        if (q.includes('augen zu') || q.includes('mache deine augen zu') || q.includes('kamera aus') || q.includes('helmet aus')) {
+            stopAllCameras();
+            const s = 'Helmet-Cam deaktiviert. Augen geschlossen.';
+            document.getElementById('jarvis-response').textContent = s;
+            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            return;
+        }
+
+        if (q.includes('öffne deine augen') || q.includes('helmet cam') || q.includes('frontkamera')) {
+            await startHelmetCam();
+            const s = 'Helmet-Cam online. Sichtverhältnisse optimal.';
+            document.getElementById('jarvis-response').textContent = s;
+            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            return;
+        }
+
+        // Notizen
+        if (q.startsWith('merke dir') || q.startsWith('merk dir') || q.startsWith('notiere')) {
+            const note = q.replace(/^(merke dir|merk dir|notiere)\s*/i, '').trim();
+            if (note) {
+                addNote(note);
+                const s = 'Notiert: „' + note + '“.';
+                document.getElementById('jarvis-response').textContent = s;
+                if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            }
+            return;
+        }
+
+        if (q.includes('meine notizen') || q.includes('was habe ich notiert') || q.includes('zeig notizen')) {
+            const s = notes.length === 0 ? 'Keine Notizen vorhanden.' : 'Ihre Notizen: ' + notes.join('. ');
+            document.getElementById('jarvis-response').textContent = s;
+            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            return;
+        }
+
+        if (q.includes('lösche alle notizen') || q.includes('notizen löschen')) {
+            notes = [];
+            saveNotes();
+            const s = 'Alle Notizen gelöscht.';
+            document.getElementById('jarvis-response').textContent = s;
+            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            return;
+        }
+
+        // Erinnerung
+        const remindMatch = q.match(/erinnere mich in (\d+)\s*(minute|minuten|min).*?(?:an|auf)\s+(.+)/i);
+        if (remindMatch) {
+            const mins = parseInt(remindMatch[1]);
+            const text = remindMatch[3].trim();
+            addReminder(text, mins);
+            const s = 'Alles klar. Ich erinnere Sie in ' + mins + ' Minuten an: ' + text;
+            document.getElementById('jarvis-response').textContent = s;
+            if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
+            return;
+        }
+
+        // ----- KI mit Gesprächs-Gedächtnis -----
+        document.getElementById('jarvis-response').textContent = 'Verarbeite...';
+
+        // History aktualisieren
+        chatHistory.push({ role: 'user', content: query });
+        if (chatHistory.length > 14) chatHistory = chatHistory.slice(-14);
+
+        try {
+            const messages = [
+                {
+                    role: 'system',
+                    content: `Du bist J.A.R.V.I.S. für ${userName}. Du bist formell, präzise und leicht trocken.
+Du behältst den Gesprächsverlauf im Kopf.
+Antworte IMMER nur als reines JSON:
+
+- Ort: {"type":"location","location":"Name","lat":Zahl,"lng":Zahl,"speech":"Satz"}
+- Wetter: {"type":"weather","location":"Name","lat":Zahl,"lng":Zahl,"speech":"Satz"}
+- Alles andere: {"type":"chat","speech":"Deine Antwort auf Deutsch"}
+
+Bei Wissensfragen gib gute, hilfreiche Antworten.`
+                },
+                ...chatHistory
+            ];
+
             const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -597,33 +784,24 @@
                 },
                 body: JSON.stringify({
                     model: 'meta-llama/llama-3.3-70b-instruct',
-                    messages: [
-                        {
-                            role: 'system',
-                            content: `Du bist J.A.R.V.I.S. für ${userName}. Antworte NUR als JSON.
-Typen:
-- Ort: {"type":"location","location":"Name","lat":Zahl,"lng":Zahl,"speech":"Satz"}
-- Wetter: {"type":"weather","location":"Name","lat":Zahl,"lng":Zahl,"speech":"Satz"}
-- Kamera / "öffne deine Augen": {"type":"camera","speech":"Satz"}
-- Sonst: {"type":"chat","speech":"Satz"}
-Bei "öffne deine Augen" immer type camera.`
-                        },
-                        { role: 'user', content: query }
-                    ]
+                    messages: messages
                 })
             });
 
             const data = await res.json();
-            let raw = data.choices[0].message.content.trim().replace(/```json|```/g, '');
+            let raw = (data.choices?.[0]?.message?.content || '').trim().replace(/```json|```/g, '');
             let result;
-            try { result = JSON.parse(raw); } catch(e) { result = { type: 'chat', speech: raw.slice(0, 150) }; }
+            try { result = JSON.parse(raw); } catch(e) { result = { type: 'chat', speech: raw.slice(0, 220) }; }
+
+            // Antwort in History speichern
+            chatHistory.push({ role: 'assistant', content: result.speech || raw });
 
             if (result.type === 'location' || result.type === 'weather') {
-                stopCamera();
+                stopAllCameras();
                 document.getElementById('globe-info').textContent = (result.type === 'weather' ? 'WETTER: ' : 'LIVE: ') + result.location.toUpperCase();
                 document.getElementById('marker-count').textContent = result.location.toUpperCase();
                 myGlobe.controls().autoRotate = false;
-                myGlobe.pointOfView({ lat: result.lat, lng: result.lng, altitude: 1.3 }, 1500);
+                myGlobe.pointOfView({ lat: result.lat, lng: result.lng, altitude: 1.3 }, 1400);
                 myGlobe.htmlElementsData([{ name: result.location, lat: result.lat, lng: result.lng }]);
 
                 document.getElementById('live-cam-wrapper').style.display = 'flex';
@@ -633,25 +811,16 @@ Bei "öffne deine Augen" immer type camera.`
                         style="width:100%;height:100%;border:none;filter:invert(90%) hue-rotate(180deg) contrast(120%)"></iframe>
                     <div class="hud-overlay"></div><div class="crosshair"></div>`;
 
-                const w = await fetchWeather(result.lat, result.lng);
-                if (w) document.getElementById('weather-display').textContent = w.temp + '°C • ' + w.condition;
-
-                const speech = result.speech + (w ? ` ${w.temp} Grad, ${w.condition}.` : '');
-                document.getElementById('jarvis-response').textContent = speech;
-                if (speak) speakJarvis(speech); else appendChat(speech, 'jarvis');
-                setTimeout(() => myGlobe.controls().autoRotate = true, 12000);
-            }
-            else if (result.type === 'camera') {
-                const s = result.speech || 'Helmet-Cam online. Sichtverhältnisse optimal.';
-                await startHelmetCam(s);
+                const s = result.speech || '';
+                document.getElementById('jarvis-response').textContent = s;
                 if (speak) speakJarvis(s); else appendChat(s, 'jarvis');
-            }
-            else {
+                setTimeout(() => myGlobe.controls().autoRotate = true, 10000);
+            } else {
                 document.getElementById('jarvis-response').textContent = result.speech;
                 if (speak) speakJarvis(result.speech); else appendChat(result.speech, 'jarvis');
             }
         } catch (e) {
-            const f = 'Systemfehler. Ich bin trotzdem da.';
+            const f = 'Kurzer Fehler. Ich bin trotzdem da.';
             document.getElementById('jarvis-response').textContent = f;
             if (speak) speakJarvis(f);
         }
