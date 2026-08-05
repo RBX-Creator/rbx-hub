@@ -380,7 +380,7 @@
             try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. OPENROUTER INTELLIGENZ (GARANTIERT KOSTENLOSES MODELL) ---
+        // --- 4. OPENROUTER INTELLIGENZ ---
         const REGIONS = {
             "europa": { lat: 50.0, lon: 10.0, name: "Europa" },
             "asien": { lat: 34.0, lon: 100.0, name: "Asien" },
@@ -418,7 +418,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "google/gemini-2.0-flash-lite-preview-02-05:free", // KOSTENLOSES MODELL GEWÄHLT!
+                        model: "meta-llama/llama-3.3-70b-instruct:free",
                         messages: [
                             { role: "system", content: systemPrompt },
                             { role: "user", content: userQuery }
@@ -427,7 +427,9 @@
                 });
 
                 if (!response.ok) {
-                    jarvisResponse.textContent = `Fehler (${response.status}): Key / API prüfen.`;
+                    const errData = await response.json().catch(() => ({}));
+                    const msg = errData.error?.message || response.statusText;
+                    jarvisResponse.textContent = `Fehler (${response.status}): ${msg}`;
                     return;
                 }
 
@@ -461,15 +463,6 @@
                     if (match) {
                         showSingleLocation(match[1].trim().toLowerCase());
                         reply = reply.replace(/\[SHOW_LOCATION:.*?\]/, '');
-                    }
-                }
-
-                const queryLower = userQuery.toLowerCase();
-                if ((queryLower.includes("von") && queryLower.includes("nach")) || queryLower.includes("wie lange")) {
-                    if (queryLower.includes("asien") && queryLower.includes("europa")) drawRouteOnGlobe("asien", "europa");
-                } else if (queryLower.includes("wo ist") || queryLower.includes("wo liegt")) {
-                    for(let r in REGIONS) {
-                        if(queryLower.includes(r)) showSingleLocation(r);
                     }
                 }
 
