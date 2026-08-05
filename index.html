@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v13.0</title>
+    <title>JARVIS // ACTIVE OS v14.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -570,7 +570,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "meta-llama/llama-3.3-70b-instruct:free",
+                        model: "openrouter/auto",
                         messages: [
                             { role: "system", content: systemPrompt },
                             { role: "user", content: userQuery }
@@ -585,7 +585,7 @@
                     if (response.status === 401) {
                         speechIndicator.textContent = "API Key ungültig! Bitte oben auf [LOGOUT] klicken und erneuern.";
                     } else {
-                        speechIndicator.textContent = `API Fehler (${response.status}): Key prüfen.`;
+                        speechIndicator.textContent = `API Fehler (${response.status}): Bitte Key erneut eingeben.`;
                     }
                     return;
                 }
@@ -630,7 +630,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. 3D GLOBUS RENDERER (DUNKLER, DEZENTER LOOK) ---
+        // --- 5. 3D GLOBUS RENDERER ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
