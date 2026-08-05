@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v10.0</title>
+    <title>JARVIS // ACTIVE OS v11.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -336,19 +336,19 @@
 
             <!-- SCHRITT 2 -->
             <div class="wizard-step" id="step-2">
-                <p class="step-desc"><b>Schritt 1 zur API:</b> Gehe auf die Website von OpenAI und melde dich an oder erstelle einen kostenlosen Account.</p>
+                <p class="step-desc"><b>Schritt 1 zur API:</b> Gehe auf die Website von OpenAI und melde dich an oder erstelle einen Account.</p>
                 <a href="https://platform.openai.com" target="_blank" class="step-link">🔗 platform.openai.com öffnen</a>
             </div>
 
             <!-- SCHRITT 3 -->
             <div class="wizard-step" id="step-3">
-                <p class="step-desc"><b>Schritt 2 zur API:</b> Navigiere zu "API Keys", klicke auf <b>"Create new secret key"</b>, vergib einen Namen und kopiere den Schlüssel.</p>
+                <p class="step-desc"><b>Schritt 2 zur API:</b> Navigiere zu "API Keys", klicke auf <b>"Create new secret key"</b> und kopiere den Key.</p>
                 <a href="https://platform.openai.com/api-keys" target="_blank" class="step-link">🔗 Direkt zu den API-Keys</a>
             </div>
 
             <!-- SCHRITT 4 -->
             <div class="wizard-step" id="step-4">
-                <p class="step-desc"><b>Schritt 3 zur API:</b> Füge deinen kopierten Key (beginnt mit <code>sk-...</code>) hier ein, um das KI-Gehirn zu aktivieren.</p>
+                <p class="step-desc"><b>Schritt 3 zur API:</b> Füge deinen kopierten Key (beginnt mit <code>sk-...</code>) hier ein.</p>
                 <div class="input-group">
                     <label>OPENAI API KEY</label>
                     <input type="password" id="apikey" placeholder="sk-..." required>
@@ -476,7 +476,7 @@
             }
         });
 
-        // LOGOUT FUNCTION
+        // LOGOUT
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('jarvis_user_name');
             localStorage.removeItem('jarvis_openai_key');
@@ -544,19 +544,20 @@
             try { recognition.start(); } catch(e){}
         }
 
-        // --- 4. CHATGPT ANBINDUNG ---
+        // --- 4. CHATGPT ANBINDUNG MIT VOLLER DIAGNOSE ---
         async function processVoiceCommandWithChatGPT(userQuery) {
             if (!apiKey) {
-                speechIndicator.textContent = "Kein API-Key vorhanden!";
+                speechIndicator.textContent = "Kein API-Key vorhanden! Klicke auf Logout.";
                 return;
             }
 
+            const cleanKey = apiKey.trim();
+
             const systemPrompt = `
-            Du bist JARVIS, das hochentwickelte KI-System.
-            Der Benutzer heißt ${userName}. Antworte kurz und präzise auf Deutsch.
-            DU KANNST DIE WEBSEITE STEUERN:
-            - Guthaben ändern: [SET_BALANCE: Betrag] Deine Antwort.
-            - Neues Widget: [ADD_WIDGET: Titel | Inhalt] Deine Antwort.
+            Du bist JARVIS, das KI-System.
+            Der Benutzer heißt ${userName}. Antworte kurz auf Deutsch.
+            Guthaben ändern: [SET_BALANCE: Betrag] Antwort.
+            Neues Widget: [ADD_WIDGET: Titel | Inhalt] Antwort.
             `;
 
             try {
@@ -564,7 +565,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey.trim()}`
+                        'Authorization': `Bearer ${cleanKey}`
                     },
                     body: JSON.stringify({
                         model: "gpt-3.5-turbo",
@@ -578,8 +579,15 @@
 
                 if (!response.ok) {
                     const errData = await response.json().catch(() => ({}));
-                    console.error("OpenAI Error:", errData);
-                    speechIndicator.textContent = `Fehler: ${errData.error?.message || 'Ungültiger API-Key oder Guthaben erschöpft.'}`;
+                    console.error("OpenAI Details:", errData);
+                    
+                    if (response.status === 401) {
+                        speechIndicator.textContent = "API-Key ungültig! Bitte oben auf [LOGOUT] klicken und Key neu eingeben.";
+                    } else if (response.status === 429) {
+                        speechIndicator.textContent = "OpenAI Guthaben aufgebraucht (Quota Exceeded)!";
+                    } else {
+                        speechIndicator.textContent = `API Fehler (${response.status}): ${errData.error?.message || 'Unbekannt'}`;
+                    }
                     return;
                 }
 
@@ -606,8 +614,8 @@
                 speakJarvis(reply);
 
             } catch (err) {
-                console.error(err);
-                speechIndicator.textContent = "Netzwerkfehler zu OpenAI!";
+                console.error("Fetch Exception:", err);
+                speechIndicator.textContent = "Netzwerk/CORS Blockade. Bitte API Key auf [LOGOUT] prüfen.";
             }
         }
 
@@ -623,7 +631,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. 3D GLOBUS RENDERER (DEZENT & ORIGINALER LOOK) ---
+        // --- 5. 3D GLOBUS RENDERER (ORIGINALER DUNKLER LOOK) ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -641,9 +649,10 @@
         const globeGroup = new THREE.Group();
         scene.add(globeGroup);
 
-        const sphereGeo = new THREE.SphereGeometry(100, 20, 20);
+        const sphereGeo = new THREE.SphereGeometry(100, 22, 22);
+        // Dunkle Farbe & geringe Deckkraft wie zu Beginn
         const sphereMat = new THREE.MeshBasicMaterial({ 
-            color: 0xff7700, 
+            color: 0x441800, 
             wireframe: true,
             transparent: true,
             opacity: 0.25
@@ -655,7 +664,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.0025;
+            globeGroup.rotation.y += 0.002;
             renderer.render(scene, camera);
         }
         animate();
