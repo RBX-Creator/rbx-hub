@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JARVIS // ACTIVE OS v8.5</title>
+    <title>JARVIS // ACTIVE OS v9.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -507,13 +507,16 @@
             recognition.start();
         }
 
-        // --- 4. CHATGPT ANBINDUNG MIT WEBSEITEN-STEUERUNG ---
+        // --- 4. CHATGPT ANBINDUNG (OPTIMIERT & FEHLERDIAGNOSE) ---
         async function processVoiceCommandWithChatGPT(userQuery) {
-            if (!apiKey) return;
+            if (!apiKey) {
+                speechIndicator.textContent = "Kein API-Key vorhanden!";
+                return;
+            }
 
             const systemPrompt = `
             Du bist JARVIS, das hochentwickelte KI-System.
-            Der Benutzer heißt ${userName}. Antworte kurz, hochpräzise und professionell.
+            Der Benutzer heißt ${userName}. Antworte kurz, hochpräzise und professionell auf Deutsch.
             
             DU KANNST DIE WEBSEITE STEUERN:
             - Wenn der User das Guthaben ändern möchte, antworte im Format:
@@ -527,10 +530,10 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
+                        'Authorization': `Bearer ${apiKey.trim()}`
                     },
                     body: JSON.stringify({
-                        model: "gpt-4o-mini",
+                        model: "gpt-3.5-turbo",
                         messages: [
                             { role: "system", content: systemPrompt },
                             { role: "user", content: userQuery }
@@ -538,6 +541,13 @@
                         max_tokens: 150
                     })
                 });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    console.error("OpenAI API Fehler:", errData);
+                    speechIndicator.textContent = `API Fehler: ${errData.error?.message || response.statusText}`;
+                    return;
+                }
 
                 const data = await response.json();
                 let reply = data.choices[0].message.content;
@@ -565,7 +575,7 @@
 
             } catch (err) {
                 console.error(err);
-                speechIndicator.textContent = "Fehler bei der Verbindung zu ChatGPT.";
+                speechIndicator.textContent = "Verbindungsfehler zu OpenAI!";
             }
         }
 
@@ -581,7 +591,7 @@
             newPanel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 5. 3D GLOBUS RENDERER ---
+        // --- 5. 3D GLOBUS RENDERER (MIT AMBER LEUCHTEN) ---
         const box = document.getElementById('globe-box');
         const canvas = document.getElementById('globe-canvas');
         const scene = new THREE.Scene();
@@ -600,7 +610,12 @@
         scene.add(globeGroup);
 
         const sphereGeo = new THREE.SphereGeometry(100, 24, 24);
-        const sphereMat = new THREE.MeshBasicMaterial({ color: 0x140802, wireframe: true });
+        const sphereMat = new THREE.MeshBasicMaterial({ 
+            color: 0xff7700, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.5
+        });
         const baseSphere = new THREE.Mesh(sphereGeo, sphereMat);
         globeGroup.add(baseSphere);
 
