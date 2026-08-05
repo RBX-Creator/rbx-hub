@@ -102,7 +102,7 @@
         }
         .response-text { color: var(--text-bright); font-size: 0.8rem; line-height: 1.4; margin-top: 4px; }
 
-        /* LIVE GLOBUS CONTAINER */
+        /* TECH GLOBUS CONTAINER */
         .globe-card {
             background: rgba(6, 3, 1, 0.95); border: 1px solid var(--amber-main);
             border-radius: 4px; height: 350px; width: 100%; position: relative;
@@ -155,10 +155,10 @@
             <div class="step-indicator" id="step-indicator">SCHRITT 1 VON 4</div>
 
             <div class="wizard-step active-step" id="step-1">
-                <p class="step-desc">Willkommen, Sir. Wie darf JARVIS Sie ansprechen?</p>
+                <p class="step-desc">Willkommen. Wie darf JARVIS Sie ansprechen?</p>
                 <div class="input-group">
                     <label>BENUTZERNAME</label>
-                    <input type="text" id="username" placeholder="z. B. Master" required>
+                    <input type="text" id="username" placeholder="z. B. Vida" required>
                 </div>
             </div>
 
@@ -201,22 +201,22 @@
         <div class="status-header">
             <div class="status-left">
                 <div class="pulse-dot"></div>
-                <span id="speech-indicator">JARVIS online. (Tippe Städte an oder sprich)</span>
+                <span id="speech-indicator">JARVIS online. (Sprich Befehle wie "Zeige Kamera Tokio")</span>
             </div>
             <button class="test-voice-btn" onclick="testVoiceManual()">TEST VOICE</button>
         </div>
-        <div class="response-text" id="jarvis-response">Systeme bereit für Protokoll Mark-85.</div>
+        <div class="response-text" id="jarvis-response">Systeme bereit für Befehle.</div>
     </div>
 
-    <!-- ECHTER INTERAKTIVER GLOBUS MIT MEHRFACH-PINS -->
+    <!-- TECH-GLOBUS CONTAINER -->
     <div class="globe-card">
-        <div class="globe-target-info" id="globe-info">STATUS: MULTI-TARGET AKTIV</div>
+        <div class="globe-target-info" id="globe-info">STATUS: CYBERNETIC GRID AKTIV</div>
         <div id="globe-container"></div>
         
         <div class="mode-selector">
-            <button class="mode-btn active" onclick="setGlobeMode('standard')">STANDARD</button>
-            <button class="mode-btn" onclick="setGlobeMode('clouds')">WOLKEN / WETTER</button>
-            <button class="mode-btn" onclick="setGlobeMode('night')">NACHT</button>
+            <button class="mode-btn active" onclick="setGlobeMode('tech')">TECH GRID</button>
+            <button class="mode-btn" onclick="setGlobeMode('cctv')">CCTV FEED</button>
+            <button class="mode-btn" onclick="setGlobeMode('matrix')">MATRIX</button>
         </div>
     </div>
 
@@ -228,14 +228,14 @@
             <h2>FINANZEN // GUTHABEN</h2>
             <div class="sub-text">VERFÜGBAR</div>
             <div class="balance-val" id="balance-display">10,00 €</div>
-            <div class="sub-text" style="color: #ffaa00; margin-top:5px;">STARK ATOMISCH GESICHERT</div>
+            <div class="sub-text" style="color: #ffaa00; margin-top:5px;">ATOMISCH GESICHERT</div>
         </div>
 
         <div class="panel">
-            <h2>SUIT STATUS // MARK-85</h2>
-            <div class="sub-text">POWER CORE: <b style="color:#ffaa00">100% ARC REACTOR</b></div>
+            <h2>SYSTEM STATUS // HUD</h2>
+            <div class="sub-text">POWER CORE: <b style="color:#ffaa00">100% ONLINE</b></div>
             <div class="sub-text" style="margin-top: 4px;">INTEGRITÄT: <b style="color:#fff">99.8%</b></div>
-            <div class="sub-text" style="margin-top: 4px;">AKTIVES TARGET: <b style="color:#ffaa00" id="marker-count">MEHRERE PINS</b></div>
+            <div class="sub-text" style="margin-top: 4px;">AKTIVER FEED: <b style="color:#ffaa00" id="marker-count">KEIN FEED</b></div>
         </div>
     </div>
 
@@ -287,7 +287,7 @@
                 userDisplay.textContent = `HALLO, ${userName.toUpperCase()}`;
                 loginModal.style.display = 'none';
                 setTimeout(() => {
-                    speakJarvis(`Guten Tag, Sir. Alle Protokolle für ${userName} sind online.`);
+                    speakJarvis(`Guten Tag, ${userName}. Alle Systeme sind online.`);
                     startListening();
                 }, 500);
             } else {
@@ -318,22 +318,23 @@
         }
 
         function testVoiceManual() {
-            speakJarvis("Systemtest erfolgreich. Alle audiovisuellen Subroutinen arbeiten im optimalen Bereich, Sir.");
+            speakJarvis(`Systemtest erfolgreich. Alle Subroutinen arbeiten im optimalen Bereich, ${userName}.`);
         }
 
-        // --- GLOBUS & MEHRFACH-PINS (Berlin & London gleichzeitig standardmäßig aktiv) ---
+        // --- TECH-GLOBUS & KAMERAS ---
         const CITIES = [
-            { name: "Berlin", lat: 52.52, lng: 13.40, alt: 1.4, desc: "Hauptstadt von Deutschland." },
-            { name: "London", lat: 51.50, lng: -0.12, alt: 1.4, desc: "Historische Weltstadt in Großbritannien." },
-            { name: "New York", lat: 40.71, lng: -74.00, alt: 1.4, desc: "Metropole an der US-Ostküste." },
-            { name: "Tokio", lat: 35.67, lng: 139.65, alt: 1.4, desc: "Wirtschaftszentrum von Japan." },
-            { name: "Sydney", lat: -33.86, lng: 151.20, alt: 1.4, desc: "Küstenmetropole in Australien." }
+            { name: "Berlin", lat: 52.52, lng: 13.40, alt: 1.2, camId: "CAM_BLN_01", desc: "Öffentlicher Feed: Brandenburger Tor Sektor." },
+            { name: "London", lat: 51.50, lng: -0.12, alt: 1.2, camId: "CAM_LDN_04", desc: "Öffentlicher Feed: Westminster Überwachung." },
+            { name: "New York", lat: 40.71, lng: -74.00, alt: 1.2, camId: "CAM_NYC_88", desc: "Öffentlicher Feed: Times Square Live-Cam." },
+            { name: "Tokio", lat: 35.67, lng: 139.65, alt: 1.2, camId: "CAM_TKO_09", desc: "Öffentlicher Feed: Shibuya Crossing Cam." },
+            { name: "Sydney", lat: -33.86, lng: 151.20, alt: 1.2, camId: "CAM_SYD_02", desc: "Öffentlicher Feed: Opera House Sektor." }
         ];
 
         const container = document.getElementById('globe-container');
         const myGlobe = Globe()
             (container)
-            .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+            // Tech-Style Globus Textur (Dunkler Hologramm / Cyberpunk-Look statt Foto)
+            .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
             .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
             .backgroundColor('rgba(0,0,0,0)')
             .htmlElementsData(CITIES)
@@ -341,46 +342,43 @@
             .htmlLng(d => d.lng)
             .htmlElement(d => {
                 const el = document.createElement('div');
-                el.innerHTML = `<div style="background: rgba(0,0,0,0.85); border: 1px solid #ff6600; color: #ffaa00; padding: 3px 6px; font-size: 9px; font-family: monospace; border-radius: 3px; cursor: pointer; white-space: nowrap; box-shadow: 0 0 8px rgba(255,102,0,0.5);">📍 ${d.name}</div>`;
-                el.onclick = () => focusCity(d);
+                el.innerHTML = `<div style="background: rgba(0,0,0,0.9); border: 1px solid #ff6600; color: #ffaa00; padding: 4px 8px; font-size: 9px; font-family: monospace; border-radius: 3px; cursor: pointer; white-space: nowrap; box-shadow: 0 0 10px rgba(255,102,0,0.7);">📷 [${d.camId}] ${d.name}</div>`;
+                el.onclick = () => focusCamera(d);
                 return el;
             });
 
         myGlobe.controls().autoRotate = true;
-        myGlobe.controls().autoRotateSpeed = 0.5;
+        myGlobe.controls().autoRotateSpeed = 0.4;
 
-        function focusCity(city) {
+        function focusCamera(city) {
             myGlobe.controls().autoRotate = false;
             myGlobe.pointOfView({ lat: city.lat, lng: city.lng, altitude: city.alt }, 1500);
 
-            document.getElementById('globe-info').textContent = `TARGET: ${city.name.toUpperCase()}`;
-            document.getElementById('marker-count').textContent = city.name.toUpperCase();
+            document.getElementById('globe-info').textContent = `LIVE FEED: ${city.camId} (${city.name.toUpperCase()})`;
+            document.getElementById('marker-count').textContent = city.camId;
             document.getElementById('jarvis-response').textContent = `${city.name}: ${city.desc}`;
-            speakJarvis(`${city.name}. ${city.desc}`);
+            speakJarvis(`Verbinde mit Live-Kamera ${city.name}. ${city.desc}`);
 
-            setTimeout(() => { myGlobe.controls().autoRotate = true; }, 8000);
+            setTimeout(() => { myGlobe.controls().autoRotate = true; }, 10000);
         }
 
         function setGlobeMode(mode) {
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
 
-            if (mode === 'standard') {
-                myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
-                myGlobe.cloudsImageUrl(null);
-                document.getElementById('globe-info').textContent = "STATUS: STANDARD HUD";
-            } else if (mode === 'clouds') {
-                myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg');
-                myGlobe.cloudsImageUrl('//unpkg.com/three-globe/example/img/fair-clouds.png');
-                document.getElementById('globe-info').textContent = "STATUS: LIVE WETTER & WOLKEN";
-            } else if (mode === 'night') {
+            if (mode === 'tech') {
                 myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg');
-                myGlobe.cloudsImageUrl(null);
-                document.getElementById('globe-info').textContent = "STATUS: NACHT-SATELLITENANSICHT";
+                document.getElementById('globe-info').textContent = "STATUS: CYBERNETIC GRID AKTIV";
+            } else if (mode === 'cctv') {
+                myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg');
+                document.getElementById('globe-info').textContent = "STATUS: CCTV ÜBERWACHUNGS-NETZWERK";
+            } else if (mode === 'matrix') {
+                myGlobe.globeImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png');
+                document.getElementById('globe-info').textContent = "STATUS: TOPOLOGISCHES DRAHTGITTER";
             }
         }
 
-        // Sprach- & KI-Steuerung
+        // Sprach- & KI-Steuerung mit automatischer Kameraerkennung
         const speechIndicator = document.getElementById('speech-indicator');
         const jarvisResponse = document.getElementById('jarvis-response');
 
@@ -396,9 +394,10 @@
                 const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
                 speechIndicator.textContent = `Erkannt: "${transcript}"`;
 
+                // Prüfen ob eine der Städte genannt wurde
                 let matchedCity = CITIES.find(c => transcript.includes(c.name.toLowerCase()));
                 if (matchedCity) {
-                    focusCity(matchedCity);
+                    focusCamera(matchedCity);
                 } else {
                     processVoiceCommandWithOpenRouter(transcript);
                 }
@@ -421,7 +420,7 @@
                     body: JSON.stringify({
                         model: "meta-llama/llama-3.3-70b-instruct",
                         messages: [
-                            { role: "system", content: `Du bist J.A.R.V.I.S., das KI-System von Tony Stark. Antworte extrem kurz, präzise und loyal zu ${userName}.` },
+                            { role: "system", content: `Du bist J.A.R.V.I.S., ein fortschrittliches HUD-System. Der Benutzer heißt ${userName}. Wenn der Benutzer nach Kameras, Städten oder Standorten fragt, weise ihn an, den Namen der Stadt zu nennen (z.B. Tokio, Berlin, London, New York, Sydney), damit du den Live-Feed aufschalten kannst. Antworte extrem kurz und professionell.` },
                             { role: "user", content: userQuery }
                         ]
                     })
