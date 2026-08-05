@@ -246,7 +246,7 @@
                 <button class="close-chat-btn" id="close-chat-btn">SCHLIESSEN</button>
             </div>
             <div class="chat-messages" id="chat-messages-box">
-                <div class="chat-msg jarvis">JARVIS: Chat-Kanal geöffnet. Tippe einen Ort oder Befehl, um leise zu agieren.</div>
+                <div class="chat-msg jarvis">JARVIS: Chat-Kanal geöffnet. Du kannst fragen, was du möchtest, oder Orte suchen.</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input-field" placeholder="Nachricht an JARVIS...">
@@ -443,7 +443,7 @@
             }
         }
 
-        // --- SPRACH- & KAMERA-SYSTEM (SPRACHSTEUERUNG) ---
+        // --- SPRACH- & KAMERA-SYSTEM ---
         const speechIndicator = document.getElementById('speech-indicator');
         const jarvisResponse = document.getElementById('jarvis-response');
 
@@ -458,7 +458,7 @@
             recognition.onresult = (event) => {
                 const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
                 speechIndicator.textContent = `Erkannt: "${transcript}"`;
-                processVoiceCommandWithOpenRouter(transcript, true); // Mit Sprachausgabe
+                processVoiceCommandWithOpenRouter(transcript, true);
             };
             recognition.onend = () => { try { recognition.start(); } catch(e){} };
             try { recognition.start(); } catch(e){}
@@ -474,11 +474,8 @@
             const text = chatInputField.value.trim();
             if (!text) return;
 
-            // Nachricht im Chat hinzufügen
             appendChatMessage(text, 'user');
             chatInputField.value = '';
-
-            // An AI übergeben (ohne Sprachausgabe, da leiser Modus)
             processVoiceCommandWithOpenRouter(text, false);
         }
 
@@ -493,7 +490,7 @@
         async function processVoiceCommandWithOpenRouter(userQuery, speakOutLoud) {
             if (!apiKey) return;
             try {
-                jarvisResponse.textContent = `Analysiere Sektor für: ${userQuery}...`;
+                jarvisResponse.textContent = `Verarbeite Anfrage: ${userQuery}...`;
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -507,14 +504,12 @@
                         messages: [
                             { 
                                 role: "system", 
-                                content: `Du bist J.A.R.V.I.S. für ${userName}. Der Nutzer nennt einen Ort (Stadt, Dorf, Region). Ermittle die ungefähren Koordinaten.
-Antworte AUSSCHLIESSLICH im JSON-Format (kein Markdown drumherum):
-{
-  "location": "Name des Ortes",
-  "lat": Breitengrad (Zahl),
-  "lng": Längengrad (Zahl),
-  "speech": "Kurzer Satz auf Deutsch, z.B. Sektor [Ort] erfasst."
-}` 
+                                content: `Du bist J.A.R.V.I.S., das KI-Betriebssystem für ${userName}. Du kannst normale Unterhaltungen führen, Fragen beantworten ODER Orte auf der Erde suchen.
+Prüfe die Eingabe des Nutzers:
+1. Wenn der Nutzer einen Ort (Stadt, Land, Region) sucht oder ansteuern will, antworte AUSSCHLIESSLICH als JSON im Format:
+{"type": "location", "location": "Name", "lat": Breitengrad, "lng": Längengrad, "speech": "Kurzer Satz"}
+2. Wenn der Nutzer eine normale Frage stellt, plaudert oder Befehle ohne Ortsbezug gibt, antworte AUSSCHLIESSLICH als JSON im Format:
+{"type": "chat", "speech": "Deine normale Textantwort auf Deutsch"}` 
                             },
                             { role: "user", content: userQuery }
                         ]
@@ -526,36 +521,43 @@ Antworte AUSSCHLIESSLICH im JSON-Format (kein Markdown drumherum):
                 rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
                 const result = JSON.parse(rawContent);
 
-                // UI & Globus aktualisieren
-                document.getElementById('globe-info').textContent = `LIVE: ${result.location.toUpperCase()}`;
-                document.getElementById('marker-count').textContent = result.location.toUpperCase();
-                document.getElementById('jarvis-response').textContent = result.speech;
+                if (result.type === "location") {
+                    // UI & Globus aktualisieren
+                    document.getElementById('globe-info').textContent = `LIVE: ${result.location.toUpperCase()}`;
+                    document.getElementById('marker-count').textContent = result.location.toUpperCase();
+                    document.getElementById('jarvis-response').textContent = result.speech;
 
-                // Globus drehen
-                myGlobe.controls().autoRotate = false;
-                myGlobe.pointOfView({ lat: result.lat, lng: result.lng, altitude: 1.2 }, 1500);
-                myGlobe.htmlElementsData([{ name: result.location, lat: result.lat, lng: result.lng }]);
+                    myGlobe.controls().autoRotate = false;
+                    myGlobe.pointOfView({ lat: result.lat, lng: result.lng, altitude: 1.2 }, 1500);
+                    myGlobe.htmlElementsData([{ name: result.location, lat: result.lat, lng: result.lng }]);
 
-                // Kamera-Fenster einblenden & Bild laden
-                const camBox = document.getElementById('live-cam-wrapper');
-                camBox.style.display = 'flex';
-                document.getElementById('cam-title').textContent = `CCTV FEED: ${result.location.toUpperCase()}`;
-                
-                const screenContainer = document.getElementById('cam-screen-container');
-                screenContainer.innerHTML = `<img src="https://picsum.photos/seed/${encodeURIComponent(result.location)}/600/400" alt="Live Feed">`;
+                    const camBox = document.getElementById('live-cam-wrapper');
+                    camBox.style.display = 'flex';
+                    document.getElementById('cam-title').textContent = `CCTV FEED: ${result.location.toUpperCase()}`;
+                    
+                    const screenContainer = document.getElementById('cam-screen-container');
+                    screenContainer.innerHTML = `<img src="https://picsum.photos/seed/${encodeURIComponent(result.location)}/600/400" alt="Live Feed">`;
 
-                // Nur sprechen wenn per Sprachbefehl gestartet, sonst nur in den Chat schreiben
-                if (speakOutLoud) {
-                    speakJarvis(result.speech);
+                    if (speakOutLoud) {
+                        speakJarvis(result.speech);
+                    } else {
+                        appendChatMessage(result.speech, 'jarvis');
+                    }
+
+                    setTimeout(() => { myGlobe.controls().autoRotate = true; }, 12000);
                 } else {
-                    appendChatMessage(result.speech, 'jarvis');
+                    // Normale Chat-Antwort (ohne Kamera/Globus-Wechsel)
+                    document.getElementById('jarvis-response').textContent = result.speech;
+                    if (speakOutLoud) {
+                        speakJarvis(result.speech);
+                    } else {
+                        appendChatMessage(result.speech, 'jarvis');
+                    }
                 }
 
-                setTimeout(() => { myGlobe.controls().autoRotate = true; }, 12000);
-
             } catch (err) {
-                jarvisResponse.textContent = "Ort verarbeitet.";
-                if (!speakOutLoud) appendChatMessage("Ort verarbeitet.", 'jarvis');
+                jarvisResponse.textContent = "Befehl verarbeitet.";
+                if (!speakOutLoud) appendChatMessage("Befehl verarbeitet.", 'jarvis');
             }
         }
 
