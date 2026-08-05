@@ -42,17 +42,14 @@
 
         /* LOGIN OVERLAY WIZARD */
         #login-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(4, 2, 1, 0.96);
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(4, 2, 1, 0.96); z-index: 1000;
             display: flex; justify-content: center; align-items: center;
             padding: 20px; backdrop-filter: blur(8px);
         }
 
         .login-box {
-            background: var(--panel-bg);
-            border: 1px solid var(--amber-main);
+            background: var(--panel-bg); border: 1px solid var(--amber-main);
             padding: 25px; border-radius: 4px; width: 100%; max-width: 420px;
             box-shadow: var(--hud-glow);
         }
@@ -88,15 +85,21 @@
         .status { color: var(--amber-bright); font-size: 0.7rem; font-weight: bold; }
         .logout-btn { background: rgba(255, 102, 0, 0.15); border: 1px solid var(--amber-main); color: var(--text-bright); font-size: 0.65rem; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-weight: bold; }
 
-        /* LIVE VOICE & CHAT STATUS */
+        /* VOICE & CHAT STATUS */
         .voice-status {
             display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem;
             color: var(--amber-bright); padding: 10px 14px; background: rgba(255, 102, 0, 0.1);
             border: 1px solid var(--amber-main); border-radius: 4px; box-shadow: var(--hud-glow);
         }
-        .status-header { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .status-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .status-left { display: flex; align-items: center; gap: 8px; }
         .pulse-dot { width: 8px; height: 8px; background: var(--amber-bright); border-radius: 50%; box-shadow: 0 0 8px var(--amber-bright); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+        
+        .test-voice-btn {
+            background: var(--amber-main); color: #000; border: none; padding: 4px 8px;
+            font-size: 0.65rem; font-weight: bold; border-radius: 3px; cursor: pointer;
+        }
         .response-text { color: var(--text-bright); font-size: 0.8rem; line-height: 1.4; margin-top: 4px; }
 
         /* LIVE GLOBUS CONTAINER */
@@ -170,7 +173,7 @@
             </div>
 
             <div class="wizard-step" id="step-4">
-                <p class="step-desc"><b>Schritt 3: Key einfügen</b><br>Füge deinen kopierten Schlüssel (beginnt mit <code>sk-or-v1-...</code>) hier ein.</p>
+                <p class="step-desc"><b>Schritt 3: Key einfügen</b><br>Füge deinen kopierten Schlüssel hier ein.</p>
                 <div class="input-group">
                     <label>OPENROUTER API KEY</label>
                     <input type="password" id="apikey" placeholder="sk-or-v1-..." required>
@@ -196,15 +199,18 @@
     <!-- VOICE & CHAT STATUS -->
     <div class="voice-status">
         <div class="status-header">
-            <div class="pulse-dot"></div>
-            <span id="speech-indicator">JARVIS hört zu... (Frage z.B. "Zeige mir Berlin" oder tippe Städte an)</span>
+            <div class="status-left">
+                <div class="pulse-dot"></div>
+                <span id="speech-indicator">JARVIS online. (Tippe Städte an oder sprich)</span>
+            </div>
+            <button class="test-voice-btn" onclick="testVoiceManual()">TEST VOICE</button>
         </div>
-        <div class="response-text" id="jarvis-response">Systeme bereit.</div>
+        <div class="response-text" id="jarvis-response">Systeme bereit für Protokoll Mark-85.</div>
     </div>
 
-    <!-- ECHTER INTERAKTIVER GLOBUS MIT KLICK-STÄDTEN -->
+    <!-- ECHTER INTERAKTIVER GLOBUS MIT MEHRFACH-PINS -->
     <div class="globe-card">
-        <div class="globe-target-info" id="globe-info">STATUS: LIVE SATELLITENANSICHT</div>
+        <div class="globe-target-info" id="globe-info">STATUS: MULTI-TARGET AKTIV</div>
         <div id="globe-container"></div>
         
         <div class="mode-selector">
@@ -228,8 +234,8 @@
         <div class="panel">
             <h2>SUIT STATUS // MARK-85</h2>
             <div class="sub-text">POWER CORE: <b style="color:#ffaa00">100% ARC REACTOR</b></div>
-            <div class="sub-text" style="margin-top: 4px;">SYSTEM TEMPERATUR: <b style="color:#fff">36.5° C</b></div>
-            <div class="sub-text" style="margin-top: 4px;">AKTIVES TARGET: <b style="color:#ffaa00" id="marker-count">KEINES</b></div>
+            <div class="sub-text" style="margin-top: 4px;">INTEGRITÄT: <b style="color:#fff">99.8%</b></div>
+            <div class="sub-text" style="margin-top: 4px;">AKTIVES TARGET: <b style="color:#ffaa00" id="marker-count">MEHRERE PINS</b></div>
         </div>
     </div>
 
@@ -281,7 +287,7 @@
                 userDisplay.textContent = `HALLO, ${userName.toUpperCase()}`;
                 loginModal.style.display = 'none';
                 setTimeout(() => {
-                    speakJarvis(`Guten Tag, ${userName}. Systeme online.`);
+                    speakJarvis(`Guten Tag, Sir. Alle Protokolle für ${userName} sind online.`);
                     startListening();
                 }, 500);
             } else {
@@ -311,13 +317,17 @@
             }
         }
 
-        // --- GLOBUS & STÄDTE-DATEN ---
+        function testVoiceManual() {
+            speakJarvis("Systemtest erfolgreich. Alle audiovisuellen Subroutinen arbeiten im optimalen Bereich, Sir.");
+        }
+
+        // --- GLOBUS & MEHRFACH-PINS (Berlin & London gleichzeitig standardmäßig aktiv) ---
         const CITIES = [
             { name: "Berlin", lat: 52.52, lng: 13.40, alt: 1.4, desc: "Hauptstadt von Deutschland." },
-            { name: "New York", lat: 40.71, lng: -74.00, alt: 1.4, desc: "Metropole an der US-Ostküste." },
-            { name: "Tokio", lat: 35.67, lng: 139.65, alt: 1.4, desc: "Wirtschaftszentrum und Hauptstadt von Japan." },
             { name: "London", lat: 51.50, lng: -0.12, alt: 1.4, desc: "Historische Weltstadt in Großbritannien." },
-            { name: "Sydney", lat: -33.86, lng: 151.20, alt: 1.4, desc: "Bekannteste Küstenstadt Australiens." }
+            { name: "New York", lat: 40.71, lng: -74.00, alt: 1.4, desc: "Metropole an der US-Ostküste." },
+            { name: "Tokio", lat: 35.67, lng: 139.65, alt: 1.4, desc: "Wirtschaftszentrum von Japan." },
+            { name: "Sydney", lat: -33.86, lng: 151.20, alt: 1.4, desc: "Küstenmetropole in Australien." }
         ];
 
         const container = document.getElementById('globe-container');
@@ -326,7 +336,6 @@
             .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
             .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
             .backgroundColor('rgba(0,0,0,0)')
-            // Interaktive Städte-Marker auf dem Globus
             .htmlElementsData(CITIES)
             .htmlLat(d => d.lat)
             .htmlLng(d => d.lng)
@@ -338,7 +347,7 @@
             });
 
         myGlobe.controls().autoRotate = true;
-        myGlobe.controls().autoRotateSpeed = 0.6;
+        myGlobe.controls().autoRotateSpeed = 0.5;
 
         function focusCity(city) {
             myGlobe.controls().autoRotate = false;
@@ -387,7 +396,6 @@
                 const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
                 speechIndicator.textContent = `Erkannt: "${transcript}"`;
 
-                // Prüfen ob eine Stadt genannt wurde
                 let matchedCity = CITIES.find(c => transcript.includes(c.name.toLowerCase()));
                 if (matchedCity) {
                     focusCity(matchedCity);
@@ -413,7 +421,7 @@
                     body: JSON.stringify({
                         model: "meta-llama/llama-3.3-70b-instruct",
                         messages: [
-                            { role: "system", content: `Du bist J.A.R.V.I.S. Antworte EXTREM KURZ (1 kurzer Satz) für ${userName}.` },
+                            { role: "system", content: `Du bist J.A.R.V.I.S., das KI-System von Tony Stark. Antworte extrem kurz, präzise und loyal zu ${userName}.` },
                             { role: "user", content: userQuery }
                         ]
                     })
