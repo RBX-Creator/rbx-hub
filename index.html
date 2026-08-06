@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JARVIS // MARK-85 HUD OS</title>
     <script src="//unpkg.com/globe.gl"></script>
-    <!-- MediaPipe nur für Helmet Cam -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
@@ -171,10 +170,73 @@
         .sub-text { font-size: 0.65rem; opacity: 0.7; }
         #notes-list { font-size: 0.7rem; color: var(--text-main); margin-top: 6px; max-height: 70px; overflow-y: auto; }
         @media (min-width: 768px) { .panel { flex: 0 0 45%; } }
+
+        /* ========== WLAN CRASH / INTRUSION OVERLAY ========== */
+        #crash-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 9999;
+            flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        #crash-overlay.active { display: flex; }
+        .crash-glitch {
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,0,0,0.03) 2px, rgba(255,0,0,0.03) 4px);
+            animation: glitch 0.15s infinite;
+            pointer-events: none;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 2px); }
+            40% { transform: translate(3px, -2px); }
+            60% { transform: translate(-2px, -1px); }
+            80% { transform: translate(2px, 1px); }
+            100% { transform: translate(0); }
+        }
+        .crash-code {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; font-size: 11px; line-height: 1.3;
+            color: #00ff41; opacity: 0.7; padding: 10px;
+            font-family: 'Courier New', monospace;
+            white-space: pre; pointer-events: none;
+        }
+        .crash-warning {
+            position: relative; z-index: 10; text-align: center;
+            background: rgba(80, 0, 0, 0.85); border: 2px solid #ff2200;
+            padding: 25px 30px; border-radius: 6px; max-width: 90%;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
+        }
+        .crash-warning h1 {
+            color: #ff2200; font-size: 1.4rem; letter-spacing: 3px;
+            margin-bottom: 10px; text-shadow: 0 0 10px #ff0000;
+            animation: blink 0.6s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .crash-warning p { color: #ffcc99; font-size: 0.85rem; margin-bottom: 18px; }
+        .crash-abort-btn {
+            background: #ff2200; color: #000; border: none;
+            padding: 14px 28px; font-size: 0.9rem; font-weight: 900;
+            letter-spacing: 1px; cursor: pointer; border-radius: 4px;
+            box-shadow: 0 0 20px rgba(255, 30, 0, 0.7);
+        }
+        .crash-abort-btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
 
+    <!-- CRASH OVERLAY -->
+    <div id="crash-overlay">
+        <div class="crash-glitch"></div>
+        <div class="crash-code" id="crash-code"></div>
+        <div class="crash-warning">
+            <h1>⚠ SYSTEM INTRUSION ⚠</h1>
+            <p>WLAN / NETZWERK KOMPROMITTIERT<br>DATEN WERDEN GELÖSCHT…</p>
+            <button class="crash-abort-btn" id="crash-abort-btn">ABBRUCH – ALLES LÖSCHEN &amp; RESET</button>
+        </div>
+    </div>
+
+    <!-- LOGIN -->
     <div id="login-modal">
         <div class="login-box">
             <h2>JARVIS MARK-85 INITIALISIERUNG</h2>
@@ -295,6 +357,7 @@
     let isScanMode = false;
     let isHelmetMode = false;
     let lastScanResult = null;
+    let crashInterval = null;
 
     // LOGIN
     const loginModal = document.getElementById('login-modal');
@@ -375,6 +438,58 @@
     }
     function testVoiceManual() { speakJarvis('Systemtest erfolgreich, ' + userName + '.'); }
 
+    // ========== WLAN CRASH ==========
+    function startWlanCrash() {
+        const overlay = document.getElementById('crash-overlay');
+        const codeEl = document.getElementById('crash-code');
+        overlay.classList.add('active');
+
+        // Kurzer Alarm
+        speakJarvis('Warnung! System-Intrusion erkannt. WLAN-Verbindung kompromittiert.');
+
+        // Hacker-Code Animation
+        const lines = [
+            'root@jarvis:~# nmap -sS 192.168.1.0/24',
+            'PORT   STATE SERVICE',
+            '22/tcp open  ssh',
+            '80/tcp open  http',
+            '443/tcp open  https',
+            'ACCESSING KERNEL MODULES...',
+            'rm -rf /var/log/*',
+            'KILLING NETWORK INTERFACES...',
+            'ifconfig wlan0 down',
+            'ENCRYPTING USER DATA...',
+            '0x4A 0x41 0x52 0x56 0x49 0x53',
+            'BREACH LEVEL: CRITICAL',
+            'DELETING CACHE...',
+            'DELETING NOTES...',
+            'DELETING API KEYS...',
+            'SYSTEM SHUTDOWN IN 10...',
+            '9...',
+            '8...',
+            'OVERRIDE POSSIBLE – PRESS ABORT'
+        ];
+        let i = 0;
+        codeEl.textContent = '';
+        crashInterval = setInterval(() => {
+            codeEl.textContent += lines[i % lines.length] + '\n';
+            i++;
+            if (codeEl.textContent.split('\n').length > 40) {
+                codeEl.textContent = codeEl.textContent.split('\n').slice(-30).join('\n');
+            }
+        }, 180);
+    }
+
+    function abortCrashAndWipe() {
+        if (crashInterval) clearInterval(crashInterval);
+        // Alles löschen
+        localStorage.clear();
+        // Seite komplett neu laden → Login erscheint wieder
+        location.reload();
+    }
+
+    document.getElementById('crash-abort-btn').addEventListener('click', abortCrashAndWipe);
+
     // GLOBE
     const myGlobe = Globe()(document.getElementById('globe-container'))
         .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
@@ -437,7 +552,6 @@
         document.getElementById('chat-messages-box').scrollTop = 99999;
     }
 
-    // ========== KAMERA STOP ==========
     function stopAllCameras() {
         if (currentStream) {
             currentStream.getTracks().forEach(t => t.stop());
@@ -452,7 +566,6 @@
         document.getElementById('cam-screen-container').innerHTML = '';
     }
 
-    // ========== HELMET CAM + HAND PUNKTE ==========
     function onHandResults(results) {
         const canvas = document.getElementById('hand-canvas');
         if (!canvas) return;
@@ -510,7 +623,6 @@
         }
     }
 
-    // ========== SCANMODUL (RÜCKKAMERA) ==========
     async function startScanModul() {
         stopAllCameras();
         isScanMode = true;
@@ -539,22 +651,18 @@
         }
     }
 
-    // ========== PRODUKT SCAN (verbessert) ==========
     async function performScan(extra = '') {
         if (!isScanMode) {
             speakJarvis('Scanmodul ist nicht aktiv. Sagen Sie zuerst „Scanmodul“.');
             return;
         }
-
         const video = document.getElementById('scan-video');
         if (!video || video.readyState < 2) {
             speakJarvis('Kamera noch nicht bereit.');
             return;
         }
-
         document.getElementById('jarvis-response').textContent = 'Scanne Produkt...';
 
-        // Frame capturen
         const canvas = document.createElement('canvas');
         const maxSide = 900;
         const scale = Math.min(1, maxSide / Math.max(video.videoWidth, video.videoHeight));
@@ -565,14 +673,8 @@
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
 
         const promptText = extra
-            ? `Du siehst ein Produktfoto. Lies alle sichtbaren Texte auf der Verpackung (Marke, Produktname, Geschmack, Gewicht etc.). 
-Zusätzliche Anfrage des Nutzers: ${extra}.
-Antworte NUR als JSON:
-{"name":"vollständiger Produktname","description":"was du genau siehst","price":"ungefährer Preis in Euro","ingredients":"...","calories":"...","extra":"..."}`
-            : `Du siehst ein Produktfoto. Lies alle sichtbaren Texte auf der Verpackung (Marke, Name, Geschmack, Größe).
-Beschreibe genau was abgebildet ist. Schätze einen realistischen Preis.
-Antworte NUR als JSON ohne zusätzlichen Text:
-{"name":"Produktname + Marke","description":"genaue Beschreibung was du siehst","price":"ca. X €","ingredients":"falls Essen","calories":"falls Essen","extra":"weitere sichtbare Infos"}`;
+            ? `Du siehst ein Produktfoto. Lies alle sichtbaren Texte. Zusätzliche Anfrage: ${extra}. Antworte NUR als JSON: {"name":"...","description":"...","price":"...","ingredients":"...","calories":"...","extra":"..."}`
+            : `Du siehst ein Produktfoto. Lies alle sichtbaren Texte (Marke, Name, Geschmack). Beschreibe genau was abgebildet ist. Antworte NUR als JSON: {"name":"...","description":"...","price":"ca. X €","ingredients":"...","calories":"...","extra":"..."}`;
 
         try {
             const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -586,7 +688,7 @@ Antworte NUR als JSON ohne zusätzlichen Text:
                 body: JSON.stringify({
                     model: 'google/gemma-4-31b-it:free',
                     messages: [
-                        { role: 'system', content: 'Du bist ein präziser Produktscanner. Du liest Verpackungstexte und beschreibst genau was du siehst. Antworte ausschließlich mit validem JSON.' },
+                        { role: 'system', content: 'Du bist ein präziser Produktscanner. Antworte ausschließlich mit validem JSON.' },
                         { role: 'user', content: [
                             { type: 'text', text: promptText },
                             { type: 'image_url', image_url: { url: dataUrl } }
@@ -595,36 +697,22 @@ Antworte NUR als JSON ohne zusätzlichen Text:
                     max_tokens: 650
                 })
             });
-
             if (!res.ok) throw new Error('Status ' + res.status);
-
             const data = await res.json();
-            let raw = (data.choices?.[0]?.message?.content || '').trim()
-                .replace(/```json/gi, '').replace(/```/g, '').trim();
-
+            let raw = (data.choices?.[0]?.message?.content || '').trim().replace(/```json/gi, '').replace(/```/g, '').trim();
             let result;
-            try {
-                result = JSON.parse(raw);
-            } catch (e) {
-                // Notfall: rohen Text nehmen
-                result = {
-                    name: 'Erkanntes Objekt',
-                    description: raw.slice(0, 180) || 'Konnte Details nicht extrahieren',
-                    price: '—'
-                };
+            try { result = JSON.parse(raw); } catch (e) {
+                result = { name: 'Erkanntes Objekt', description: raw.slice(0, 180) || 'Details nicht extrahierbar', price: '—' };
             }
-
             lastScanResult = result;
             showScanInfo(result);
-
             let speech = (result.name || 'Produkt') + '. ' + (result.description || '');
             if (result.price && result.price !== '—') speech += ' Ungefährer Preis: ' + result.price;
             document.getElementById('jarvis-response').textContent = speech;
             speakJarvis(speech);
-
         } catch (err) {
             console.error(err);
-            const s = 'Scan fehlgeschlagen. Das Vision-Modell ist gerade überlastet oder nicht erreichbar. Bitte in 10 Sekunden nochmal versuchen.';
+            const s = 'Scan fehlgeschlagen. Vision-Modell überlastet. Bitte später erneut versuchen.';
             document.getElementById('jarvis-response').textContent = s;
             speakJarvis(s);
         }
@@ -648,6 +736,13 @@ Antworte NUR als JSON ohne zusätzlichen Text:
         if (!apiKey) return;
         const q = query.toLowerCase().trim();
 
+        // WLAN CRASH
+        if (q.includes('wlan crash') || q.includes('system crash') || q.includes('starte crash') ||
+            q.includes('hacker angriff') || q.includes('system intrusion') || q.includes('crash starten')) {
+            startWlanCrash();
+            return;
+        }
+
         // Augen / Kamera schließen
         if ((q.includes('augen') && (q.includes('zu') || q.includes('schließ') || q.includes('schliess') || q.includes('mach'))) ||
             q.includes('kamera aus') || q.includes('scanmodul schließen') || q.includes('scanmodul aus') || q.includes('modul aus')) {
@@ -658,7 +753,7 @@ Antworte NUR als JSON ohne zusätzlichen Text:
             return;
         }
 
-        // Scanmodul starten
+        // Scanmodul
         if (q.includes('scanmodul') || q.includes('scan modul') || q.includes('starte scan')) {
             await startScanModul();
             const s = 'Scanmodul online. Halten Sie das Produkt in die Kamera und sagen Sie „scann“.';
@@ -667,19 +762,18 @@ Antworte NUR als JSON ohne zusätzlichen Text:
             return;
         }
 
-        // Scann ausführen
         if (isScanMode && (q === 'scann' || q === 'scan' || q.startsWith('scann ') || q.startsWith('scan ') || q.includes('scann das') || q.includes('scan das'))) {
             let extra = '';
             if (q.includes('kalorien') || q.includes('kcal')) extra = 'Kalorien und Nährwerte';
-            else if (q.includes('zutaten') || q.includes('inhaltsstoffe')) extra = 'Zutatenliste';
+            else if (q.includes('zutaten')) extra = 'Zutatenliste';
             else if (q.includes('preis')) extra = 'Preis';
             else if (q.length > 8) extra = q.replace(/scann?|das/gi, '').trim();
             await performScan(extra);
             return;
         }
 
-        // Helmet Cam + Handpunkte
-        if (q.includes('öffne deine augen') || q.includes('helmet') || q.includes('frontkamera') || q.includes('vordere kamera')) {
+        // Helmet Cam
+        if (q.includes('öffne deine augen') || q.includes('helmet') || q.includes('frontkamera')) {
             await startHelmetCam();
             const s = 'Helmet-Cam online. Hand-Tracking aktiv.';
             document.getElementById('jarvis-response').textContent = s;
