@@ -1,1 +1,181 @@
+--[[
+	Oreo Keyboard Escape - Schonendes Server Anti-Cheat
+	- Prüft echte Bewegungsgeschwindigkeit (nicht nur WalkSpeed)
+	- Soft-Strafen zuerst (Rubberband)
+	- Sehr hohe Toleranz → normale Spieler werden kaum gestört
+]]
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+-- ====================== EINSTELLUNGEN ======================
+local CONFIG = {
+	CheckInterval = 0.35,           -- Wie oft geprüft wird (höher = weniger Performance-Last)
+	SpeedTolerance = 2.1,           -- 2.1x der erlaubten Speed ist noch okay (Lag-Schutz)
+	MaxFlagsBeforeKick = 6,         -- Nach wie vielen Verstößen Kick
+	TeleportThreshold = 85,         -- Studs in einem Check = verdächtig (Teleport)
+	FlyAirTime = 2.8,               -- Sekunden in der Luft ohne Boden = verdächtig
+	SoftPunish = true,              -- true = zuerst zurücksetzen statt sofort kicken
+	KickMessage = "Oreo Anti-Cheat: Ungewöhnliche Bewegung erkannt. Bitte fair spielen 🍪",
+	
+	-- Whitelist (deine UserIds + Admins)
+	Whitelist = {
+		[123456789] = true, -- <-- DEINE UserId hier eintragen
+	}
+}
+
+-- ====================== DATEN ======================
+local playerData = {}
+
+local function isWhitelisted(player)
+	return CONFIG.Whitelist[player.UserId] or player.UserId == game.CreatorId
+end
+
+local function getAllowedSpeed(player, character)
+	-- WICHTIG: Hier deine echte erlaubte Speed holen!
+	-- Variante 1: Attribute am Character (empfohlen)
+	local attr = character:GetAttribute("MaxAllowedSpeed")
+	if typeof(attr) == "number" and attr > 0 then
+		return attr
+	end
+	
+	-- Variante 2: Fallback (falls du noch kein System hast)
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	return (humanoid and humanoid.WalkSpeed) or 16
+end
+
+local function softReset(player, character, lastGoodCFrame)
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	
+	-- Velocity killen + Position zurücksetzen
+	hrp.AssemblyLinearVelocity = Vector3.zero
+	hrp.AssemblyAngularVelocity = Vector3.zero
+	character:PivotTo(lastGoodCFrame)
+end
+
+local function flagPlayer(player, reason)
+	local data = playerData[player]
+	if not data then return end
+	
+	data.flags += 1
+	warn(string.format("[OreoAC] %s (%d) → %s | Flags: %d/%d", 
+		player.Name, player.UserId, reason, data.flags, CONFIG.MaxFlagsBeforeKick))
+	
+	if data.flags >= CONFIG.MaxFlagsBeforeKick then
+		player:Kick(CONFIG.KickMessage)
+	end
+end
+
+-- ====================== MAIN LOOP ======================
+local function startMonitoring(player)
+	if isWhitelisted(player) then return end
+	
+	playerData[player] = {
+		lastPos = nil,
+		lastTime = tick(),
+		lastGoodCFrame = nil,
+		flags = 0,
+		airTime = 0,
+		lastGroundY = 0
+	}
+	
+	local data = playerData[player]
+	
+	local connection
+	connection = RunService.Heartbeat:Connect(function()
+		if not player.Parent or not player.Character then return end
+		
+		local character = player.Character
+		local hrp = character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid or humanoid.Health <= 0 then return end
+		
+		local now = tick()
+		local dt = now - data.lastTime
+		
+		if dt < CONFIG.CheckInterval then return end
+		
+		local currentPos = hrp.Position
+		local currentCFrame = hrp.CFrame
+		
+		-- Erste Messung nur speichern
+		if not data.lastPos then
+			data.lastPos = currentPos
+			data.lastTime = now
+			data.lastGoodCFrame = currentCFrame
+			return
+		end
+		
+		-- Horizontale Distanz (Y ignorieren für Speed-Check)
+		local horizontalDelta = (Vector3.new(currentPos.X, 0, currentPos.Z) - Vector3.new(data.lastPos.X, 0, data.lastPos.Z)).Magnitude
+		local allowedSpeed = getAllowedSpeed(player, character)
+		local maxAllowedDistance = allowedSpeed * dt * CONFIG.SpeedTolerance
+		
+		-- === SPEED / TELEPORT CHECK ===
+		if horizontalDelta > maxAllowedDistance and horizontalDelta > 12 then
+			if horizontalDelta > CONFIG.TeleportThreshold then
+				flagPlayer(player, "Teleport (" .. math.floor(horizontalDelta) .. " studs)")
+			else
+				flagPlayer(player, "Speed (" .. math.floor(horizontalDelta / dt) .. " studs/s)")
+			end
+			
+			if CONFIG.SoftPunish and data.lastGoodCFrame then
+				softReset(player, character, data.lastGoodCFrame)
+			end
+		else
+			-- Nur bei cleanem Check die "gute" Position speichern
+			data.lastGoodCFrame = currentCFrame
+		end
+		
+		-- === EINFACHER FLY CHECK ===
+		local rayParams = RaycastParams.new()
+		rayParams.FilterDescendantsInstances = {character}
+		rayParams.FilterType = Enum.RaycastFilterType.Exclude
+		
+		local ray = workspace:Raycast(currentPos, Vector3.new(0, -12, 0), rayParams)
+		if ray then
+			data.airTime = 0
+			data.lastGroundY = ray.Position.Y
+		else
+			data.airTime += dt
+			if data.airTime > CONFIG.FlyAirTime and humanoid.FloorMaterial == Enum.Material.Air then
+				flagPlayer(player, "Fly/Hover")
+				if CONFIG.SoftPunish and data.lastGoodCFrame then
+					softReset(player, character, data.lastGoodCFrame)
+				end
+				data.airTime = 0
+			end
+		end
+		
+		-- Update
+		data.lastPos = currentPos
+		data.lastTime = now
+	end)
+	
+	-- Cleanup wenn Character stirbt / verlässt
+	character:GetPropertyChangedSignal("Parent"):Connect(function()
+		if not character.Parent and connection then
+			connection:Disconnect()
+		end
+	end)
+end
+
+-- ====================== EVENTS ======================
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		task.wait(1.2) -- kurz warten bis alles geladen ist
+		startMonitoring(player)
+	end)
+	
+	if player.Character then
+		task.wait(1.2)
+		startMonitoring(player)
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	playerData[player] = nil
+end)
+
+print("[Oreo Anti-Cheat] aktiv – normale Spieler werden geschont 🍪")
